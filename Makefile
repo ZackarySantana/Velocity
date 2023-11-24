@@ -1,5 +1,6 @@
 .SILENT:
 PACKAGES=$(shell go list ./... | grep -v /vendor/)
+CONFIG_FILE=velocity.yml
 
 test:
 	$(foreach package,$(PACKAGES), \
@@ -7,7 +8,7 @@ test:
 	)
 
 workflows:
-	go run cmd/workflows/main.go
+	go run cmd/workflows/main.go $(CONFIG_FILE)
 
 packages:
 	echo $(PACKAGES)

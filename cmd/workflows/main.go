@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/zackarysantana/velocity/src/config"
 )
@@ -14,7 +15,12 @@ b:
 `
 
 func main() {
-	config, err := config.ReadConfigFromFile("velocity.yml")
+	if len(os.Args) < 2 {
+		fmt.Println("Usage: filename")
+		return
+	}
+	filename := os.Args[1]
+	config, err := config.ReadConfigFromFile(filename)
 	if err != nil {
 		panic(err)
 	}
