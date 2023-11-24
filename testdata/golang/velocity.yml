@@ -1,26 +1,26 @@
 tests:
-    - name: Test 1 label
-      desc: Desc
-      run: sh bash_test.sh
+    test-1-name:
+        desc: Description here
+        run: sh bash_test.sh
 
-    - name: Test 2 label
-      desc: Desc
-      language: javascript
-      framework: jest
-      directory: tests
-      env:
-          MODE: development
+    test-2-name:
+        desc: Description here
+        language: javascript
+        framework: jest
+        directory: tests
+        env:
+            MODE: development
 
-    - name: Test 3 label
-      desc: Desc
-      language: python
-      framework: this-framework
-      directory: python-tests
+    test-3-name:
+        desc: Description here
+        language: python
+        framework: this-framework
+        directory: python-tests
 
-    - name: Test 4 label
-      desc: Desc
-      language: golang
-      directory: golang/this/fsadfD
+    test-4-name:
+        desc: Description here
+        language: golang
+        directory: golang/this/fsadfD
 
 config:
     register: docker.io

@@ -1,52 +1,57 @@
-tests:
-    - name: Test 1 label
-      desc: Desc
-      run: sh bash_test.sh
-
-    - name: Test 2 label
-      desc: Desc
-      language: javascript
-      framework: jest
-      directory: tests
-      env:
-          MODE: development
-
-    - name: Test 3 label
-      desc: Desc
-      language: python
-      framework: this-framework
-      directory: python-tests
-
-    - name: Test 4 label
-      desc: Desc
-      language: golang
-      directory: golang/this/fsadfD
-
 config:
-    register: docker.io
+    registry: docker.io
+
+tests:
+    velocity:
+        exclude_directories:
+            - tests
+        language: golang
+
+    end-to-end:
+        directory: tests/end-to-end
+        run: echo "TBA"
+
+    golang:
+        directory: tests/golang
+        language: golang
+
+    javascript-jest:
+        directory: tests/javascript-jest
+        language: javascript
+        framework: jest
+
+    python-pytest:
+        directory: tests/python-pytest
+        language: python
+        framework: pytest
 
 images:
-    ubuntu: ubuntu:mantic
+    ubuntu:
+        image: ubuntu:mantic
 
 workflows:
-    - name: Local dev workflow
-      desc: This a quick pre-test on your local machine
-      conditions:
-          - List of predefined conditions if any?
-      tests:
-          ubuntu:
-              - test-1-label
-              - test-4-label
-      env:
-          MODE: development
+    all-tests:
+        tests:
+            ubuntu:
+                - velocity
+                - end-to-end
+                - golang
+                - javascript-jest
+                - python-pytest
 
-    - name: Prod workflow
-      desc: This is a more extensive workflow
-      tests:
-          ubuntu:
-              - test-1-label
-              - test-2-label
-              - test-3-label
-              - test-4-label
-      env:
-          MODE: prod
+    velocity:
+        tests:
+            ubuntu:
+                - velocity
+
+    end-to-end:
+        tests:
+            ubuntu:
+                - end-to-end
+
+    languages:
+        tests:
+            ubuntu:
+                - golang
+                - javascript-jest
+                - python-pytest

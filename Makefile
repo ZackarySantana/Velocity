@@ -6,6 +6,9 @@ test:
 		go test -v $(package); \
 	)
 
+workflows:
+	go run cmd/workflows/main.go
+
 packages:
 	echo $(PACKAGES)
 
