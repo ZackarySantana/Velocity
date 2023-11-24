@@ -10,9 +10,10 @@ import (
 
 var Run = []cli.Command{
 	{
-		Name:    "add",
-		Aliases: []string{"a"},
-		Usage:   "add a task to the list",
+		Name:      "run",
+		Aliases:   []string{"r"},
+		Usage:     "run a workflow",
+		ArgsUsage: "[workflow]",
 		Action: func(cCtx *cli.Context) error {
 			providedWorkflow := cCtx.Args().First()
 			c, err := config.LoadConfig()
