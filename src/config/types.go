@@ -18,6 +18,9 @@ type YAMLTest struct {
 	Run *string `yaml:"run,omitempty" json:"run,omitempty"`
 
 	Env *map[string]string `yaml:"env,omitempty" json:"env,omitempty"`
+
+	// Computed
+	Name string `yaml:"-" json:"-"`
 }
 
 type YAMLImages map[string]YAMLImage
@@ -25,6 +28,9 @@ type YAMLImage struct {
 	Image *string `yaml:"image,omitempty" json:"image,omitempty"`
 
 	Env *map[string]string `yaml:"env,omitempty" json:"env,omitempty"`
+
+	// Computed
+	Name string `yaml:"-" json:"-"`
 }
 
 type YAMLWorkflowTests map[string]YAMLWorkflowTest
@@ -39,6 +45,9 @@ type YAMLWorkflow struct {
 	Description *string `yaml:"description,omitempty" json:"description,omitempty"`
 
 	Env *map[string]string `yaml:"env,omitempty" json:"env,omitempty"`
+
+	// Computed
+	Name string `yaml:"-" json:"-"`
 }
 
 type Config struct {

@@ -24,12 +24,6 @@ func (p *JSONParser) Parse(data []byte, out interface{}) error {
 	return errors.New("not implemented, will we use this?")
 }
 
-type WebParser struct{}
-
-func (p *WebParser) Parse(data []byte, out interface{}) error {
-	return errors.New("not implemented, will we use this?")
-}
-
 func NewMultiParser(parsers ...Parser) MultiParser {
 	return parsers
 }
