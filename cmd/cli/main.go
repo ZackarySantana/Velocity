@@ -10,10 +10,10 @@ import (
 
 func main() {
 	app := &cli.App{
-		Name:  "boom",
-		Usage: "make an explosive entrance",
+		Name:  "velocity",
+		Usage: "fight the loneliness!",
 		Action: func(*cli.Context) error {
-			fmt.Println("boom! I say!")
+			fmt.Println("Hello friend!")
 			return nil
 		},
 	}
