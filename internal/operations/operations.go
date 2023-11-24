@@ -14,6 +14,7 @@ func NewCLIApp() CLIApp {
 	cliApp := CLIApp{}
 	cliApp.app = &cli.App{
 		Name:     "velocity",
+		Version:  "0.0.1",
 		Usage:    "manage, run, and report on tests quickly",
 		Commands: append([]cli.Command{}, Run...),
 	}
