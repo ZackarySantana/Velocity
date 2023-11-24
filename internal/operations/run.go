@@ -8,6 +8,7 @@ import (
 	"github.com/zackarysantana/velocity/src/config"
 )
 
+// TODO: Make list, edit, and other commands
 var Run = []cli.Command{
 	{
 		Name:      "run",
@@ -41,7 +42,7 @@ var Run = []cli.Command{
 				w = &workflow
 			}
 
-			fmt.Println(w.Name)
+			fmt.Println("Running workflow " + w.Name)
 
 			return nil
 		},
