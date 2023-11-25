@@ -105,14 +105,6 @@ func TestLoadConfig(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestParseConfig(t *testing.T) {
-	// parser := config.MultiParser{&config.YAMLParser{}}
-
-	// Parsing valid config
-	// _, err := config.ParseConfig([]byte(validConfig), parser)
-	// assert.NoError(t, err)
-}
-
 func TestGetWorkflow(t *testing.T) {
 	c, err := config.LoadConfig()
 	require.NoError(t, err)
