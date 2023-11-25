@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-func (c *Config) ValidateTest(t YAMLTest) error {
+func (c *Config) validateTest(t YAMLTest) error {
 	if t.Language == nil && t.Framework == nil {
 		if t.Run == nil {
 			return fmt.Errorf("test '%s' must have either language & framework or run", t.Name)
@@ -31,11 +31,11 @@ func (c *Config) ValidateTest(t YAMLTest) error {
 	return nil
 }
 
-func (c *Config) ValidateImage(i YAMLImage) error {
+func (c *Config) validateImage(i YAMLImage) error {
 	return nil
 }
 
-func (c *Config) ValidateWorkflow(w YAMLWorkflow) error {
+func (c *Config) validateWorkflow(w YAMLWorkflow) error {
 	errs := []error{}
 	for image, tests := range w.Tests {
 		_, err := c.GetImage(image)
@@ -55,17 +55,17 @@ func (c *Config) ValidateWorkflow(w YAMLWorkflow) error {
 func (c *Config) Validate() error {
 	errs := []error{}
 	for _, test := range c.Tests {
-		if err := c.ValidateTest(test); err != nil {
+		if err := c.validateTest(test); err != nil {
 			errs = append(errs, err)
 		}
 	}
 	for _, image := range c.Images {
-		if err := c.ValidateImage(image); err != nil {
+		if err := c.validateImage(image); err != nil {
 			errs = append(errs, err)
 		}
 	}
 	for _, workflow := range c.Workflows {
-		if err := c.ValidateWorkflow(workflow); err != nil {
+		if err := c.validateWorkflow(workflow); err != nil {
 			errs = append(errs, err)
 		}
 	}
