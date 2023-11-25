@@ -6,6 +6,7 @@ tests:
         exclude_directories:
             - tests
         language: golang
+        framework: std
 
     end-to-end:
         directory: tests/end-to-end
@@ -14,6 +15,7 @@ tests:
     golang:
         directory: tests/golang
         language: golang
+        framework: std
 
     javascript-jest:
         directory: tests/javascript-jest
