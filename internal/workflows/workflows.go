@@ -10,14 +10,14 @@ import (
 
 func GetWorkflow(c config.Config, title string) (config.YAMLWorkflow, error) {
 	items := []list.Item{}
-	for title, workflow := range c.Workflows {
+	for name, workflow := range c.Workflows {
 		desc := workflow.Description
 		if desc == nil {
 			descLiteral := ""
 			desc = &descLiteral
 		}
 		items = append(items, uicli.SimpleItem{
-			Label: title,
+			Label: name,
 			Desc:  *desc,
 		})
 	}
@@ -26,8 +26,8 @@ func GetWorkflow(c config.Config, title string) (config.YAMLWorkflow, error) {
 	if err != nil {
 		return config.YAMLWorkflow{}, err
 	}
-	for title, workflow := range c.Workflows {
-		if title == result {
+	for name, workflow := range c.Workflows {
+		if name == result {
 			return workflow, nil
 		}
 	}
