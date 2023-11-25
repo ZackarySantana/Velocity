@@ -6,19 +6,10 @@ import (
 	"github.com/zackarysantana/velocity/src/config"
 )
 
-func findTest(c config.Config, workflow config.YAMLWorkflow, test string) (config.YAMLTest, error) {
-	for t, yamlTest := range c.Tests {
-		if t == test {
-			return yamlTest, nil
-		}
-	}
-	return config.YAMLTest{}, fmt.Errorf("test %s not found", test)
-}
-
 func RunWorkflow(c config.Config, workflow config.YAMLWorkflow) error {
 	for image, testNames := range workflow.Tests {
 		for _, testName := range testNames {
-			test, err := findTest(c, workflow, string(testName))
+			test, err := c.GetTest(string(testName))
 			if err != nil {
 				return err
 			}
