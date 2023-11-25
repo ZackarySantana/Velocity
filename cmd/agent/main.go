@@ -12,7 +12,8 @@ import (
 )
 
 const (
-	databaseFile = "commands.db"
+	databaseFile   = "commands.db"
+	maxConcurrency = 2
 )
 
 // CommandInfo represents information about a command.
@@ -106,15 +107,23 @@ func backgroundProcess(commandQueue <-chan string, resultQueue chan<- CommandInf
 	runningCommands := make(map[int]struct{})
 	totalCommands := 0
 	completedCommands := 0
+	semaphore := make(chan struct{}, maxConcurrency)
 
 	for command := range commandQueue {
+		semaphore <- struct{}{} // Acquire a semaphore slot
 		totalCommands++
 		wg.Add(1)
 		go func(cmd string) {
-			defer wg.Done()
+			defer func() {
+				<-semaphore // Release the semaphore slot
+				wg.Done()
+				fmt.Println("Finished", cmd)
+			}()
 
 			// Execute the command
 			output, err := executeCommand(cmd)
+
+			fmt.Println("Starting", cmd)
 
 			// Update the database with the result
 			mu.Lock()
