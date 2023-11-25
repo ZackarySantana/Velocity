@@ -66,7 +66,7 @@ func ReadConfigFromURL(url string) (*Config, error) {
 	}
 	defer response.Body.Close()
 	if response.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("failed to retrieve file '%s': status code '%d' error '%v'", url, response.StatusCode, err)
+		return nil, fmt.Errorf("error retrieving file '%s': status code '%d' error '%v'", url, response.StatusCode, err)
 	}
 	bytes, err := ioutil.ReadAll(response.Body)
 	if err != nil {
@@ -79,7 +79,7 @@ func ReadConfigFromURL(url string) (*Config, error) {
 func ReadConfigFromFile(filepath string) (*Config, error) {
 	file, err := ioutil.ReadFile(filepath)
 	if err != nil {
-		return nil, fmt.Errorf("error reading YAML file '%s': %v", filepath, err)
+		return nil, fmt.Errorf("error reading file '%s': %v", filepath, err)
 	}
 	return ParseConfig(file, NewMultiParser(&YAMLParser{}, &JSONParser{}))
 }
@@ -88,15 +88,15 @@ func ParseConfig(config []byte, parser MultiParser) (*Config, error) {
 	c := &Config{}
 	err := parser.Parse(config, c)
 	if err != nil {
-		return nil, fmt.Errorf("error parsing YAML file: %v", err)
+		return nil, fmt.Errorf("error parsing config: %v", err)
 	}
 	err = c.Populate()
 	if err != nil {
-		return nil, fmt.Errorf("error populating YAML file: %v", err)
+		return nil, fmt.Errorf("error populating config: %v", err)
 	}
 	err = c.Validate()
 	if err != nil {
-		return nil, fmt.Errorf("error validating YAML file: %v", err)
+		return nil, fmt.Errorf("error validating config: %v", err)
 	}
 	return c, nil
 }
