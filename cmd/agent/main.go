@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
 	"os/exec"
 	"sync"
 	"time"
@@ -24,7 +25,18 @@ type CommandInfo struct {
 	Log     string
 }
 
+func isDockerInstalled() bool {
+	cmd := exec.Command("docker", "--version")
+
+	err := cmd.Run()
+	return err == nil
+}
+
 func main() {
+	if !isDockerInstalled() {
+		fmt.Println("Docker is not installed. Please install Docker and try again.")
+		os.Exit(1)
+	}
 	// Create a SQLite database
 	db, err := sql.Open("sqlite3", databaseFile)
 	if err != nil {
