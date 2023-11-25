@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"errors"
 
 	"gopkg.in/yaml.v3"
@@ -21,7 +22,7 @@ func (p *YAMLParser) Parse(data []byte, out interface{}) error {
 type JSONParser struct{}
 
 func (p *JSONParser) Parse(data []byte, out interface{}) error {
-	return errors.New("not implemented, will we use this?")
+	return json.Unmarshal(data, out)
 }
 
 func NewMultiParser(parsers ...Parser) MultiParser {
