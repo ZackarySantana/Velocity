@@ -8,12 +8,30 @@ import (
 )
 
 func (c *Config) GetWorkflow(w string) (YAMLWorkflow, error) {
-	for title, workflow := range c.Workflows {
-		if title == w {
+	for name, workflow := range c.Workflows {
+		if name == w {
 			return workflow, nil
 		}
 	}
 	return YAMLWorkflow{}, fmt.Errorf("workflow %s not found", w)
+}
+
+func (c *Config) GetImage(i string) (YAMLImage, error) {
+	for name, image := range c.Images {
+		if name == i {
+			return image, nil
+		}
+	}
+	return YAMLImage{}, fmt.Errorf("image %s not found", i)
+}
+
+func (c *Config) GetTest(t string) (YAMLTest, error) {
+	for name, test := range c.Tests {
+		if name == t {
+			return test, nil
+		}
+	}
+	return YAMLTest{}, fmt.Errorf("test %s not found", t)
 }
 
 func (c *Config) GetWorkflowNames() []string {
@@ -25,7 +43,7 @@ func (c *Config) GetWorkflowNames() []string {
 }
 
 func LoadConfig() (*Config, error) {
-	filePath, ok := os.LookupEnv("VELOCITY_CONFIG_FILE")
+	filePath, ok := os.LookupEnv("VELOCITY_CONFIG")
 	if !ok {
 		filePath = "velocity.yml"
 	}
@@ -34,7 +52,7 @@ func LoadConfig() (*Config, error) {
 	// then use ReadConfigFromURL
 	// else use ReadConfigFromFile
 	switch {
-	case filePath[:7] == "http://" || filePath[:8] == "https://":
+	case len(filePath) > 8 && (filePath[:7] == "http://" || filePath[:8] == "https://"):
 		return ReadConfigFromURL(filePath)
 	default:
 		return ReadConfigFromFile(filePath)
@@ -48,7 +66,7 @@ func ReadConfigFromURL(url string) (*Config, error) {
 	}
 	defer response.Body.Close()
 	if response.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("Failed to download file. Status code: %d. %v", response.StatusCode, err)
+		return nil, fmt.Errorf("failed to retrieve file '%s': status code '%d' error '%v'", url, response.StatusCode, err)
 	}
 	bytes, err := ioutil.ReadAll(response.Body)
 	if err != nil {
@@ -61,7 +79,7 @@ func ReadConfigFromURL(url string) (*Config, error) {
 func ReadConfigFromFile(filepath string) (*Config, error) {
 	file, err := ioutil.ReadFile(filepath)
 	if err != nil {
-		return nil, fmt.Errorf("error reading YAML file: %v", err)
+		return nil, fmt.Errorf("error reading YAML file '%s': %v", filepath, err)
 	}
 	return ParseConfig(file, NewMultiParser(&YAMLParser{}, &JSONParser{}))
 }
@@ -72,13 +90,13 @@ func ParseConfig(config []byte, parser MultiParser) (*Config, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error parsing YAML file: %v", err)
 	}
-	err = c.Validate()
-	if err != nil {
-		return nil, fmt.Errorf("error validating YAML file: %v", err)
-	}
 	err = c.Populate()
 	if err != nil {
 		return nil, fmt.Errorf("error populating YAML file: %v", err)
+	}
+	err = c.Validate()
+	if err != nil {
+		return nil, fmt.Errorf("error validating YAML file: %v", err)
 	}
 	return c, nil
 }

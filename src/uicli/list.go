@@ -25,7 +25,6 @@ func NewListModel(title string, items []list.Item, selected *string) listModel {
 
 		if i, ok := m.SelectedItem().(SimpleItem); ok {
 			title = i.Title()
-			*selected = i.Label
 		} else {
 			return nil
 		}
@@ -34,6 +33,7 @@ func NewListModel(title string, items []list.Item, selected *string) listModel {
 		case tea.KeyMsg:
 			switch {
 			case key.Matches(msg, choose):
+				*selected = title
 				return m.NewStatusMessage(statusMessageStyle("You chose " + title + ". Press q to quit."))
 			}
 		}

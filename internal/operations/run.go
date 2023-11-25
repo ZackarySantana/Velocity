@@ -8,16 +8,19 @@ import (
 	"github.com/zackarysantana/velocity/src/config"
 )
 
-// TODO: Make list, edit, and other commands
 var Run = []cli.Command{
 	{
 		Name:      "run",
 		Aliases:   []string{"r"},
 		Usage:     "run a workflow",
 		ArgsUsage: "[workflow]",
+		Flags: []cli.Flag{
+			configFlag,
+		},
+		Before: CombineBefores(BeforeConfig),
 		Action: func(cCtx *cli.Context) error {
 			providedWorkflow := cCtx.Args().First()
-			c, err := config.LoadConfig()
+			c, err := GetConfig(cCtx)
 			if err != nil {
 				return err
 			}
@@ -35,7 +38,7 @@ var Run = []cli.Command{
 				} else {
 					fmt.Printf("Workflow %s not found. Selecting from list.\n", providedWorkflow)
 				}
-				workflow, err := workflows.GetWorkflow(*c, "Please select a workflow: ")
+				workflow, err := workflows.GetWorkflow(c, "Please select a workflow: ")
 				if err != nil {
 					return err
 				}
@@ -43,6 +46,11 @@ var Run = []cli.Command{
 			}
 
 			fmt.Println("Running workflow " + w.Name)
+
+			err = workflows.RunWorkflow(c, *w)
+			if err != nil {
+				return err
+			}
 
 			return nil
 		},

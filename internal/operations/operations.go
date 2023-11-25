@@ -16,11 +16,19 @@ func NewCLIApp() CLIApp {
 		Name:     "velocity",
 		Version:  "0.0.1",
 		Usage:    "manage, run, and report on tests quickly",
-		Commands: append([]cli.Command{}, Run...),
+		Commands: appendCommands(Run, Validate),
 	}
 	return cliApp
 }
 
 func (c CLIApp) Run() error {
 	return c.app.Run(os.Args)
+}
+
+func appendCommands(commands ...[]cli.Command) []cli.Command {
+	var allCommands []cli.Command
+	for _, command := range commands {
+		allCommands = append(allCommands, command...)
+	}
+	return allCommands
 }

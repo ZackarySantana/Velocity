@@ -33,12 +33,13 @@ type YAMLImage struct {
 	Name string `yaml:"-" json:"-"`
 }
 
-type YAMLWorkflowTests map[string]YAMLWorkflowTest
-type YAMLWorkflowTest []string
+type YAMLWorkflowImages map[string]YAMLWorkflowTests
+type YAMLWorkflowTests []YAMLWorkflowTest
+type YAMLWorkflowTest string
 type YAMLWorkflowConditions []string // TODO: More complex conditions
 type YAMLWorkflows map[string]YAMLWorkflow
 type YAMLWorkflow struct {
-	Tests YAMLWorkflowTests `yaml:"tests" json:"tests"`
+	Tests YAMLWorkflowImages `yaml:"tests" json:"tests"`
 
 	Conditions YAMLWorkflowConditions `yaml:"conditions,omitempty" json:"conditions,omitempty"`
 
