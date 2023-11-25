@@ -43,19 +43,19 @@ func (c *Config) GetWorkflowNames() []string {
 }
 
 func LoadConfig() (*Config, error) {
-	filePath, ok := os.LookupEnv("VELOCITY_CONFIG")
+	path, ok := os.LookupEnv("VELOCITY_CONFIG")
 	if !ok {
-		filePath = "velocity.yml"
+		path = "velocity.yml"
 	}
 	// Switch statement to find out what filepath starts with
 	// if filepath starts with http:// or https://
 	// then use ReadConfigFromURL
 	// else use ReadConfigFromFile
 	switch {
-	case len(filePath) > 8 && (filePath[:7] == "http://" || filePath[:8] == "https://"):
-		return ReadConfigFromURL(filePath)
+	case len(path) > 8 && (path[:7] == "http://" || path[:8] == "https://"):
+		return ReadConfigFromURL(path)
 	default:
-		return ReadConfigFromFile(filePath)
+		return ReadConfigFromFile(path)
 	}
 }
 
