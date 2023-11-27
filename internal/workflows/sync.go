@@ -47,9 +47,9 @@ func RunSyncWorkflow(c config.Config, workflow config.YAMLWorkflow) ([]jobs.JobR
 	}
 
 	time.Sleep(time.Second)
-
 	wg.Wait()
 	close(stop)
+	time.Sleep(time.Second)
 
 	return provider.Results(), nil
 }
