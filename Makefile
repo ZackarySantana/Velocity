@@ -22,9 +22,6 @@ server:
 test-db:
 	$(ENV) go run cmd/test-db/main.go
 
-test-basicworkflow:
-	$(ENV) go run cmd/test-basicworkflow/main.go
-
 example:
 	$(ENV) go run cmd/example/main.go
 
