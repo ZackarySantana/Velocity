@@ -16,12 +16,18 @@ func LoadConfig() (*Config, error) {
 	// if filepath starts with http:// or https://
 	// then use ReadConfigFromURL
 	// else use ReadConfigFromFile
+	var c *Config
+	var err error
 	switch {
 	case len(path) > 8 && (path[:7] == "http://" || path[:8] == "https://"):
-		return readConfigFromURL(path)
+		c, err = readConfigFromURL(path)
 	default:
-		return readConfigFromFile(path)
+		c, err = readConfigFromFile(path)
 	}
+	if c != nil {
+		c.Path = path
+	}
+	return c, err
 }
 
 func readConfigFromURL(url string) (*Config, error) {

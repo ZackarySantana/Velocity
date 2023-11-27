@@ -70,4 +70,7 @@ type Config struct {
 	Images    YAMLImages    `yaml:"images" json:"images"`
 	Builds    YAMLBuilds    `yaml:"builds" json:"builds"`
 	Workflows YAMLWorkflows `yaml:"workflows" json:"workflows"`
+
+	// Computed
+	Path string `yaml:"-" json:"-"`
 }

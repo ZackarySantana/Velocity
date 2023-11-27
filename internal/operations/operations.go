@@ -3,7 +3,7 @@ package operations
 import (
 	"os"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 type CLIApp struct {
@@ -25,8 +25,8 @@ func (c CLIApp) Run() error {
 	return c.app.Run(os.Args)
 }
 
-func appendCommands(commands ...[]cli.Command) []cli.Command {
-	var allCommands []cli.Command
+func appendCommands(commands ...[]*cli.Command) []*cli.Command {
+	var allCommands []*cli.Command
 	for _, command := range commands {
 		allCommands = append(allCommands, command...)
 	}

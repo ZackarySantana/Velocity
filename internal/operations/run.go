@@ -3,24 +3,26 @@ package operations
 import (
 	"fmt"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
+	"github.com/zackarysantana/velocity/internal/operations/befores"
+	"github.com/zackarysantana/velocity/internal/operations/flags"
 	"github.com/zackarysantana/velocity/internal/workflows"
 	"github.com/zackarysantana/velocity/src/config"
 )
 
-var Run = []cli.Command{
+var Run = []*cli.Command{
 	{
 		Name:      "run",
 		Aliases:   []string{"r"},
 		Usage:     "run a workflow",
 		ArgsUsage: "[workflow]",
 		Flags: []cli.Flag{
-			configFlag,
+			flags.Config,
 		},
-		Before: CombineBefores(BeforeConfig),
+		Before: befores.CombineBefores(befores.Config),
 		Action: func(cCtx *cli.Context) error {
 			providedWorkflow := cCtx.Args().First()
-			c, err := GetConfig(cCtx)
+			c, err := befores.GetConfig(cCtx)
 			if err != nil {
 				return err
 			}
