@@ -1,7 +1,6 @@
 package workflows
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
@@ -25,8 +24,6 @@ func RunSyncWorkflow(c config.Config, workflow config.YAMLWorkflow) ([]jobs.JobR
 			if test.Run != nil {
 				run = *test.Run
 			}
-
-			fmt.Println("Running test '" + test.Name + "' on image '" + image + "'")
 
 			j = append(j, jobs.Job{
 				Image:   image,
