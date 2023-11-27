@@ -33,7 +33,6 @@ func (a *Agent) Start() error {
 }
 
 func (a *Agent) runJobs(queue <-chan jobs.Job, results chan<- jobs.JobResult, limit <-chan struct{}) {
-
 	for job := range queue {
 		a.wg.Add(1)
 		go func(job jobs.Job) {
