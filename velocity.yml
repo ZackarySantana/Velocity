@@ -32,6 +32,13 @@ images:
     ubuntu:
         image: ubuntu:mantic
 
+builds:
+    golang-app:
+        image: golang:1.21.4
+        directory: .
+        build: go build -o /tmp/app .
+        output: /tmp/app
+
 workflows:
     all-tests:
         tests:
