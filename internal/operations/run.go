@@ -18,8 +18,9 @@ var Run = []*cli.Command{
 		ArgsUsage: "[workflow]",
 		Flags: []cli.Flag{
 			flags.Config,
+			flags.Sync,
 		},
-		Before: befores.CombineBefores(befores.Config),
+		Before: befores.CombineBefores(befores.Config, befores.Sync),
 		Action: func(cCtx *cli.Context) error {
 			providedWorkflow := cCtx.Args().First()
 			c, err := befores.GetConfig(cCtx)
@@ -49,12 +50,36 @@ var Run = []*cli.Command{
 
 			fmt.Println("Running workflow " + w.Name)
 
-			err = workflows.StartWorkflow(c, *w)
-			if err != nil {
-				return err
-			}
+			sync := befores.GetSync(cCtx)
 
-			return nil
+			if sync {
+				fmt.Println("Running workflow in sync")
+				results, err := workflows.RunSyncWorkflow(c, *w)
+
+				if err != nil {
+					return err
+				}
+
+				fmt.Print("\n\nWorkflow completed: ")
+
+				for _, result := range results {
+					if result.Success != nil {
+						fmt.Println("'" + result.Job.Image + "' ran '" + result.Job.Command + "'")
+						fmt.Println(result.Success.Logs)
+						fmt.Println()
+					}
+
+					if result.Failed != nil {
+						fmt.Println("'" + result.Job.Image + "' ran '" + result.Job.Command + "'")
+						fmt.Println(result.Failed.Error)
+						fmt.Println()
+					}
+				}
+
+				return nil
+
+			}
+			return workflows.StartWorkflow(c, *w)
 		},
 	},
 }
