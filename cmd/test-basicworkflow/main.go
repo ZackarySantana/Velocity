@@ -24,7 +24,9 @@ func main() {
 
 	for _, result := range results {
 		if result.Success != nil {
+			fmt.Println("'" + result.Job.Image + "' ran '" + result.Job.Command + "'")
 			fmt.Println(result.Success.Logs)
+			fmt.Println()
 		}
 	}
 }
