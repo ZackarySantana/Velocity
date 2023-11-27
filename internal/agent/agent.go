@@ -21,7 +21,6 @@ func NewAgent(provider jobs.JobProvider, executor jobs.JobExecutor, stop <-chan 
 }
 
 func (a *Agent) Start() error {
-
 	limit := make(chan struct{}, 5)
 	queue := make(chan jobs.Job)
 	results := make(chan jobs.JobResult)
