@@ -63,6 +63,7 @@ func main() {
 	// Stop the background process
 	close(stop)
 	wg.Wait()
+	time.Sleep(time.Second * 3)
 	fmt.Println("Program terminated.")
 	// printAllCommands()
 }
