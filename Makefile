@@ -28,6 +28,9 @@ example:
 packages:
 	echo $(PACKAGES)
 
+clean:
+	rm $(GOPATH)/bin/velocity
+
 
 
 
