@@ -30,6 +30,8 @@ tests:
 images:
     ubuntu:
         image: ubuntu:mantic
+    alpine:
+        image: alpine:latest
 
 builds:
     golang-app:
@@ -47,6 +49,8 @@ workflows:
                 - golang
                 - javascript-jest
                 - python-pytest
+            alpine:
+                - end-to-end
 
     velocity:
         tests:
