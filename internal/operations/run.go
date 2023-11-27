@@ -47,7 +47,7 @@ var Run = []cli.Command{
 
 			fmt.Println("Running workflow " + w.Name)
 
-			err = workflows.RunWorkflow(c, *w)
+			err = workflows.StartWorkflow(c, *w)
 			if err != nil {
 				return err
 			}

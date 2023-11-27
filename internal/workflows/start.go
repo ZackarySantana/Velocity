@@ -6,7 +6,7 @@ import (
 	"github.com/zackarysantana/velocity/src/config"
 )
 
-func RunWorkflow(c config.Config, workflow config.YAMLWorkflow) error {
+func StartWorkflow(c config.Config, workflow config.YAMLWorkflow) error {
 	for image, testNames := range workflow.Tests {
 		for _, testName := range testNames {
 			test, err := c.GetTest(string(testName))
