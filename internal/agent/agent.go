@@ -63,6 +63,7 @@ func (a *Agent) enqueue(queue chan<- jobs.Job, limit chan<- struct{}) {
 		select {
 		case <-a.stop:
 			fmt.Println("Stopping agent...")
+			return
 		default:
 		}
 		jobs, err := a.Provider.Next(cap(limit) - len(limit))
@@ -82,10 +83,14 @@ func (a *Agent) enqueue(queue chan<- jobs.Job, limit chan<- struct{}) {
 
 func (a *Agent) postResults(results <-chan jobs.JobResult) {
 	for result := range results {
-		fmt.Println("Posting results...")
-		err := a.Provider.Update(result)
-		if err != nil {
-			fmt.Println(err)
-		}
+		a.wg.Add(1)
+		go func(result jobs.JobResult) {
+			defer a.wg.Done()
+			fmt.Println("Posting result...")
+			err := a.Provider.Update(result)
+			if err != nil {
+				fmt.Println(err)
+			}
+		}(result)
 	}
 }
