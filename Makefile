@@ -9,12 +9,9 @@ test:
 		go test -v $(package); \
 	)
 
-cli:
+build-cli:
 	go build -o build/velocity cmd/cli/main.go
 	mv build/velocity $(GOPATH)/bin
-
-workflows:
-	go run cmd/workflows/main.go $(CONFIG_FILE)
 
 agent:
 	$(ENV) go run cmd/agent/main.go
