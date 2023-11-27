@@ -16,6 +16,9 @@ build-cli:
 agent:
 	$(ENV) go run cmd/agent/main.go
 
+server:
+	$(ENV) go run cmd/server/main.go
+
 test-db:
 	$(ENV) go run cmd/test-db/main.go
 
