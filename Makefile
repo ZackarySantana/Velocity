@@ -1,6 +1,5 @@
 .SILENT:
 PACKAGES=$(shell go list ./... | grep -v /vendor/)
-CONFIG_FILE=velocity.yml
 ENV_FILE=.env
 ENV=$(shell awk '{gsub(/#.*/, ""); printf "%s ", $$0}' $(ENV_FILE))
 
