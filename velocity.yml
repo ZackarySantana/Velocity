@@ -1,6 +1,5 @@
 config:
     registry: docker.io
-    agent: localhost:1105
 
 tests:
     velocity:
