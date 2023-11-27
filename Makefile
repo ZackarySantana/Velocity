@@ -1,6 +1,8 @@
 .SILENT:
 PACKAGES=$(shell go list ./... | grep -v /vendor/)
 CONFIG_FILE=velocity.yml
+ENV_FILE=.env
+ENV=$(shell awk '{gsub(/#.*/, ""); printf "%s ", $$0}' $(ENV_FILE))
 
 test:
 	$(foreach package,$(PACKAGES), \
@@ -14,13 +16,17 @@ cli:
 workflows:
 	go run cmd/workflows/main.go $(CONFIG_FILE)
 
+agent:
+	$(ENV) go run cmd/agent/main.go
+
+test-db:
+	$(ENV) go run cmd/test-db/main.go
+
+example:
+	$(ENV) go run cmd/example/main.go
+
 packages:
 	echo $(PACKAGES)
-
-# cover-xml:
-#     @$(foreach package, $(packages), \
-#         gocov convert $(package)/cover.out | gocov-xml > $(package)/coverage.xml;)
-
 
 
 

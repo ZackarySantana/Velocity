@@ -1,15 +1,18 @@
 package main
 
 import (
-	"database/sql"
+	"context"
 	"fmt"
 	"log"
-	"os"
 	"os/exec"
 	"sync"
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/zackarysantana/velocity/internal/db"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 const (
@@ -18,65 +21,47 @@ const (
 )
 
 // CommandInfo represents information about a command.
+
 type CommandInfo struct {
-	ID      int
-	Command string
-	Status  string
-	Log     string
+	ID      primitive.ObjectID `bson:"_id"`
+	Command string             `bson:"command"`
+	Image   string             `bson:"image"`
+	Log     *string            `bson:"log"`
+	Status  *string            `bson:"status"`
 }
 
 func isDockerInstalled() bool {
-	cmd := exec.Command("docker", "--version")
-
-	err := cmd.Run()
-	return err == nil
+	return exec.Command("docker", "--version").Run() == nil
 }
 
 func main() {
 	if !isDockerInstalled() {
-		fmt.Println("Docker is not installed. Please install Docker and try again.")
-		os.Exit(1)
+		log.Fatal("Docker is not installed.")
 	}
-	// Create a SQLite database
-	db, err := sql.Open("sqlite3", databaseFile)
+	client, err := db.Connect()
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
+	defer func() {
+		if err = client.Disconnect(context.TODO()); err != nil {
+			panic(err)
+		}
+	}()
 
-	// Create the commands table if it doesn't exist
-	_, err = db.Exec(`
-		CREATE TABLE IF NOT EXISTS commands (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			command TEXT NOT NULL,
-			status TEXT,
-			log TEXT
-		)
-	`)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Create channels for communication
-	commandQueue := make(chan string)
+	commandQueue := make(chan CommandInfo)
 	resultQueue := make(chan CommandInfo)
 	stop := make(chan struct{})
 	var wg sync.WaitGroup
 
-	// Start background process
-	go backgroundProcess(commandQueue, resultQueue, stop, &wg, DoneWithItAll)
+	go processCommands(client, commandQueue, resultQueue, stop, &wg)
+	go enqueueCommands(client, commandQueue, stop)
 
-	// Enqueue some commands for demonstration
-	enqueueCommands(commandQueue, []string{"echo 'Command 1'", "echo 'Command 2'", "echo 'Command 3'"})
-
-	// Monitor the result queue for completed commands
 	go func() {
 		for result := range resultQueue {
-			fmt.Printf("Command %d completed with status: %s\n", result.ID, result.Status)
+			fmt.Printf("Command %d completed with status: %s\n", result.ID, *result.Status)
 		}
 	}()
 
-	// Wait for user to exit
 	fmt.Println("Press Enter to stop...")
 	fmt.Scanln()
 
@@ -84,129 +69,93 @@ func main() {
 	close(stop)
 	wg.Wait()
 	fmt.Println("Program terminated.")
-	printAllCommands()
+	// printAllCommands()
 }
 
-func printAllCommands() {
-	db, err := sql.Open("sqlite3", databaseFile)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
+func enqueueCommands(db *mongo.Client, commandQueue chan<- CommandInfo, stop <-chan struct{}) {
+	for {
+		time.Sleep(2 * time.Second)
+		// select {
+		// case <-stop:
+		// 	return
+		// default:
+		// }
 
-	rows, err := db.Query("SELECT id, command, status, log FROM commands")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer rows.Close()
+		cursor, err := db.Database("velocity").Collection("commands").Find(context.Background(), bson.D{{Key: "status", Value: nil}})
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		_, err = db.Database("velocity").Collection("commands").UpdateMany(context.Background(), bson.D{{Key: "status", Value: nil}}, bson.D{{Key: "$set", Value: bson.D{{Key: "status", Value: "queued"}}}})
 
-	fmt.Println("All Commands:")
-	for rows.Next() {
-		var cmdInfo CommandInfo
-		if err := rows.Scan(&cmdInfo.ID, &cmdInfo.Command, &cmdInfo.Status, &cmdInfo.Log); err != nil {
+		results := []CommandInfo{}
+		// Iterate through the cursor and decode documents into your struct
+		for cursor.Next(context.Background()) {
+			var cmdInfo CommandInfo
+			err := cursor.Decode(&cmdInfo)
+			if err != nil {
+				log.Fatal(err)
+			}
+			results = append(results, cmdInfo)
+		}
+		cursor.Close(context.Background())
+
+		for _, cmdInfo := range results {
+			fmt.Println("Enqueuing command: ", cmdInfo.Command)
+			commandQueue <- cmdInfo
+		}
+
+		// Handle errors from cursor iteration
+		if err := cursor.Err(); err != nil {
 			log.Fatal(err)
 		}
-		fmt.Printf("ID: %d, Command: %s, Status: %s, Log: %s\n", cmdInfo.ID, cmdInfo.Command, cmdInfo.Status, cmdInfo.Log)
-	}
 
-	if err := rows.Err(); err != nil {
-		log.Fatal(err)
+		fmt.Println("Enqueued commands.")
 	}
 }
 
-func backgroundProcess(commandQueue <-chan string, resultQueue chan<- CommandInfo, stop <-chan struct{}, wg *sync.WaitGroup, doneFunc func()) {
+func processCommands(db *mongo.Client, commandQueue <-chan CommandInfo, resultQueue chan<- CommandInfo, stop <-chan struct{}, wg *sync.WaitGroup) {
 	var mu sync.Mutex
-	runningCommands := make(map[int]struct{})
-	totalCommands := 0
-	completedCommands := 0
-	semaphore := make(chan struct{}, maxConcurrency)
+	semaphore := make(chan struct{}, 5)
 
 	for command := range commandQueue {
-		semaphore <- struct{}{} // Acquire a semaphore slot
-		totalCommands++
+		semaphore <- struct{}{}
 		wg.Add(1)
-		go func(cmd string) {
+		go func(command CommandInfo) {
 			defer func() {
-				<-semaphore // Release the semaphore slot
 				wg.Done()
-				fmt.Println("Finished", cmd)
+				<-semaphore
 			}()
 
-			// Execute the command
-			output, err := executeCommand(cmd)
+			log.Printf("Executing command: %s", command.Command)
+			l, err := executeCommand(command)
+			command.Log = &l
+			status := "complete"
+			command.Status = &status
 
-			fmt.Println("Starting", cmd)
+			fmt.Println(command.ID)
 
-			// Update the database with the result
+			// Update the command status
 			mu.Lock()
-			defer mu.Unlock()
-			commandID := insertCommand(cmd, output, err)
-			delete(runningCommands, commandID)
-			completedCommands++
+			err = logCommand(db, command)
+			if err != nil {
+				log.Printf("Failed to update command: %s", err)
+			}
+			mu.Unlock()
 
 			// Send the result to the result queue
-			resultQueue <- CommandInfo{
-				ID:      commandID,
-				Command: cmd,
-				Status:  getStatus(err),
-				Log:     output,
-			}
-
-			// Check if all commands are completed
-			if completedCommands == totalCommands {
-				doneFunc()
-			}
+			resultQueue <- command
 		}(command)
 	}
-
-	// Wait for stop signal
-	<-stop
 }
 
-func executeCommand(command string) (string, error) {
-	cmd := exec.Command("docker", "run", "--rm", "alpine", "sh", "-c", command)
+func executeCommand(command CommandInfo) (string, error) {
+	cmd := exec.Command("docker", "run", "--rm", command.Image, "sh", "-c", command.Command)
 	output, err := cmd.CombinedOutput()
 	return string(output), err
 }
 
-func insertCommand(command, output string, err error) int {
-	db, err := sql.Open("sqlite3", databaseFile)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
-
-	// Insert command information into the database
-	result, err := db.Exec(`
-		INSERT INTO commands (command, status, log)
-		VALUES (?, ?, ?)
-	`, command, getStatus(err), output)
-	if err != nil {
-		log.Println(err)
-		return 0
-	}
-
-	// Retrieve the ID of the inserted command
-	id, _ := result.LastInsertId()
-	return int(id)
-}
-
-func getStatus(err error) string {
-	if err != nil {
-		return "Failed"
-	}
-	return "Success"
-}
-
-func enqueueCommands(commandQueue chan<- string, commands []string) {
-	for _, cmd := range commands {
-		commandQueue <- cmd
-		time.Sleep(time.Second) // Delay between enqueuing commands for demonstration
-	}
-	close(commandQueue)
-}
-
-func DoneWithItAll() {
-	fmt.Println("Done with all commands!")
-	// Add your logic here
+func logCommand(db *mongo.Client, command CommandInfo) error {
+	_, err := db.Database("velocity").Collection("commands").UpdateOne(context.Background(), bson.D{{Key: "_id", Value: command.ID}}, bson.D{{Key: "$set", Value: bson.D{{Key: "status", Value: *command.Status}, {Key: "log", Value: command.Log}}}})
+	return err
 }
