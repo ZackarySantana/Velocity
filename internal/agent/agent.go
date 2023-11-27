@@ -84,6 +84,7 @@ func (a *Agent) enqueue(queue chan<- jobs.Job, limit chan<- struct{}) {
 
 func (a *Agent) postResults(results <-chan jobs.JobResult) {
 	for result := range results {
+		fmt.Println("Posting results...")
 		err := a.Provider.Update(result)
 		if err != nil {
 			fmt.Println(err)
