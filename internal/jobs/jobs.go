@@ -1,20 +1,55 @@
 package jobs
 
-import "errors"
-
-type Job struct {
-	RepositoryURL string
-	GitHash       string
-
-	Command string
-	Image   string
-
-	Executor *JobExecutor
+type Job interface {
+	SetupCommand() []string
+	GetImage() string
+	GetCommand() string
+	GetName() string
 }
 
-func (j *Job) Run() (string, error) {
-	if j.Executor == nil {
-		return "", errors.New("no executor provided")
-	}
-	return (*j.Executor).Execute(*j)
+type CommandJob struct {
+	Image string
+
+	Command string
+	Name    string
+}
+
+func (j *CommandJob) SetupCommand() []string {
+	return []string{}
+}
+
+func (j *CommandJob) GetImage() string {
+	return j.Image
+}
+
+func (j *CommandJob) GetCommand() string {
+	return j.Command
+}
+
+func (j *CommandJob) GetName() string {
+	return j.Name
+}
+
+type FrameworkJob struct {
+	Image string
+
+	Language  string
+	Framework string
+	Name      string
+}
+
+func (j *FrameworkJob) SetupCommand() []string {
+	return []string{}
+}
+
+func (j *FrameworkJob) GetImage() string {
+	return j.Image
+}
+
+func (j *FrameworkJob) GetCommand() string {
+	return "echo hello world"
+}
+
+func (j *FrameworkJob) GetName() string {
+	return j.Name
 }

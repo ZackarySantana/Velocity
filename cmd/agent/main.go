@@ -24,7 +24,8 @@ func main() {
 
 	stop := make(chan bool)
 	wg := sync.WaitGroup{}
-	a := agent.NewAgent(jobs.NewMongoDBJobProvider(*client), &jobs.DockerJobExecutor{}, stop, &wg)
+	ctx := jobs.NewContext("https://github.com/zackarysantana/velocity.git", "c8dc99dfc0b62842b0a524fe34112c3df27f7e86")
+	a := agent.NewAgent(jobs.NewMongoDBJobProvider(*client), &jobs.DockerJobExecutor{}, ctx, stop, &wg)
 
 	err = a.Start()
 	if err != nil {

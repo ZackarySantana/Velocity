@@ -11,13 +11,14 @@ import (
 type Agent struct {
 	Provider jobs.JobProvider
 	Executor jobs.JobExecutor
+	Context  jobs.Context
 
 	stop <-chan bool
 	wg   *sync.WaitGroup
 }
 
-func NewAgent(provider jobs.JobProvider, executor jobs.JobExecutor, stop <-chan bool, wg *sync.WaitGroup) *Agent {
-	return &Agent{provider, executor, stop, wg}
+func NewAgent(provider jobs.JobProvider, executor jobs.JobExecutor, context jobs.Context, stop <-chan bool, wg *sync.WaitGroup) *Agent {
+	return &Agent{provider, executor, context, stop, wg}
 }
 
 func (a *Agent) Start() error {
@@ -40,8 +41,7 @@ func (a *Agent) runJobs(queue <-chan jobs.Job, results chan<- jobs.JobResult, li
 				a.wg.Done()
 				<-limit
 			}()
-			job.Executor = &a.Executor
-			logs, err := job.Run()
+			logs, err := a.Executor.Execute(a.Context, job)
 			if err != nil {
 				results <- jobs.JobResult{
 					Job:    job,

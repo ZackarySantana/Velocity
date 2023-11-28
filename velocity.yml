@@ -12,6 +12,9 @@ tests:
         directory: tests/end-to-end
         run: echo "TBA"
 
+    local-test:
+        run: cat velocity.yml
+
     golang:
         directory: tests/golang
         language: golang
@@ -61,6 +64,11 @@ workflows:
         tests:
             ubuntu:
                 - end-to-end
+
+    local-test:
+        tests:
+            ubuntu:
+                - local-test
 
     languages:
         tests:
