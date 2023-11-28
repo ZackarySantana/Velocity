@@ -22,7 +22,7 @@ var (
 		SetupCommands: []string{
 			"go mod vendor",
 		},
-		Command:   "go test./...",
+		Command:   "go test ./...",
 		Image:     "golang",
 		Language:  "golang",
 		Framework: "std",
