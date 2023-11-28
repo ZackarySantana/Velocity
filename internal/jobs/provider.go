@@ -7,6 +7,7 @@ import (
 type JobProvider interface {
 	Next(num int) ([]Job, error)
 	Update(result JobResult) error
+	Finished() (bool, error)
 	Cleanup() error
 }
 
@@ -38,6 +39,10 @@ func (p *MongoDBJobProvider) Cleanup() error {
 	return nil
 }
 
+func (p *MongoDBJobProvider) Finished() (bool, error) {
+	return false, nil
+}
+
 type InMemoryJobProvider struct {
 	jobs    []Job
 	i       int
@@ -63,6 +68,10 @@ func (p *InMemoryJobProvider) Update(result JobResult) error {
 
 func (p *InMemoryJobProvider) Cleanup() error {
 	return nil
+}
+
+func (p *InMemoryJobProvider) Finished() (bool, error) {
+	return p.i == len(p.jobs), nil
 }
 
 func (p *InMemoryJobProvider) Results() []JobResult {
