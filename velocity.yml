@@ -35,6 +35,10 @@ images:
         image: ubuntu:mantic
     alpine:
         image: alpine:latest
+    golang:
+        image: golang:latest
+    golang-1-16-15:
+        image: golang:1.16.15
 
 builds:
     golang-app:
@@ -70,9 +74,9 @@ workflows:
             ubuntu:
                 - local-test
 
-    languages:
+    golang:
         tests:
-            ubuntu:
+            golang:
                 - golang
-                - javascript-jest
-                - python-pytest
+            golang-1-16-15:
+                - golang
