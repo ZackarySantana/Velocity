@@ -32,6 +32,7 @@ var Run = []*cli.Command{
 			for title, workflow := range c.Workflows {
 				if title == providedWorkflow {
 					w = &workflow
+					break
 				}
 			}
 
@@ -53,24 +54,26 @@ var Run = []*cli.Command{
 			sync := befores.GetSync(cCtx)
 
 			if sync {
-				fmt.Println("Running workflow in sync")
+				fmt.Println("-- Running synchronously --")
 				results, err := workflows.RunSyncWorkflow(c, *w)
 
 				if err != nil {
 					return err
 				}
 
-				fmt.Print("\n\nWorkflow completed: ")
+				fmt.Println("\n\nWorkflow completed: ")
 
 				for _, result := range results {
 					if result.Success != nil {
-						fmt.Println("'" + result.Job.Image + "' ran '" + result.Job.Command + "'")
+						fmt.Print("✅")
+						fmt.Println("'" + result.Job.GetImage() + "' ran '" + (result.Job.GetCommand()) + "'")
 						fmt.Println(result.Success.Logs)
 						fmt.Println()
 					}
 
 					if result.Failed != nil {
-						fmt.Println("'" + result.Job.Image + "' ran '" + result.Job.Command + "'")
+						fmt.Println("❌")
+						fmt.Println("'" + result.Job.GetImage() + "' ran '" + (result.Job.GetCommand()) + "'")
 						fmt.Println(result.Failed.Error)
 						fmt.Println()
 					}
