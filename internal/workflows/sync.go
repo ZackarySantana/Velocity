@@ -11,16 +11,20 @@ import (
 
 func RunSyncWorkflow(c config.Config, workflow config.YAMLWorkflow) ([]jobs.JobResult, error) {
 	j := []jobs.Job{}
-	for image, testNames := range workflow.Tests {
+	for imageName, testNames := range workflow.Tests {
 		for _, testName := range testNames {
 			test, err := c.GetTest(string(testName))
+			if err != nil {
+				return nil, err
+			}
+			image, err := c.GetImage(imageName)
 			if err != nil {
 				return nil, err
 			}
 
 			if test.Run != nil {
 				j = append(j, &jobs.CommandJob{
-					Image:   image,
+					Image:   *image.Image,
 					Command: *test.Run,
 					Name:    string(testName),
 				})
@@ -31,7 +35,7 @@ func RunSyncWorkflow(c config.Config, workflow config.YAMLWorkflow) ([]jobs.JobR
 			j = append(j, &jobs.FrameworkJob{
 				Language:  *test.Language,
 				Framework: *test.Framework,
-				Image:     &image,
+				Image:     image.Image,
 				Name:      string(testName),
 			})
 		}
