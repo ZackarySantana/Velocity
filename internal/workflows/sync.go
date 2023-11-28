@@ -31,7 +31,7 @@ func RunSyncWorkflow(c config.Config, workflow config.YAMLWorkflow) ([]jobs.JobR
 			j = append(j, &jobs.FrameworkJob{
 				Language:  *test.Language,
 				Framework: *test.Framework,
-				Image:     image,
+				Image:     &image,
 				Name:      string(testName),
 			})
 		}

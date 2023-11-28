@@ -31,7 +31,7 @@ func (j *CommandJob) GetName() string {
 }
 
 type FrameworkJob struct {
-	Image string
+	Image *string
 
 	Language  string
 	Framework string
@@ -39,15 +39,19 @@ type FrameworkJob struct {
 }
 
 func (j *FrameworkJob) SetupCommand() []string {
-	return []string{}
+	defaults := getLanguageAndFrameworkDefaults(j.Language, j.Framework)
+	return defaults.SetupCommands
 }
 
 func (j *FrameworkJob) GetImage() string {
-	return j.Image
+	if j.Image != nil {
+		return *j.Image
+	}
+	return getLanguageAndFrameworkDefaults(j.Language, j.Framework).Image
 }
 
 func (j *FrameworkJob) GetCommand() string {
-	return "echo hello world"
+	return getLanguageAndFrameworkDefaults(j.Language, j.Framework).Command
 }
 
 func (j *FrameworkJob) GetName() string {
