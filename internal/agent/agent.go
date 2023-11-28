@@ -77,6 +77,24 @@ func (a *Agent) enqueue(queue chan<- jobs.Job, limit chan<- struct{}) {
 			limit <- struct{}{}
 		}
 
+		finished, err := a.Provider.Finished()
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+
+		if finished {
+			fmt.Println("Finished queuing all jobs.")
+			fmt.Println("Cleaning up...")
+			err := a.Provider.Cleanup()
+			if err != nil {
+				fmt.Println(err)
+			}
+			fmt.Println("Finished cleanup.")
+			fmt.Println(len(limit), "Job(s) are currently running.")
+			return
+		}
+
 		time.Sleep(time.Second)
 	}
 }
