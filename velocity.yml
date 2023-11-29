@@ -8,7 +8,7 @@ tests:
         framework: std
 
     test-golang-std:
-        directory: testdata/golang
+        directory: testdata/golang-std
         language: golang
         framework: std
 
@@ -31,6 +31,10 @@ images:
         image: golang:latest
     golang-1-18:
         image: golang:1.18
+    javascript:
+        image: node:latest
+    python:
+        image: python:latest
 
 builds:
     golang-app:
@@ -42,12 +46,12 @@ builds:
 workflows:
     all-tests:
         tests:
-            ubuntu:
+            golang:
                 - test-golang-std
+            javascript:
                 - test-javascript-jest
+            python:
                 - test-python-pytest
-            alpine:
-                - test-golang-std
 
     velocity:
         tests:
