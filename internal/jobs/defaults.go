@@ -1,5 +1,7 @@
 package jobs
 
+import "strings"
+
 type LanguageAndFrameworkDefaults struct {
 	SetupCommands []string
 	Command       string
@@ -28,15 +30,27 @@ var (
 		Framework: "std",
 	}
 
+	javascript_jest = LanguageAndFrameworkDefaults{
+		SetupCommands: []string{
+			"RUN npm install",
+		},
+		Command:   "npm test",
+		Image:     "node",
+		Language:  "javascript",
+		Framework: "jest",
+	}
+
 	landuageAndFrameworkDefaults = []LanguageAndFrameworkDefaults{
 		golang_std,
 	}
 )
 
 func getLanguageAndFrameworkDefaults(language, framework string) LanguageAndFrameworkDefaults {
-	for _, l := range landuageAndFrameworkDefaults {
-		if l.Language == language && l.Framework == framework {
-			return l
+	l := strings.ToLower(language)
+	f := strings.ToLower(framework)
+	for _, d := range landuageAndFrameworkDefaults {
+		if d.Language == l && d.Framework == f {
+			return d
 		}
 	}
 	return LanguageAndFrameworkDefaults{}

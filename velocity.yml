@@ -8,17 +8,17 @@ tests:
         framework: std
 
     test-golang-std:
-        directory: testdata/golang-std
+        directory: testdata/golang/std
         language: golang
         framework: std
 
     test-javascript-jest:
-        directory: tests/javascript-jest
+        directory: tests/javascript/jest
         language: javascript
         framework: jest
 
     test-python-pytest:
-        directory: tests/python-pytest
+        directory: tests/python/pytest
         language: python
         framework: pytest
 
@@ -64,3 +64,8 @@ workflows:
                 - test-golang-std
             golang-1-18:
                 - test-golang-std
+
+    javascript:
+        tests:
+            javascript:
+                - test-javascript-jest
