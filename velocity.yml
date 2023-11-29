@@ -69,3 +69,8 @@ workflows:
         tests:
             javascript:
                 - test-javascript-jest
+
+    python:
+        tests:
+            python:
+                - test-python-pytest

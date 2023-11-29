@@ -40,9 +40,20 @@ var (
 		Framework: "jest",
 	}
 
+	python_pytest = LanguageAndFrameworkDefaults{
+		SetupCommands: []string{
+			"RUN pip install -r requirements.txt",
+		},
+		Command:   "pytest",
+		Image:     "python",
+		Language:  "python",
+		Framework: "pytest",
+	}
+
 	landuageAndFrameworkDefaults = []LanguageAndFrameworkDefaults{
 		golang_std,
 		javascript_jest,
+		python_pytest,
 	}
 )
 
