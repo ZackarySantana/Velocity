@@ -19,8 +19,7 @@ func (e *DockerJobExecutor) Execute(ctx Context, job Job) (string, error) {
 		FROM alpine/git
 		RUN git clone %s app
 		WORKDIR app
-		RUN git fetch --all
-		RUN git checkout %s
+		RUN git fetch --all && git checkout %s
 	`, ctx.RepositoryURL, ctx.CommitHash)
 	buildCmd.Stdin = strings.NewReader(dockerfileContent)
 	output, err := buildCmd.CombinedOutput()
