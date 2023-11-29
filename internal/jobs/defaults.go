@@ -42,6 +42,7 @@ var (
 
 	landuageAndFrameworkDefaults = []LanguageAndFrameworkDefaults{
 		golang_std,
+		javascript_jest,
 	}
 )
 
