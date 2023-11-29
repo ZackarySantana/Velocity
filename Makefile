@@ -18,9 +18,6 @@ agent:
 server:
 	$(ENV) go run cmd/server/main.go
 
-test-db:
-	$(ENV) go run cmd/test-db/main.go
-
 example:
 	$(ENV) go run cmd/example/main.go
 
