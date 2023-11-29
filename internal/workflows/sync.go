@@ -47,7 +47,7 @@ func RunSyncWorkflow(c config.Config, workflow config.YAMLWorkflow) ([]jobs.JobR
 
 	stop := make(chan bool)
 	wg := sync.WaitGroup{}
-	ctx := jobs.NewContext("https://github.com/zackarysantana/velocity.git", "c8dc99dfc0b62842b0a524fe34112c3df27f7e86")
+	ctx := jobs.NewContext("https://github.com/zackarysantana/velocity.git", "39cda93035ccc195da0df09c5fa8b984e983751c")
 	a := agent.NewAgent(provider, &jobs.DockerJobExecutor{}, ctx, stop, &wg)
 
 	err := a.Start()
