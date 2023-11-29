@@ -20,7 +20,7 @@ var (
 
 	golang_std = LanguageAndFrameworkDefaults{
 		SetupCommands: []string{
-			"go mod vendor",
+			"RUN go mod vendor",
 		},
 		Command:   "go test ./...",
 		Image:     "golang",
@@ -40,4 +40,14 @@ func getLanguageAndFrameworkDefaults(language, framework string) LanguageAndFram
 		}
 	}
 	return LanguageAndFrameworkDefaults{}
+}
+
+func getDirectoryCommands(directory string) []string {
+	// TODO: Should we remove a leading slash?
+	if directory == "" {
+		return []string{}
+	}
+	return []string{
+		"WORKDIR " + directory,
+	}
 }

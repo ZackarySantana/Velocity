@@ -52,9 +52,5 @@ func (e *DockerJobExecutor) Execute(ctx Context, job Job) (string, error) {
 }
 
 func parseCommands(commands []string) string {
-	cmds := make([]string, len(commands))
-	for i, command := range commands {
-		cmds[i] = "RUN " + command
-	}
-	return strings.Join(cmds, "\n")
+	return strings.Join(commands, "\n")
 }
