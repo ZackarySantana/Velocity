@@ -8,14 +8,19 @@ type Job interface {
 }
 
 type CommandJob struct {
-	Image string
+	Image     string
+	Directory *string
 
 	Command string
 	Name    string
 }
 
 func (j *CommandJob) SetupCommand() []string {
-	return []string{}
+	cmds := []string{}
+	if j.Directory != nil {
+		cmds = append(cmds, getDirectoryCommands(*j.Directory)...)
+	}
+	return cmds
 }
 
 func (j *CommandJob) GetImage() string {
@@ -31,7 +36,8 @@ func (j *CommandJob) GetName() string {
 }
 
 type FrameworkJob struct {
-	Image *string
+	Image     *string
+	Directory *string
 
 	Language  string
 	Framework string
@@ -40,7 +46,9 @@ type FrameworkJob struct {
 
 func (j *FrameworkJob) SetupCommand() []string {
 	cmds := []string{}
-	cmds = append(cmds, getDirectoryCommands(j.Name)...)
+	if j.Directory != nil {
+		cmds = append(cmds, getDirectoryCommands(*j.Directory)...)
+	}
 	cmds = append(cmds, getLanguageAndFrameworkDefaults(j.Language, j.Framework).SetupCommands...)
 	return cmds
 }
