@@ -4,34 +4,20 @@ config:
 
 tests:
     velocity:
-        exclude_directories:
-            - tests
         language: golang
         framework: std
 
-    end-to-end:
-        directory: tests/end-to-end
-        run: echo "TBA"
-
-    local-test:
-        run: cat velocity.yml
-
-    golang-test:
+    test-golang-std:
         directory: testdata/golang
         language: golang
         framework: std
 
-    golang:
-        directory: .
-        language: golang
-        framework: std
-
-    javascript-jest:
+    test-javascript-jest:
         directory: tests/javascript-jest
         language: javascript
         framework: jest
 
-    python-pytest:
+    test-python-pytest:
         directory: tests/python-pytest
         language: python
         framework: pytest
@@ -43,8 +29,8 @@ images:
         image: alpine:latest
     golang:
         image: golang:latest
-    golang-1-16-15:
-        image: golang:1.16.15
+    golang-1-18:
+        image: golang:1.18
 
 builds:
     golang-app:
@@ -57,37 +43,20 @@ workflows:
     all-tests:
         tests:
             ubuntu:
-                - velocity
-                - end-to-end
-                - golang
-                - javascript-jest
-                - python-pytest
+                - test-golang-std
+                - test-javascript-jest
+                - test-python-pytest
             alpine:
-                - end-to-end
+                - test-golang-std
 
     velocity:
         tests:
             ubuntu:
                 - velocity
 
-    end-to-end:
-        tests:
-            ubuntu:
-                - end-to-end
-
-    local-test:
-        tests:
-            ubuntu:
-                - local-test
-
     golang:
         tests:
             golang:
-                - golang
-            golang-1-16-15:
-                - golang
-
-    golang-test:
-        tests:
-            golang:
-                - golang-test
+                - test-golang-std
+            golang-1-18:
+                - test-golang-std
