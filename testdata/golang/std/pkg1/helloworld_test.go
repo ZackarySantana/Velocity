@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/zackarysantana/repo1/pkg1"
 )
 
 func TestHelloWorld(t *testing.T) {
@@ -17,7 +19,7 @@ func TestHelloWorld(t *testing.T) {
 	rr := httptest.NewRecorder()
 
 	// Call the HelloWorld handler with the fake request and response recorder
-	HelloWorld(rr, req)
+	pkg1.HelloWorld(rr, req)
 
 	// Check the status code
 	if status := rr.Code; status != http.StatusOK {
