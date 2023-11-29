@@ -1,5 +1,6 @@
 config:
-    registry: docker.io
+    registry: docker.io/library
+    server: https://velocity-ci.com/api
 
 tests:
     velocity:
@@ -15,8 +16,13 @@ tests:
     local-test:
         run: cat velocity.yml
 
+    golang-test:
+        directory: testdata/golang
+        language: golang
+        framework: std
+
     golang:
-        directory: tests/golang
+        directory: .
         language: golang
         framework: std
 
@@ -80,3 +86,8 @@ workflows:
                 - golang
             golang-1-16-15:
                 - golang
+
+    golang-test:
+        tests:
+            golang:
+                - golang-test
