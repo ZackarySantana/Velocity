@@ -13,12 +13,12 @@ tests:
         framework: std
 
     test-javascript-jest:
-        directory: tests/javascript/jest
+        directory: testdata/javascript/jest
         language: javascript
         framework: jest
 
     test-python-pytest:
-        directory: tests/python/pytest
+        directory: testdata/python/pytest
         language: python
         framework: pytest
 
