@@ -39,8 +39,10 @@ type FrameworkJob struct {
 }
 
 func (j *FrameworkJob) SetupCommand() []string {
-	defaults := getLanguageAndFrameworkDefaults(j.Language, j.Framework)
-	return defaults.SetupCommands
+	cmds := []string{}
+	cmds = append(cmds, getDirectoryCommands(j.Name)...)
+	cmds = append(cmds, getLanguageAndFrameworkDefaults(j.Language, j.Framework).SetupCommands...)
+	return cmds
 }
 
 func (j *FrameworkJob) GetImage() string {
