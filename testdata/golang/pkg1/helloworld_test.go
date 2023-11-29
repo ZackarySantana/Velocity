@@ -1,4 +1,4 @@
-package pkg1
+package pkg1_test
 
 import (
 	"net/http"
