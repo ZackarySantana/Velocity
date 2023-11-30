@@ -9,8 +9,7 @@ test:
 	)
 
 build-cli:
-	go build -o build/velocity cmd/cli/main.go
-	mv build/velocity $(GOPATH)/bin
+	go build -o $(GOPATH)/bin/velocity cmd/cli/main.go
 
 agent:
 	$(ENV) go run cmd/agent/main.go
