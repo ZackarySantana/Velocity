@@ -4,6 +4,7 @@ type Env map[string]string
 
 type YAMLConfig struct {
 	Registry *string `yaml:"registry,omitempty" json:"registry,omitempty"`
+	Server   *string `yaml:"server,omitempty" json:"server,omitempty"`
 }
 
 type YAMLTests map[string]YAMLTest
