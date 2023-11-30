@@ -10,7 +10,6 @@ import (
 )
 
 func main() {
-
 	client, err := db.Connect(nil)
 	if err != nil {
 		log.Fatal(err)
