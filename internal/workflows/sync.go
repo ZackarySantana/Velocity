@@ -1,8 +1,6 @@
 package workflows
 
 import (
-	"os/exec"
-	"strings"
 	"sync"
 	"time"
 
@@ -45,23 +43,14 @@ func RunSyncWorkflow(c config.Config, workflow config.YAMLWorkflow) ([]jobs.JobR
 		}
 	}
 
-	gitRepo, err := exec.Command("git", "config", "--get", "remote.origin.url").Output()
-	if err != nil {
-		return nil, err
-	}
-
-	commitHash, err := exec.Command("git", "rev-parse", "HEAD").Output()
-	if err != nil {
-		return nil, err
-	}
-
 	provider := jobs.NewInMemoryJobProvider(j)
 
 	stop := make(chan bool)
 	wg := sync.WaitGroup{}
-	repo, _ := strings.CutSuffix(string(gitRepo), "\n")
-	hash, _ := strings.CutSuffix(string(commitHash), "\n")
-	ctx := jobs.NewContext(repo, hash)
+	ctx, err := jobs.NewCurrentContext()
+	if err != nil {
+		return nil, err
+	}
 	a := agent.NewAgent(provider, &jobs.DockerJobExecutor{}, ctx, stop, &wg)
 
 	err = a.Start()

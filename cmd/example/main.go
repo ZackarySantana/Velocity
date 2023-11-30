@@ -24,7 +24,7 @@ type CommandInfo struct {
 
 func main() {
 	// Create or open the database
-	client, err := db.Connect()
+	client, err := db.Connect(nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -38,9 +38,9 @@ func main() {
 
 	// Create the commands table if it doesn't exist
 
-	addExampleTasks(client)
+	addExampleTasks(client.Client)
 	fmt.Println("Example tasks added to the database.")
-	printCommands(client)
+	printCommands(client.Client)
 }
 
 func printCommands(db *mongo.Client) {
