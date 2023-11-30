@@ -2,6 +2,8 @@ package workflows
 
 import (
 	"fmt"
+	"sort"
+	"strings"
 
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/zackarysantana/velocity/src/config"
@@ -9,7 +11,7 @@ import (
 )
 
 func GetWorkflow(c config.Config, title string) (config.YAMLWorkflow, error) {
-	items := []list.Item{}
+	items := []uicli.SimpleItem{}
 	for name, workflow := range c.Workflows {
 		desc := workflow.Description
 		if desc == nil {
@@ -22,7 +24,16 @@ func GetWorkflow(c config.Config, title string) (config.YAMLWorkflow, error) {
 		})
 	}
 
-	result, err := uicli.Run(title, items)
+	sort.Slice(items, func(i, j int) bool {
+		return strings.Compare(items[i].Label, items[j].Label) < 0
+	})
+
+	var listItems []list.Item
+	for _, item := range items {
+		listItems = append(listItems, item)
+	}
+
+	result, err := uicli.Run(title, listItems)
 	if err != nil {
 		return config.YAMLWorkflow{}, err
 	}
