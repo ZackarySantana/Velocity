@@ -10,6 +10,7 @@ import (
 
 var (
 	authenticators = []func(*gin.Context) (*db.User, *authError){
+		authByEmailAndPassword,
 		authBySessionToken,
 	}
 )
@@ -38,6 +39,26 @@ func Auth(c *gin.Context) {
 	}
 
 	c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized no authenticator found"})
+}
+
+func authByEmailAndPassword(c *gin.Context) (*db.User, *authError) {
+	db := GetDB(c)
+
+	email, password, ok := c.Request.BasicAuth()
+	if !ok {
+		return nil, nil
+	}
+
+	user, err := db.GetUserByEmail(email)
+	if err != nil {
+		return nil, &authError{"Unauthorized username or password", http.StatusUnauthorized}
+	}
+
+	if !user.CheckPassword(password) {
+		return nil, &authError{"Unauthorized username or password", http.StatusUnauthorized}
+	}
+
+	return user, nil
 }
 
 func authBySessionToken(c *gin.Context) (*db.User, *authError) {
