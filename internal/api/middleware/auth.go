@@ -38,7 +38,7 @@ func Auth(c *gin.Context) {
 		}
 	}
 
-	c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized no authenticator found"})
+	c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized no authentication found"})
 }
 
 func authByEmailAndPassword(c *gin.Context) (*db.User, *authError) {
