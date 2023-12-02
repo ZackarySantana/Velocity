@@ -48,20 +48,31 @@ func Auth(db db.Connection) gin.HandlerFunc {
 	}
 }
 
-func AdminAuth(db db.Connection) gin.HandlerFunc {
+func AdminAuth(client db.Connection) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		var permissions *db.Permissions
+		var err *authError
 		for _, authenticator := range adminAuthenticators {
-			permissions, err := authenticator(c, db)
+			permissions, err = authenticator(c, client)
 			if err != nil {
 				c.AbortWithStatusJSON(err.Code, gin.H{"error": err.Msg})
 				return
 			}
 
 			if permissions != nil {
-				c.Set("permissions", permissions)
-				c.Next()
-				return
+				break
 			}
+		}
+
+		if permissions != nil && permissions.Admin {
+			c.Set("permissions", permissions)
+			c.Next()
+			return
+		}
+
+		if permissions != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized- you are not an admin"})
+			return
 		}
 
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized- no authentication found"})
