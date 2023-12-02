@@ -11,6 +11,8 @@ import (
 
 type Connection struct {
 	*mongo.Client
+
+	db string
 }
 
 func Connect(ctx *context.Context) (*Connection, error) {
@@ -18,12 +20,46 @@ func Connect(ctx *context.Context) (*Connection, error) {
 		defaultContext := context.TODO()
 		ctx = &defaultContext
 	}
-	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
-	username := os.Getenv("MONGODB_USERNAME")
-	password := os.Getenv("MONGODB_PASSWORD")
-	uri := os.Getenv("MONGODB_URI")
+
+	db, err := getEnv("MONGODB_DATABASE")
+	if err != nil {
+		return nil, err
+	}
+
+	username, err := getEnv("MONGODB_USERNAME")
+	if err != nil {
+		return nil, err
+	}
+
+	password, err := getEnv("MONGODB_PASSWORD")
+	if err != nil {
+		return nil, err
+	}
+
+	uri, err := getEnv("MONGODB_URI")
+	if err != nil {
+		return nil, err
+	}
 	path := fmt.Sprintf(uri, username, password)
+	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
 	opts := options.Client().ApplyURI(path).SetServerAPIOptions(serverAPI)
+
 	client, err := mongo.Connect(*ctx, opts)
-	return &Connection{client}, err
+	if err != nil {
+		return nil, err
+	}
+
+	return &Connection{client, db}, err
+}
+
+func getEnv(name string) (string, error) {
+	value, exists := os.LookupEnv(name)
+	if !exists {
+		return "", fmt.Errorf("%s not set", name)
+	}
+	return value, nil
+}
+
+func (c *Connection) col(collection string) *mongo.Collection {
+	return c.Database(c.db).Collection(collection)
 }

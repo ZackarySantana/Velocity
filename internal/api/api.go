@@ -1,6 +1,8 @@
 package api
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"net/http"
 
 	"github.com/gorilla/websocket"
@@ -13,3 +15,14 @@ var upgrader = websocket.Upgrader{
 }
 
 var UpgradeToWebsocket = upgrader.Upgrade
+
+func generateAPIKey() (string, error) {
+	keyBytes := make([]byte, 32)
+	_, err := rand.Read(keyBytes)
+	if err != nil {
+		return "", err
+	}
+
+	apiKey := base64.StdEncoding.EncodeToString(keyBytes)
+	return apiKey, nil
+}
