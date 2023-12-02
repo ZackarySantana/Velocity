@@ -17,17 +17,8 @@ agent:
 server:
 	$(ENV) go run cmd/server/main.go
 
-example:
-	$(ENV) go run cmd/example/main.go
-
 packages:
 	echo $(PACKAGES)
 
 clean:
 	rm $(GOPATH)/bin/velocity
-
-
-
-
-
-
