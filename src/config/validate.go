@@ -48,6 +48,9 @@ func (c *Config) validateWorkflow(w YAMLWorkflow) error {
 			}
 		}
 	}
+	if len(errs) == 0 {
+		return nil
+	}
 	return fmt.Errorf("%v", errs)
 }
 
@@ -67,6 +70,9 @@ func (c *Config) Validate() error {
 		if err := c.validateWorkflow(workflow); err != nil {
 			errs = append(errs, err)
 		}
+	}
+	if len(errs) == 0 {
+		return nil
 	}
 	return fmt.Errorf("%v", errs)
 }
