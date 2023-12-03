@@ -1,7 +1,6 @@
 package config
 
 import (
-	"errors"
 	"fmt"
 )
 
@@ -49,7 +48,7 @@ func (c *Config) validateWorkflow(w YAMLWorkflow) error {
 			}
 		}
 	}
-	return errors.Join(errs...)
+	return fmt.Errorf("%v", errs)
 }
 
 func (c *Config) Validate() error {
@@ -69,7 +68,7 @@ func (c *Config) Validate() error {
 			errs = append(errs, err)
 		}
 	}
-	return errors.Join(errs...)
+	return fmt.Errorf("%v", errs)
 }
 
 func (c *Config) Populate() error {

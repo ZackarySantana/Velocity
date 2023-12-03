@@ -24,8 +24,8 @@ func NewCurrentContext() (Context, error) {
 	if err != nil {
 		return Context{}, err
 	}
-	repo, _ := strings.CutSuffix(string(gitRepo), "\n")
-	hash, _ := strings.CutSuffix(string(commitHash), "\n")
+	repo := strings.TrimSuffix(string(gitRepo), "\n")
+	hash := strings.TrimSuffix(string(commitHash), "\n")
 
 	return NewContext(string(repo), string(hash)), nil
 }
