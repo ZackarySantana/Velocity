@@ -61,14 +61,14 @@ workflows:
                 - velocity
             golang-1-18:
                 - velocity
-            golang-1-16:
-                - velocity
 
     golang:
         tests:
             golang:
                 - test-golang-std
             golang-1-18:
+                - test-golang-std
+            golang-1-16:
                 - test-golang-std
 
     javascript:
