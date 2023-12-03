@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"log"
 
 	"github.com/zackarysantana/velocity/internal/api"
 	"go.mongodb.org/mongo-driver/bson"
@@ -59,7 +58,6 @@ func (c *Connection) CreateAdminUser(ctx context.Context, email string) (*User, 
 	}
 
 	err = c.UseSessionWithOptions(ctx, nil, func(ctx mongo.SessionContext) error {
-
 		if err := ctx.StartTransaction(); err != nil {
 			return err
 		}
@@ -69,7 +67,6 @@ func (c *Connection) CreateAdminUser(ctx context.Context, email string) (*User, 
 			_ = ctx.AbortTransaction(context.Background())
 			return err
 		}
-
 		user.Id = r.InsertedID.(primitive.ObjectID)
 
 		_, err = c.col("permissions").InsertOne(ctx, Permissions{
@@ -85,7 +82,7 @@ func (c *Connection) CreateAdminUser(ctx context.Context, email string) (*User, 
 		return ctx.CommitTransaction(context.Background())
 	})
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	return &user, nil
