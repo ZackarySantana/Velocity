@@ -42,6 +42,7 @@ func (a *Agent) runJobs(queue <-chan jobs.Job, results chan<- jobs.JobResult, li
 				<-limit
 			}()
 			logs, err := a.Executor.Execute(a.Context, job)
+			job.SetStatus(jobs.JobStatusCompleted)
 			if err != nil {
 				results <- jobs.JobResult{
 					Job:    job,
