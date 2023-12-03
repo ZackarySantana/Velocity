@@ -23,23 +23,15 @@ func RunSyncWorkflow(c config.Config, workflow config.YAMLWorkflow) ([]jobs.JobR
 			}
 
 			if test.Run != nil {
-				j = append(j, &jobs.CommandJob{
-					Image:     *image.Image,
-					Directory: test.Directory,
-					Command:   *test.Run,
-					Name:      string(testName),
-				})
+				j = append(j, jobs.NewCommandJob(string(testName), *image.Image, *test.Run, nil, jobs.JobStatusQueued, nil))
 
 				continue
 			}
 
-			j = append(j, &jobs.FrameworkJob{
+			j = append(j, jobs.NewFrameworkJob(string(testName), *test.Language, *test.Framework, jobs.JobStatusQueued, &jobs.FrameworkJobOptions{
 				Image:     image.Image,
 				Directory: test.Directory,
-				Language:  *test.Language,
-				Framework: *test.Framework,
-				Name:      string(testName),
-			})
+			}))
 		}
 	}
 

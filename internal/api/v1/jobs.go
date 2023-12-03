@@ -13,3 +13,21 @@ func (v *V1App) GetJobs(c *gin.Context) {
 		"amount":  amount,
 	})
 }
+
+func (v *V1App) PostJobsDequeue(c *gin.Context) {
+	amount := middleware.GetQueryAmount(c)
+
+	c.JSON(200, gin.H{
+		"message": "pong",
+		"amount":  amount,
+	})
+}
+
+func (v *V1App) PostJobsEnqueue(c *gin.Context) {
+	amount := middleware.GetQueryAmount(c)
+
+	c.JSON(200, gin.H{
+		"message": "pong",
+		"amount":  amount,
+	})
+}

@@ -22,11 +22,8 @@ func NewMongoDBJobProvider(client mongo.Client) *MongoDBJobProvider {
 func (p *MongoDBJobProvider) Next(num int) ([]Job, error) {
 	jobs := []Job{}
 	for i := 0; i < num; i++ {
-		job := CommandJob{
-			Command: "echo hello world",
-			Image:   "alpine",
-		}
-		jobs = append(jobs, &job)
+		job := NewCommandJob("test", "alpine", "echo hello world", nil, JobStatusQueued, nil)
+		jobs = append(jobs, job)
 	}
 	return jobs, nil
 }
