@@ -36,6 +36,7 @@ type Job interface {
 	GetCommand() string
 	GetName() string
 	GetStatus() JobStatus
+	SetStatus(JobStatus)
 	Validate() error
 }
 
@@ -65,6 +66,10 @@ func (j *BaseJob) GetName() string {
 
 func (j *BaseJob) GetStatus() JobStatus {
 	return j.Status
+}
+
+func (j *BaseJob) SetStatus(status JobStatus) {
+	j.Status = status
 }
 
 func (j *BaseJob) Validate() error {
