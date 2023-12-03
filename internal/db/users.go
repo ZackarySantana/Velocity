@@ -10,19 +10,19 @@ import (
 )
 
 type User struct {
-	Id     primitive.ObjectID `bson:"_id,omitempty"`
-	APIKey string             `bson:"api_key"`
+	Id     primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	APIKey string             `bson:"api_key" json:"api_key"`
 
-	Email string `bson:"email"`
+	Email string `bson:"email" json:"email"`
 }
 
 type Permissions struct {
-	Id     primitive.ObjectID `bson:"_id,omitempty"`
-	APIKey string             `bson:"api_key"`
+	Id     primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	APIKey string             `bson:"api_key" json:"api_key"`
 
-	UserId primitive.ObjectID `bson:"user_id"`
+	UserId primitive.ObjectID `bson:"user_id" json:"user_id"`
 
-	Admin bool `bson:"admin"`
+	Admin bool `bson:"admin" json:"admin"`
 }
 
 func (c *Connection) CreateUser(ctx context.Context, email string) (*User, error) {
