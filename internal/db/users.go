@@ -2,9 +2,12 @@ package db
 
 import (
 	"context"
+	"log"
 
+	"github.com/zackarysantana/velocity/internal/api"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type User struct {
@@ -18,13 +21,74 @@ type Permissions struct {
 	Id     primitive.ObjectID `bson:"_id,omitempty"`
 	APIKey string             `bson:"api_key"`
 
-	UserId string `bson:"user_id"`
+	UserId primitive.ObjectID `bson:"user_id"`
 
 	Admin bool `bson:"admin"`
 }
 
-func (u *User) CheckPassword(password string) bool {
-	return true
+func (c *Connection) CreateUser(ctx context.Context, email string) (*User, error) {
+	apiKey, err := api.GenerateAPIKey()
+	if err != nil {
+		return nil, err
+	}
+
+	user := User{
+		APIKey: apiKey,
+		Email:  email,
+	}
+
+	r, err := c.col("users").InsertOne(ctx, user)
+	if err != nil {
+		return nil, err
+	}
+
+	user.Id = r.InsertedID.(primitive.ObjectID)
+
+	return &user, nil
+}
+
+func (c *Connection) CreateAdminUser(ctx context.Context, email string) (*User, error) {
+	apiKey, err := api.GenerateAPIKey()
+	if err != nil {
+		return nil, err
+	}
+
+	user := User{
+		APIKey: apiKey,
+		Email:  email,
+	}
+
+	err = c.UseSessionWithOptions(ctx, nil, func(ctx mongo.SessionContext) error {
+
+		if err := ctx.StartTransaction(); err != nil {
+			return err
+		}
+
+		r, err := c.col("users").InsertOne(ctx, user)
+		if err != nil {
+			_ = ctx.AbortTransaction(context.Background())
+			return err
+		}
+
+		user.Id = r.InsertedID.(primitive.ObjectID)
+
+		_, err = c.col("permissions").InsertOne(ctx, Permissions{
+			APIKey: apiKey,
+			UserId: user.Id,
+			Admin:  true,
+		})
+		if err != nil {
+			_ = ctx.AbortTransaction(context.Background())
+			return err
+		}
+
+		return ctx.CommitTransaction(context.Background())
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return &user, nil
 }
 
 func (c *Connection) GetUser(ctx context.Context, query interface{}) (*User, error) {
@@ -47,4 +111,9 @@ func (c *Connection) GetPermissions(ctx context.Context, query interface{}) (*Pe
 
 func (c *Connection) GetPermissionsByAPIKey(ctx context.Context, apiKey string) (*Permissions, error) {
 	return c.GetPermissions(ctx, bson.M{"api_key": apiKey})
+}
+
+func (c *Connection) HasAdminUsers(ctx context.Context) (bool, error) {
+	count, err := c.col("permissions").CountDocuments(ctx, bson.M{"admin": true})
+	return count > 0, err
 }

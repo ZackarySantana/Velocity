@@ -17,12 +17,14 @@ func CreateV1App(client db.Connection) (*gin.Engine, error) {
 
 	v1 := router.Group("/v1")
 
+	v1.POST("/first_time_register", a.PostFirstTimeRegister()...)
+
 	authorizedV1 := v1.Group("/", middleware.Auth(client))
 	authorizedV1.GET("/jobs", middleware.QueryAmount(1), a.GetJobs)
 	authorizedV1.GET("/jobs/dequeue", middleware.QueryAmount(1), a.GetJobs)
 
 	adminV1 := v1.Group("/admin", middleware.AdminAuth(client))
-	adminV1.POST("/users", CreateUser()...)
+	adminV1.POST("/user", a.PostUser()...)
 
 	return router, nil
 }

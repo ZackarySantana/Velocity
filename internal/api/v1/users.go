@@ -6,7 +6,7 @@ import (
 	"github.com/zackarysantana/velocity/internal/api/v1/v1types"
 )
 
-func CreateUser() []gin.HandlerFunc {
+func (v *V1App) PostUser() []gin.HandlerFunc {
 	var data v1types.CreateUserRequest
 	return []gin.HandlerFunc{
 		middleware.ParseBody(&data),

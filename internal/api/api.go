@@ -16,7 +16,7 @@ var upgrader = websocket.Upgrader{
 
 var UpgradeToWebsocket = upgrader.Upgrade
 
-func generateAPIKey() (string, error) {
+func GenerateAPIKey() (string, error) {
 	keyBytes := make([]byte, 32)
 	_, err := rand.Read(keyBytes)
 	if err != nil {
