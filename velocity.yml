@@ -31,6 +31,8 @@ images:
         image: golang:latest
     golang-1-18:
         image: golang:1.18
+    golang-1-16:
+        image: golang:1.16
     javascript:
         image: node:latest
     python:
@@ -55,7 +57,11 @@ workflows:
 
     velocity:
         tests:
-            ubuntu:
+            golang:
+                - velocity
+            golang-1-18:
+                - velocity
+            golang-1-16:
                 - velocity
 
     golang:
