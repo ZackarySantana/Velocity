@@ -4,8 +4,10 @@ import (
 	"context"
 	"strings"
 
+	"github.com/zackarysantana/velocity/internal/api/v1/v1types"
 	"github.com/zackarysantana/velocity/internal/db"
 	"github.com/zackarysantana/velocity/internal/jobs/jobtypes"
+	"github.com/zackarysantana/velocity/src/clients"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -17,19 +19,19 @@ type JobProvider interface {
 }
 
 type VelocityJobProvider struct {
-	c db.Connection
+	v *clients.VelocityClientV1
 }
 
-func NewVelocityJobProvider(client db.Connection) *VelocityJobProvider {
-	return &VelocityJobProvider{client}
+func NewVelocityJobProvider(v *clients.VelocityClientV1) *VelocityJobProvider {
+	return &VelocityJobProvider{v}
 }
 
 func (p *VelocityJobProvider) Next(num int) ([]Job, error) {
-	// TODO should this be another context?
-	dbJobs, err := p.c.DequeueNJobs(context.TODO(), int64(num))
+	resp, err := p.v.PostJobsDequeue(v1types.PostJobsDequeueRequest{}, v1types.PostJobsDequeueQueryParams{})
 	if err != nil {
 		return nil, err
 	}
+	dbJobs := resp.Jobs
 
 	jobs := []Job{}
 	for i := 0; i < len(dbJobs); i++ {
@@ -41,22 +43,18 @@ func (p *VelocityJobProvider) Next(num int) ([]Job, error) {
 }
 
 func (p *VelocityJobProvider) Update(result JobResult) error {
-	id, err := primitive.ObjectIDFromHex(result.Job.GetName())
-	if err != nil {
-		return err
-	}
-	// TODO: Replace this context?
-	j := &db.Job{
-		Id:     id,
-		Status: jobtypes.JobStatusCompleted,
+	j := v1types.PostJobResultRequest{
+		Id: result.Job.GetName(),
 	}
 	if result.Failed != nil {
-		j.Error = result.Failed.Error.Error()
+		err := result.Failed.Error.Error()
+		j.Error = &err
 	}
 	if result.Success != nil {
-		j.Logs = strings.TrimSuffix(result.Success.Logs, "\n")
+		logs := strings.TrimSuffix(result.Success.Logs, "\n")
+		j.Logs = &logs
 	}
-	_, err = p.c.UpdateJob(context.TODO(), j)
+	_, err := p.v.PostJobsResults(j)
 
 	return err
 }

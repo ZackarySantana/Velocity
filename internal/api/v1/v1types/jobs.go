@@ -8,8 +8,8 @@ import (
 // POST /api/v1/jobs/result
 type PostJobResultRequest struct {
 	Id    string  `json:"id"`
-	Logs  *string `json:"logs"`
-	Error *string `json:"error"`
+	Logs  *string `json:"logs,omitempty"`
+	Error *string `json:"error,omitempty"`
 }
 type PostJobResultResponse db.Job
 
