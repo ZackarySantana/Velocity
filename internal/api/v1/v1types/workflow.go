@@ -2,9 +2,9 @@ package v1types
 
 import "github.com/zackarysantana/velocity/src/config"
 
-type PostWorkflowRequest struct {
+type PostWorkflowsStartRequest struct {
 	Config config.YAMLWorkflow `json:"config"`
 }
 
 // TBA
-type PostWorkflowResponse string
+type PostWorkflowsStartResponse string

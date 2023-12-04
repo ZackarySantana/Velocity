@@ -21,7 +21,7 @@ func CreateV1App(client db.Connection) (*gin.Engine, error) {
 
 	authorizedV1 := v1.Group("/", middleware.Auth(client))
 	workflows := authorizedV1.Group("/workflows")
-	workflows.POST("", a.PostWorkflow()...)
+	workflows.POST("/start", a.PostWorkflowsStart()...)
 
 	// TODO: Agent routes? should we separate these out?
 	jobs := authorizedV1.Group("/jobs")
