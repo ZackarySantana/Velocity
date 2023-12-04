@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"github.com/zackarysantana/velocity/internal/db"
+	"github.com/zackarysantana/velocity/internal/jobs/jobtypes"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type JobProvider interface {
@@ -38,7 +40,17 @@ func (p *MongoDBJobProvider) Next(num int) ([]Job, error) {
 }
 
 func (p *MongoDBJobProvider) Update(result JobResult) error {
-	return nil
+	id, err := primitive.ObjectIDFromHex(result.Job.GetName())
+	if err != nil {
+		return err
+	}
+	// TODO: Replace this context?
+	_, err = p.c.UpdateJob(context.TODO(), &db.Job{
+		Id:     id,
+		Status: jobtypes.JobStatusCompleted,
+	})
+
+	return err
 }
 
 func (p *MongoDBJobProvider) Cleanup() error {
