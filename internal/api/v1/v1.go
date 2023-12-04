@@ -25,7 +25,6 @@ func CreateV1App(client db.Connection) (*gin.Engine, error) {
 
 	// TODO: Agent routes? should we separate these out?
 	jobs := authorizedV1.Group("/jobs")
-	jobs.GET("", append(middleware.JobsFilter(getJobsOptsDefault), a.GetJobs)...)
 	jobs.POST("/dequeue", append(middleware.JobsFilter(postJobsDequeueOptsDefault), a.PostJobsDequeue)...)
 	jobs.POST("/result", a.PostJobResult()...)
 
