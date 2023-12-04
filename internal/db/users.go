@@ -43,7 +43,6 @@ func (c *Connection) InsertUser(ctx context.Context, email string) (*User, error
 	if err != nil {
 		return nil, err
 	}
-
 	user := User{
 		APIKey: apiKey,
 		Email:  email,
@@ -53,7 +52,6 @@ func (c *Connection) InsertUser(ctx context.Context, email string) (*User, error
 	if err != nil {
 		return nil, err
 	}
-
 	user.Id = r.InsertedID.(primitive.ObjectID)
 
 	return &user, nil
@@ -65,22 +63,18 @@ func (c *Connection) InsertAdminUser(ctx context.Context, email string) (*User, 
 		return nil, err
 	}
 
-	user := User{
-		APIKey: apiKey,
-		Email:  email,
-	}
+	var user *User
 
 	err = c.UseSessionWithOptions(ctx, nil, func(ctx mongo.SessionContext) error {
 		if err := ctx.StartTransaction(); err != nil {
 			return err
 		}
 
-		r, err := c.col("users").InsertOne(ctx, user)
+		user, err = c.InsertUser(ctx, email)
 		if err != nil {
 			_ = ctx.AbortTransaction(context.Background())
 			return err
 		}
-		user.Id = r.InsertedID.(primitive.ObjectID)
 
 		_, err = c.col("permissions").InsertOne(ctx, Permissions{
 			APIKey: apiKey,
@@ -98,7 +92,7 @@ func (c *Connection) InsertAdminUser(ctx context.Context, email string) (*User, 
 		return nil, err
 	}
 
-	return &user, nil
+	return user, nil
 }
 
 func (c *Connection) GetPermissions(ctx context.Context, query interface{}) (*Permissions, error) {
