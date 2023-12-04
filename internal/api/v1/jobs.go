@@ -57,6 +57,12 @@ func (a *V1App) PostJobResult() []gin.HandlerFunc {
 				Id:     id,
 				Status: jobtypes.JobStatusCompleted,
 			}
+			if data.Logs != nil {
+				j.Logs = *data.Logs
+			}
+			if data.Error != nil {
+				j.Error = *data.Error
+			}
 			j, err = a.client.UpdateJob(c, j)
 			if err != nil {
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})

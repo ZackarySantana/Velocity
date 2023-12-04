@@ -15,7 +15,7 @@ func CreateV1App(client db.Connection) (*gin.Engine, error) {
 
 	a := V1App{client: client}
 
-	v1 := router.Group("/v1")
+	v1 := router.Group("/api/v1")
 	v1.POST("/first_time_register", a.PostFirstTimeRegister()...)
 
 	adminV1 := v1.Group("/admin", middleware.AdminAuth(client))

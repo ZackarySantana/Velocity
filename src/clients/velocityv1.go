@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
@@ -16,7 +17,7 @@ import (
 type VelocityClientV1 struct {
 	BaseURL string
 
-	SessionToken *string
+	ApiKey string
 }
 
 func NewVelocityClientV1(baseURL string) *VelocityClientV1 {
@@ -25,10 +26,10 @@ func NewVelocityClientV1(baseURL string) *VelocityClientV1 {
 	}
 }
 
-func NewVelocityClientV1WithSessionToken(baseURL, sessionToken string) *VelocityClientV1 {
+func NewVelocityClientV1WithAPIKey(baseURL, apiKey string) *VelocityClientV1 {
 	return &VelocityClientV1{
-		BaseURL:      strings.TrimSuffix(baseURL, "/"),
-		SessionToken: &sessionToken,
+		BaseURL: strings.TrimSuffix(baseURL, "/"),
+		ApiKey:  apiKey,
 	}
 }
 
@@ -79,11 +80,23 @@ func (v *VelocityClientV1) post(route string, body, resp interface{}) error {
 		return err
 	}
 
-	response, err := http.Post(v.makeRoute(route), "application/json", bytes.NewBuffer(out))
+	path := v.makeRoute(route)
+	req, err := http.NewRequest("POST", path, bytes.NewBuffer(out))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+v.ApiKey)
+
+	response, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return err
 	}
 	defer response.Body.Close()
+	if response.StatusCode != 200 {
+		b, _ := ioutil.ReadAll(response.Body)
+		return errors.New(path + " - " + response.Status + ": " + string(b))
+	}
 
 	return json.NewDecoder(response.Body).Decode(&resp)
 }

@@ -1,26 +1,17 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"sync"
 
 	"github.com/zackarysantana/velocity/internal/agent"
-	"github.com/zackarysantana/velocity/internal/db"
 	"github.com/zackarysantana/velocity/internal/jobs"
+	"github.com/zackarysantana/velocity/src/clients"
 )
 
 func main() {
-	client, err := db.Connect(nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer func() {
-		if err = client.Disconnect(context.TODO()); err != nil {
-			panic(err)
-		}
-	}()
+	v := clients.NewVelocityClientV1WithAPIKey("http://localhost:8080", "YOUR_API_KEY")
 
 	stop := make(chan bool)
 	wg := sync.WaitGroup{}
@@ -28,7 +19,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	a := agent.NewAgent(jobs.NewMongoDBJobProvider(*client), &jobs.DockerJobExecutor{}, ctx, stop, &wg)
+	a := agent.NewAgent(jobs.NewVelocityJobProvider(v), &jobs.DockerJobExecutor{}, ctx, stop, &wg)
 
 	err = a.Start()
 	if err != nil {

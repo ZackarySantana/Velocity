@@ -71,6 +71,7 @@ func (a *Agent) enqueue(queue chan<- jobs.Job, limit chan<- struct{}) {
 		jobs, err := a.Provider.Next(cap(limit) - len(limit))
 		if err != nil {
 			fmt.Println(err)
+			time.Sleep(time.Second)
 			continue
 		}
 		fmt.Printf("Queuing %d jobs...\n", len(jobs))
@@ -82,6 +83,7 @@ func (a *Agent) enqueue(queue chan<- jobs.Job, limit chan<- struct{}) {
 		finished, err := a.Provider.Finished()
 		if err != nil {
 			fmt.Println(err)
+			time.Sleep(time.Second)
 			continue
 		}
 
