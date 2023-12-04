@@ -28,7 +28,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	a := agent.NewAgent(jobs.NewMongoDBJobProvider(*client.Client), &jobs.DockerJobExecutor{}, ctx, stop, &wg)
+	a := agent.NewAgent(jobs.NewMongoDBJobProvider(*client), &jobs.DockerJobExecutor{}, ctx, stop, &wg)
 
 	err = a.Start()
 	if err != nil {

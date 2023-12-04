@@ -3,40 +3,17 @@ package jobs
 import (
 	"errors"
 	"fmt"
+
+	"github.com/zackarysantana/velocity/internal/jobs/jobtypes"
 )
-
-type JobStatus string
-
-var (
-	JobStatusQueued    JobStatus = "queued"
-	JobStatusInactive  JobStatus = "inactive"
-	JobStatusActive    JobStatus = "active"
-	JobStatusCompleted JobStatus = "completed"
-
-	JobStatuses = []JobStatus{
-		JobStatusQueued,
-		JobStatusInactive,
-		JobStatusActive,
-		JobStatusCompleted,
-	}
-)
-
-func JobStatusFromString(s string) (JobStatus, error) {
-	for _, status := range JobStatuses {
-		if s == string(status) {
-			return status, nil
-		}
-	}
-	return "", fmt.Errorf("invalid status %s", s)
-}
 
 type Job interface {
 	SetupCommand() []string
 	GetImage() string
 	GetCommand() string
 	GetName() string
-	GetStatus() JobStatus
-	SetStatus(JobStatus)
+	GetStatus() jobtypes.JobStatus
+	SetStatus(jobtypes.JobStatus)
 	Validate() error
 }
 
@@ -45,7 +22,7 @@ type BaseJob struct {
 	Image         string
 	Command       string
 	Name          string
-	Status        JobStatus
+	Status        jobtypes.JobStatus
 }
 
 func (j *BaseJob) SetupCommand() []string {
@@ -64,11 +41,11 @@ func (j *BaseJob) GetName() string {
 	return j.Name
 }
 
-func (j *BaseJob) GetStatus() JobStatus {
+func (j *BaseJob) GetStatus() jobtypes.JobStatus {
 	return j.Status
 }
 
-func (j *BaseJob) SetStatus(status JobStatus) {
+func (j *BaseJob) SetStatus(status jobtypes.JobStatus) {
 	j.Status = status
 }
 
@@ -106,7 +83,7 @@ type CommandJobOptions struct {
 	Directory *string
 }
 
-func NewCommandJob(name string, image string, command string, setupCommands []string, status JobStatus, opts *CommandJobOptions) *CommandJob {
+func NewCommandJob(name string, image string, command string, setupCommands []string, status jobtypes.JobStatus, opts *CommandJobOptions) *CommandJob {
 	j := &CommandJob{
 		BaseJob: BaseJob{
 			SetupCommands: setupCommands,
@@ -137,7 +114,7 @@ type FrameworkJobOptions struct {
 	Image     *string
 }
 
-func NewFrameworkJob(name, language, framework string, status JobStatus, opts *FrameworkJobOptions) *FrameworkJob {
+func NewFrameworkJob(name, language, framework string, status jobtypes.JobStatus, opts *FrameworkJobOptions) *FrameworkJob {
 	i := getLanguageAndFrameworkDefaults(language, framework)
 	j := &FrameworkJob{
 		BaseJob: BaseJob{

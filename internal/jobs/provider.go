@@ -1,7 +1,9 @@
 package jobs
 
 import (
-	"go.mongodb.org/mongo-driver/mongo"
+	"context"
+
+	"github.com/zackarysantana/velocity/internal/db"
 )
 
 type JobProvider interface {
@@ -12,19 +14,26 @@ type JobProvider interface {
 }
 
 type MongoDBJobProvider struct {
-	client mongo.Client
+	c db.Connection
 }
 
-func NewMongoDBJobProvider(client mongo.Client) *MongoDBJobProvider {
+func NewMongoDBJobProvider(client db.Connection) *MongoDBJobProvider {
 	return &MongoDBJobProvider{client}
 }
 
 func (p *MongoDBJobProvider) Next(num int) ([]Job, error) {
+	// TODO should this be another context?
+	dbJobs, err := p.c.GetNQueuedJobs(context.TODO(), int64(num))
+	if err != nil {
+		return nil, err
+	}
+
 	jobs := []Job{}
-	for i := 0; i < num; i++ {
-		job := NewCommandJob("test", "alpine", "echo hello world", nil, JobStatusQueued, nil)
+	for i := 0; i < len(dbJobs); i++ {
+		job := NewCommandJob(dbJobs[i].Name, dbJobs[i].Image, dbJobs[i].Command, dbJobs[i].SetupCommands, dbJobs[i].Status, nil)
 		jobs = append(jobs, job)
 	}
+
 	return jobs, nil
 }
 

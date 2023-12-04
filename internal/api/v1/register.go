@@ -23,7 +23,7 @@ func (v *V1App) PostFirstTimeRegister() []gin.HandlerFunc {
 				return
 			}
 
-			user, err := v.client.CreateAdminUser(c, data.Email)
+			user, err := v.client.InsertAdminUser(c, data.Email)
 			if err != nil {
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
 				return

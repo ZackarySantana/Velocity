@@ -4,18 +4,18 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/zackarysantana/velocity/internal/jobs"
+	"github.com/zackarysantana/velocity/internal/jobs/jobtypes"
 )
 
 type JobFilterOpts struct {
 	Amount int
-	Status jobs.JobStatus
+	Status jobtypes.JobStatus
 }
 
 var (
 	defaultJobFilter = JobFilterOpts{
 		Amount: 100,
-		Status: jobs.JobStatusQueued,
+		Status: jobtypes.JobStatusQueued,
 	}
 )
 
@@ -35,7 +35,7 @@ func JobsFilter(opts *JobFilterOpts) []gin.HandlerFunc {
 				return
 			}
 			statusAsString := c.DefaultQuery("status", string(opts.Status))
-			status, err := jobs.JobStatusFromString(statusAsString)
+			status, err := jobtypes.JobStatusFromString(statusAsString)
 			if err != nil {
 				c.JSON(400, gin.H{
 					"message": "status must be a valid job status. received: " + statusAsString,
@@ -57,11 +57,11 @@ func GetJobsFilter(c *gin.Context) JobFilterOpts {
 	if !aExists || !sExists {
 		return JobFilterOpts{
 			Amount: -1,
-			Status: jobs.JobStatusCompleted,
+			Status: jobtypes.JobStatusCompleted,
 		}
 	}
 	return JobFilterOpts{
 		Amount: amount.(int),
-		Status: status.(jobs.JobStatus),
+		Status: status.(jobtypes.JobStatus),
 	}
 }

@@ -13,7 +13,7 @@ func (v *V1App) PostUser() []gin.HandlerFunc {
 	return []gin.HandlerFunc{
 		middleware.ParseBody(&data),
 		func(c *gin.Context) {
-			user, err := v.client.CreateUser(c, data.Email)
+			user, err := v.client.InsertUser(c, data.Email)
 			if err != nil {
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
 				return

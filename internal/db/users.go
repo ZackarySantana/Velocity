@@ -11,21 +11,34 @@ import (
 
 type User struct {
 	Id     primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	APIKey string             `bson:"api_key" json:"api_key"`
+	APIKey string             `bson:"api_key,omitempty" json:"api_key"`
 
-	Email string `bson:"email" json:"email"`
+	Email string `bson:"email,omitempty" json:"email"`
 }
 
 type Permissions struct {
 	Id     primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	APIKey string             `bson:"api_key" json:"api_key"`
+	APIKey string             `bson:"api_key,omitempty" json:"api_key"`
 
-	UserId primitive.ObjectID `bson:"user_id" json:"user_id"`
+	UserId primitive.ObjectID `bson:"user_id,omitempty" json:"user_id"`
 
-	Admin bool `bson:"admin" json:"admin"`
+	Admin bool `bson:"admin,omitempty" json:"admin"`
 }
 
-func (c *Connection) CreateUser(ctx context.Context, email string) (*User, error) {
+func (c *Connection) GetUser(ctx context.Context, query interface{}) (*User, error) {
+	var user User
+	return &user, c.col("users").FindOne(ctx, query).Decode(&user)
+}
+
+func (c *Connection) GetUserByEmail(ctx context.Context, email string) (*User, error) {
+	return c.GetUser(ctx, bson.M{"email": email})
+}
+
+func (c *Connection) GetUserByAPIKey(ctx context.Context, apiKey string) (*User, error) {
+	return c.GetUser(ctx, bson.M{"api_key": apiKey})
+}
+
+func (c *Connection) InsertUser(ctx context.Context, email string) (*User, error) {
 	apiKey, err := api.GenerateAPIKey()
 	if err != nil {
 		return nil, err
@@ -46,7 +59,7 @@ func (c *Connection) CreateUser(ctx context.Context, email string) (*User, error
 	return &user, nil
 }
 
-func (c *Connection) CreateAdminUser(ctx context.Context, email string) (*User, error) {
+func (c *Connection) InsertAdminUser(ctx context.Context, email string) (*User, error) {
 	apiKey, err := api.GenerateAPIKey()
 	if err != nil {
 		return nil, err
@@ -86,19 +99,6 @@ func (c *Connection) CreateAdminUser(ctx context.Context, email string) (*User, 
 	}
 
 	return &user, nil
-}
-
-func (c *Connection) GetUser(ctx context.Context, query interface{}) (*User, error) {
-	var user User
-	return &user, c.col("users").FindOne(ctx, query).Decode(&user)
-}
-
-func (c *Connection) GetUserByEmail(ctx context.Context, email string) (*User, error) {
-	return c.GetUser(ctx, bson.M{"email": email})
-}
-
-func (c *Connection) GetUserByAPIKey(ctx context.Context, apiKey string) (*User, error) {
-	return c.GetUser(ctx, bson.M{"api_key": apiKey})
 }
 
 func (c *Connection) GetPermissions(ctx context.Context, query interface{}) (*Permissions, error) {

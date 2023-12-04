@@ -6,6 +6,7 @@ import (
 
 	"github.com/zackarysantana/velocity/internal/agent"
 	"github.com/zackarysantana/velocity/internal/jobs"
+	"github.com/zackarysantana/velocity/internal/jobs/jobtypes"
 	"github.com/zackarysantana/velocity/src/config"
 )
 
@@ -23,12 +24,12 @@ func RunSyncWorkflow(c config.Config, workflow config.YAMLWorkflow) ([]jobs.JobR
 			}
 
 			if test.Run != nil {
-				j = append(j, jobs.NewCommandJob(string(testName), *image.Image, *test.Run, nil, jobs.JobStatusQueued, nil))
+				j = append(j, jobs.NewCommandJob(string(testName), *image.Image, *test.Run, nil, jobtypes.JobStatusQueued, nil))
 
 				continue
 			}
 
-			j = append(j, jobs.NewFrameworkJob(string(testName), *test.Language, *test.Framework, jobs.JobStatusQueued, &jobs.FrameworkJobOptions{
+			j = append(j, jobs.NewFrameworkJob(string(testName), *test.Language, *test.Framework, jobtypes.JobStatusQueued, &jobs.FrameworkJobOptions{
 				Image:     image.Image,
 				Directory: test.Directory,
 			}))

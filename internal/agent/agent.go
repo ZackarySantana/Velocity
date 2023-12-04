@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/zackarysantana/velocity/internal/jobs"
+	"github.com/zackarysantana/velocity/internal/jobs/jobtypes"
 )
 
 type Agent struct {
@@ -42,7 +43,7 @@ func (a *Agent) runJobs(queue <-chan jobs.Job, results chan<- jobs.JobResult, li
 				<-limit
 			}()
 			logs, err := a.Executor.Execute(a.Context, job)
-			job.SetStatus(jobs.JobStatusCompleted)
+			job.SetStatus(jobtypes.JobStatusCompleted)
 			if err != nil {
 				results <- jobs.JobResult{
 					Job:    job,
