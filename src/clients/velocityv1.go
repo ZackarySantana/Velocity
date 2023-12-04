@@ -48,14 +48,24 @@ func NewVelocityClientV1FromConfig(c config.Config) (*VelocityClientV1, error) {
 	return NewVelocityClientV1(*c.Config.Server), nil
 }
 
+func (v *VelocityClientV1) PostFirstTimeRegister(body v1types.PostRegisterUserRequest) (*v1types.PostRegisterUserResponse, error) {
+	var data v1types.PostRegisterUserResponse
+	return &data, v.post("/first_time_register", body, &data)
+}
+
 func (v *VelocityClientV1) PostWorkflow(body v1types.PostWorkflowRequest) (*v1types.PostWorkflowResponse, error) {
 	var data v1types.PostWorkflowResponse
 	return &data, v.post("/workflows", body, &data)
 }
 
-func (v *VelocityClientV1) PostFirstTimeRegister(email string) (*v1types.PostRegisterUserResponse, error) {
-	var data v1types.PostJobResultRequest
-	return &data, v.post("/workflows", body, &data)
+func (v *VelocityClientV1) PostJobsDequeue(body v1types.PostJobsDequeueRequest) (*v1types.PostJobsDequeueResponse, error) {
+	var data v1types.PostJobsDequeueResponse
+	return &data, v.post("/jobs/dequeue", body, &data)
+}
+
+func (v *VelocityClientV1) PostJobsResults(body v1types.PostJobResultRequest) (*v1types.PostJobResultResponse, error) {
+	var data v1types.PostJobResultResponse
+	return &data, v.post("/jobs/result", body, &data)
 }
 
 func (v *VelocityClientV1) post(route string, body, resp interface{}) error {
@@ -74,5 +84,5 @@ func (v *VelocityClientV1) post(route string, body, resp interface{}) error {
 }
 
 func (v *VelocityClientV1) makeRoute(route string) string {
-	return v.BaseURL + "/api/v1/" + strings.TrimPrefix(route, "/")
+	return v.BaseURL + "/api/v1" + route
 }

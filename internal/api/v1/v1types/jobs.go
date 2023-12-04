@@ -10,3 +10,9 @@ type PostJobResultRequest struct {
 
 // TBA
 type PostJobResultResponse db.Job
+
+type PostJobsDequeueRequest struct{}
+
+type PostJobsDequeueResponse struct {
+	Jobs []db.Job `json:"jobs"`
+}

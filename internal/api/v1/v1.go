@@ -27,7 +27,7 @@ func CreateV1App(client db.Connection) (*gin.Engine, error) {
 	jobs := authorizedV1.Group("/jobs")
 	jobs.GET("", append(middleware.JobsFilter(getJobsOptsDefault), a.GetJobs)...)
 	jobs.POST("/dequeue", append(middleware.JobsFilter(postJobsDequeueOptsDefault), a.PostJobsDequeue)...)
-	jobs.POST("/results", a.PostJobResult()...)
+	jobs.POST("/result", a.PostJobResult()...)
 
 	adminV1 := v1.Group("/admin", middleware.AdminAuth(client))
 	adminV1.POST("/user", a.PostUser()...)

@@ -35,6 +35,7 @@ func (v *V1App) GetJobs(c *gin.Context) {
 
 func (v *V1App) PostJobsDequeue(c *gin.Context) {
 	opts := middleware.GetJobsFilter(c)
+
 	dbJobs, err := v.client.DequeueNJobs(c, int64(opts.Amount))
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
@@ -46,9 +47,14 @@ func (v *V1App) PostJobsDequeue(c *gin.Context) {
 		})
 		return
 	}
-	c.JSON(200, gin.H{
-		"jobs": dbJobs,
-	})
+
+	jobs := []db.Job{}
+	for _, job := range dbJobs {
+		jobs = append(jobs, *job)
+	}
+
+	resp := v1types.PostJobsDequeueResponse{Jobs: jobs}
+	c.JSON(200, resp)
 }
 
 func (a *V1App) PostJobResult() []gin.HandlerFunc {
