@@ -16,6 +16,59 @@ type JobProvider interface {
 	Cleanup() error
 }
 
+type VelocityJobProvider struct {
+	c db.Connection
+}
+
+func NewVelocityJobProvider(client db.Connection) *VelocityJobProvider {
+	return &VelocityJobProvider{client}
+}
+
+func (p *VelocityJobProvider) Next(num int) ([]Job, error) {
+	// TODO should this be another context?
+	dbJobs, err := p.c.DequeueNJobs(context.TODO(), int64(num))
+	if err != nil {
+		return nil, err
+	}
+
+	jobs := []Job{}
+	for i := 0; i < len(dbJobs); i++ {
+		job := NewCommandJob(dbJobs[i].Id.Hex(), dbJobs[i].Image, dbJobs[i].Command, dbJobs[i].SetupCommands, dbJobs[i].Status, nil)
+		jobs = append(jobs, job)
+	}
+
+	return jobs, nil
+}
+
+func (p *VelocityJobProvider) Update(result JobResult) error {
+	id, err := primitive.ObjectIDFromHex(result.Job.GetName())
+	if err != nil {
+		return err
+	}
+	// TODO: Replace this context?
+	j := &db.Job{
+		Id:     id,
+		Status: jobtypes.JobStatusCompleted,
+	}
+	if result.Failed != nil {
+		j.Error = result.Failed.Error.Error()
+	}
+	if result.Success != nil {
+		j.Logs = strings.TrimSuffix(result.Success.Logs, "\n")
+	}
+	_, err = p.c.UpdateJob(context.TODO(), j)
+
+	return err
+}
+
+func (p *VelocityJobProvider) Cleanup() error {
+	return nil
+}
+
+func (p *VelocityJobProvider) Finished() (bool, error) {
+	return false, nil
+}
+
 type MongoDBJobProvider struct {
 	c db.Connection
 }

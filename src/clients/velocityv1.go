@@ -1,12 +1,14 @@
 package clients
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"os"
 	"strings"
 
-	"github.com/zackarysantana/velocity/internal/db"
+	"github.com/zackarysantana/velocity/internal/api/v1/v1types"
 	"github.com/zackarysantana/velocity/src/config"
 )
 
@@ -46,15 +48,29 @@ func NewVelocityClientV1FromConfig(c config.Config) (*VelocityClientV1, error) {
 	return NewVelocityClientV1(*c.Config.Server), nil
 }
 
-func (v *VelocityClientV1) Login(username, password string) (*db.User, error) {
-	response, err := http.Get(v.makeRoute("/login"))
+func (v *VelocityClientV1) PostWorkflow(body v1types.PostWorkflowRequest) (*v1types.PostWorkflowResponse, error) {
+	var data v1types.PostWorkflowResponse
+	return &data, v.post("/workflows", body, &data)
+}
+
+func (v *VelocityClientV1) PostFirstTimeRegister(email string) (*v1types.PostRegisterUserResponse, error) {
+	var data v1types.PostJobResultRequest
+	return &data, v.post("/workflows", body, &data)
+}
+
+func (v *VelocityClientV1) post(route string, body, resp interface{}) error {
+	out, err := json.Marshal(body)
 	if err != nil {
-		return nil, err
+		return err
+	}
+
+	response, err := http.Post(v.makeRoute(route), "application/json", bytes.NewBuffer(out))
+	if err != nil {
+		return err
 	}
 	defer response.Body.Close()
 
-	// Parse body
-	return nil, nil
+	return json.NewDecoder(response.Body).Decode(&resp)
 }
 
 func (v *VelocityClientV1) makeRoute(route string) string {

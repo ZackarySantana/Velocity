@@ -9,7 +9,7 @@ import (
 )
 
 func (v *V1App) PostFirstTimeRegister() []gin.HandlerFunc {
-	var data v1types.RegisterUserRequest
+	var data v1types.PostRegisterUserRequest
 	return []gin.HandlerFunc{
 		middleware.ParseBody(&data),
 		func(c *gin.Context) {
@@ -29,7 +29,8 @@ func (v *V1App) PostFirstTimeRegister() []gin.HandlerFunc {
 				return
 			}
 
-			c.JSON(200, user)
+			resp := v1types.PostRegisterUserResponse(*user)
+			c.JSON(200, resp)
 		},
 	}
 }

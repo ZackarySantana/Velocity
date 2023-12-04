@@ -7,6 +7,9 @@ import (
 )
 
 func StartWorkflow(c config.Config, workflow config.YAMLWorkflow) error {
+	// Hit server endpoint to start workflow
+	// Upload the config to the server, and get back a workflow ID
+
 	for image, testNames := range workflow.Tests {
 		for _, testName := range testNames {
 			test, err := c.GetTest(string(testName))

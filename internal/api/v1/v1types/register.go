@@ -2,8 +2,8 @@ package v1types
 
 import "github.com/zackarysantana/velocity/internal/db"
 
-type RegisterUserRequest struct {
+type PostRegisterUserRequest struct {
 	Email string `json:"email"`
 }
 
-type RegisterUserResponse db.User
+type PostRegisterUserResponse db.User

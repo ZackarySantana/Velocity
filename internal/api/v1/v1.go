@@ -20,10 +20,14 @@ func CreateV1App(client db.Connection) (*gin.Engine, error) {
 	v1.POST("/first_time_register", a.PostFirstTimeRegister()...)
 
 	authorizedV1 := v1.Group("/", middleware.Auth(client))
+	workflows := authorizedV1.Group("/workflows")
+	workflows.POST("", a.PostWorkflow()...)
+
+	// TODO: Agent routes? should we separate these out?
 	jobs := authorizedV1.Group("/jobs")
 	jobs.GET("", append(middleware.JobsFilter(getJobsOptsDefault), a.GetJobs)...)
-	jobs.POST("/enqueue", a.PostJobsEnqueue)
 	jobs.POST("/dequeue", append(middleware.JobsFilter(postJobsDequeueOptsDefault), a.PostJobsDequeue)...)
+	jobs.POST("/results", a.PostJobResult()...)
 
 	adminV1 := v1.Group("/admin", middleware.AdminAuth(client))
 	adminV1.POST("/user", a.PostUser()...)
