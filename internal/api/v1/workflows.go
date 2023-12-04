@@ -24,13 +24,25 @@ func (a *V1App) PostWorkflowsStart() []gin.HandlerFunc {
 				return
 			}
 
+			// TODO: Add git repo / project to body/data
 			// Find project in mongo by git repo
 			// If not found, create project in mongo
 
-			// Upload instance to mongo
-			// Start workflow in mongo (logic should be here, calling client.InsertJobs)
-			// w, err := a.client.StartWorkflow(data.Config, data.Workflow)
+			// Upload instance to mongo (connect it to the project)
+			//  - Start workflow in mongo (logic should be here, calling client.InsertJobs)
+			//  - Workflow is not it's own entity, in instance we should have a field for what workflow the instance is associated with, it's a 1-1 mapping
+
+			// Example database calls:
+			// ---
+			// p, err := a.client.FindProject(projectFilter)
+			// p, err := a.client.CreateProject(project)
+			// ---
+			// i, err := a.client.InsertInstance(instance)
+			// ---
+			// The jobs should all have a field that points back to the instance, like "instance_id"
+			// We can make this optional or a only db field if we want to
 			// j, err := a.client.InsertJobs(computeThoseJobs)
+			// ---
 
 			// Give user back instance id
 
