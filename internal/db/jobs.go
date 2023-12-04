@@ -16,11 +16,13 @@ type Job struct {
 	Id primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 
 	Name          string   `bson:"name,omitempty" json:"name"`
-	Image         string   `bson:"image,omitemptyy" json:"image"`
+	Image         string   `bson:"image,omitempty" json:"image"`
 	Command       string   `bson:"command,omitempty" json:"command"`
 	SetupCommands []string `bson:"setup_commands,omitempty" json:"setup_commands"`
 
 	Status jobtypes.JobStatus `bson:"status,omitempty" json:"status"`
+	Logs   string             `bson:"logs,omitempty" json:"logs"`
+	Error  string             `bson:"error,omitempty" json:"error"`
 
 	CreatedAt time.Time `bson:"created_at,omitempty" json:"created_at"`
 	UpdatedAt time.Time `bson:"updated_at,omitempty" json:"updated_at"`

@@ -2,6 +2,7 @@ package jobs
 
 import (
 	"context"
+	"strings"
 
 	"github.com/zackarysantana/velocity/internal/db"
 	"github.com/zackarysantana/velocity/internal/jobs/jobtypes"
@@ -32,7 +33,7 @@ func (p *MongoDBJobProvider) Next(num int) ([]Job, error) {
 
 	jobs := []Job{}
 	for i := 0; i < len(dbJobs); i++ {
-		job := NewCommandJob(dbJobs[i].Id.String(), dbJobs[i].Image, dbJobs[i].Command, dbJobs[i].SetupCommands, dbJobs[i].Status, nil)
+		job := NewCommandJob(dbJobs[i].Id.Hex(), dbJobs[i].Image, dbJobs[i].Command, dbJobs[i].SetupCommands, dbJobs[i].Status, nil)
 		jobs = append(jobs, job)
 	}
 
@@ -45,10 +46,17 @@ func (p *MongoDBJobProvider) Update(result JobResult) error {
 		return err
 	}
 	// TODO: Replace this context?
-	_, err = p.c.UpdateJob(context.TODO(), &db.Job{
+	j := &db.Job{
 		Id:     id,
 		Status: jobtypes.JobStatusCompleted,
-	})
+	}
+	if result.Failed != nil {
+		j.Error = result.Failed.Error.Error()
+	}
+	if result.Success != nil {
+		j.Logs = strings.TrimSuffix(result.Success.Logs, "\n")
+	}
+	_, err = p.c.UpdateJob(context.TODO(), j)
 
 	return err
 }
