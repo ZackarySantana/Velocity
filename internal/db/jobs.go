@@ -8,6 +8,7 @@ import (
 	"github.com/zackarysantana/velocity/internal/jobs/jobtypes"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -74,6 +75,41 @@ func (c *Connection) GetNQueuedJobs(ctx context.Context, n int64) ([]*Job, error
 	return c.GetJobs(ctx, query, opts)
 }
 
+func (c *Connection) DequeueNJobs(ctx context.Context, n int64) ([]*Job, error) {
+	jobs := []*Job{}
+	err := c.UseSessionWithOptions(ctx, nil, func(ctx mongo.SessionContext) error {
+		var err error
+		if err = ctx.StartTransaction(); err != nil {
+			return err
+		}
+
+		jobs, err = c.GetNQueuedJobs(ctx, n)
+		if err != nil {
+			_ = ctx.AbortTransaction(context.Background())
+			return err
+		}
+
+		ids := []primitive.ObjectID{}
+		for _, job := range jobs {
+			ids = append(ids, job.Id)
+		}
+
+		update := bson.M{"$set": bson.M{"status": jobtypes.JobStatusActive}}
+		_, err = c.UpdateJobsByIds(ctx, ids, nil, update)
+		if err != nil {
+			_ = ctx.AbortTransaction(context.Background())
+			return err
+		}
+
+		return ctx.CommitTransaction(context.Background())
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return jobs, nil
+}
+
 func (c *Connection) InsertJob(ctx context.Context, job *Job) (*Job, error) {
 	if err := job.validate(); err != nil {
 		return nil, err
@@ -121,4 +157,23 @@ func (c *Connection) InsertJobs(ctx context.Context, jobs []*Job) ([]*Job, error
 		jobs[i].Id = id.(primitive.ObjectID)
 	}
 	return jobs, nil
+}
+
+func (c *Connection) UpdateJobsByIds(ctx context.Context, ids []primitive.ObjectID, filter, update bson.M) (int, error) {
+	if filter == nil {
+		filter = bson.M{}
+	}
+	filter["_id"] = bson.M{"$in": ids}
+	if update == nil {
+		update = bson.M{}
+	}
+	if _, ok := update["$set"]; !ok {
+		update["$set"] = bson.M{}
+	}
+	update["$set"].(bson.M)["updated_at"] = time.Now()
+	r, err := c.col("jobs").UpdateMany(ctx, filter, update)
+	if err != nil {
+		return -1, err
+	}
+	return int(r.MatchedCount), nil
 }

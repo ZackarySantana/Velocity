@@ -23,7 +23,7 @@ func NewMongoDBJobProvider(client db.Connection) *MongoDBJobProvider {
 
 func (p *MongoDBJobProvider) Next(num int) ([]Job, error) {
 	// TODO should this be another context?
-	dbJobs, err := p.c.GetNQueuedJobs(context.TODO(), int64(num))
+	dbJobs, err := p.c.DequeueNJobs(context.TODO(), int64(num))
 	if err != nil {
 		return nil, err
 	}
