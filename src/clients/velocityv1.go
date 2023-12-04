@@ -49,8 +49,8 @@ func NewVelocityClientV1FromConfig(c config.Config) (*VelocityClientV1, error) {
 	return NewVelocityClientV1(*c.Config.Server), nil
 }
 
-func (v *VelocityClientV1) PostFirstTimeRegister(body v1types.PostRegisterUserRequest) (*v1types.PostRegisterUserResponse, error) {
-	var data v1types.PostRegisterUserResponse
+func (v *VelocityClientV1) PostFirstTimeRegister(body v1types.PostFirstTimeRegisterRequest) (*v1types.PostFirstTimeRegisterResponse, error) {
+	var data v1types.PostFirstTimeRegisterResponse
 	return &data, v.post("/first_time_register", body, &data)
 }
 

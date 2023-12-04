@@ -16,10 +16,13 @@ func CreateV1App(client db.Connection) (*gin.Engine, error) {
 	a := V1App{client: client}
 
 	v1 := router.Group("/v1")
-
 	v1.POST("/first_time_register", a.PostFirstTimeRegister()...)
 
+	adminV1 := v1.Group("/admin", middleware.AdminAuth(client))
+	adminV1.POST("/user", a.PostUser()...)
+
 	authorizedV1 := v1.Group("/", middleware.Auth(client))
+
 	workflows := authorizedV1.Group("/workflows")
 	workflows.POST("/start", a.PostWorkflowsStart()...)
 
@@ -27,9 +30,6 @@ func CreateV1App(client db.Connection) (*gin.Engine, error) {
 	jobs := authorizedV1.Group("/jobs")
 	jobs.POST("/dequeue", append(middleware.JobsFilter(postJobsDequeueOptsDefault), a.PostJobsDequeue)...)
 	jobs.POST("/result", a.PostJobResult()...)
-
-	adminV1 := v1.Group("/admin", middleware.AdminAuth(client))
-	adminV1.POST("/user", a.PostUser()...)
 
 	return router, nil
 }
