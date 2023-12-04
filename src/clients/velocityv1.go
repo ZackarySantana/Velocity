@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/google/go-querystring/query"
 	"github.com/zackarysantana/velocity/internal/api/v1/v1types"
 	"github.com/zackarysantana/velocity/src/config"
 )
@@ -58,9 +59,13 @@ func (v *VelocityClientV1) PostWorkflow(body v1types.PostWorkflowRequest) (*v1ty
 	return &data, v.post("/workflows", body, &data)
 }
 
-func (v *VelocityClientV1) PostJobsDequeue(body v1types.PostJobsDequeueRequest) (*v1types.PostJobsDequeueResponse, error) {
+func (v *VelocityClientV1) PostJobsDequeue(body v1types.PostJobsDequeueRequest, opts v1types.PostJobsDequeueQueryParams) (*v1types.PostJobsDequeueResponse, error) {
+	q, err := parseQueryParams(opts)
+	if err != nil {
+		return nil, err
+	}
 	var data v1types.PostJobsDequeueResponse
-	return &data, v.post("/jobs/dequeue", body, &data)
+	return &data, v.post("/jobs/dequeue"+q, body, &data)
 }
 
 func (v *VelocityClientV1) PostJobsResults(body v1types.PostJobResultRequest) (*v1types.PostJobResultResponse, error) {
@@ -85,4 +90,16 @@ func (v *VelocityClientV1) post(route string, body, resp interface{}) error {
 
 func (v *VelocityClientV1) makeRoute(route string) string {
 	return v.BaseURL + "/api/v1" + route
+}
+
+func parseQueryParams(opts interface{}) (string, error) {
+	q, err := query.Values(opts)
+	if err != nil {
+		return "", err
+	}
+	qp := q.Encode()
+	if qp == "" {
+		return "", nil
+	}
+	return "?" + q.Encode(), nil
 }

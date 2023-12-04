@@ -1,6 +1,9 @@
 package v1types
 
-import "github.com/zackarysantana/velocity/internal/db"
+import (
+	"github.com/zackarysantana/velocity/internal/api/middleware"
+	"github.com/zackarysantana/velocity/internal/db"
+)
 
 type PostJobResultRequest struct {
 	Id    string  `json:"id"`
@@ -16,3 +19,5 @@ type PostJobsDequeueRequest struct{}
 type PostJobsDequeueResponse struct {
 	Jobs []db.Job `json:"jobs"`
 }
+
+type PostJobsDequeueQueryParams middleware.JobFilterOpts

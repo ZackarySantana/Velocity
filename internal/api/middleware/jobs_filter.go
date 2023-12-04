@@ -8,8 +8,8 @@ import (
 )
 
 type JobFilterOpts struct {
-	Amount int
-	Status jobtypes.JobStatus
+	Amount int                `url:"amount,omitempty"`
+	Status jobtypes.JobStatus `url:"status,omitempty"`
 }
 
 var (
