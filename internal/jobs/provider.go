@@ -30,7 +30,7 @@ func (p *MongoDBJobProvider) Next(num int) ([]Job, error) {
 
 	jobs := []Job{}
 	for i := 0; i < len(dbJobs); i++ {
-		job := NewCommandJob(dbJobs[i].Name, dbJobs[i].Image, dbJobs[i].Command, dbJobs[i].SetupCommands, dbJobs[i].Status, nil)
+		job := NewCommandJob(dbJobs[i].Id.String(), dbJobs[i].Image, dbJobs[i].Command, dbJobs[i].SetupCommands, dbJobs[i].Status, nil)
 		jobs = append(jobs, job)
 	}
 
