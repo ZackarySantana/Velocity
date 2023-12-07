@@ -8,11 +8,11 @@ import (
 	"github.com/zackarysantana/velocity/internal/api/v1/v1types"
 )
 
-func (a *V1App) PostWorkflowsStart() []gin.HandlerFunc {
+func (a *V1App) PostInstanceStart() []gin.HandlerFunc {
 	return []gin.HandlerFunc{
-		middleware.ParseBody(v1types.NewPostWorkflowsStartRequest),
+		middleware.ParseBody(v1types.NewPostInstanceStartRequest),
 		func(c *gin.Context) {
-			data := middleware.GetBody(c).(v1types.PostWorkflowsStartRequest)
+			data := middleware.GetBody(c).(v1types.PostInstanceStartRequest)
 			err := data.Config.Populate()
 			if err != nil {
 				c.AbortWithStatusJSON(400, fmt.Sprintf("error populating config: %v", err))
@@ -23,6 +23,8 @@ func (a *V1App) PostWorkflowsStart() []gin.HandlerFunc {
 				c.AbortWithStatusJSON(400, fmt.Sprintf("error validating config: %v", err))
 				return
 			}
+
+			// p, err := a.client.GetProject(c, )
 
 			// TODO: Add git repo / project to body/data
 			// Find project in mongo by git repo

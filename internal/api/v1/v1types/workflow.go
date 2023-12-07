@@ -3,13 +3,14 @@ package v1types
 import "github.com/zackarysantana/velocity/src/config"
 
 // POST /api/v1/workflows/start
-type PostWorkflowsStartRequest struct {
-	Config     *config.Config `json:"config"`
-	Repository string         `json:"repository"`
-	Workflow   string         `json:"workflow"`
-}
-type PostWorkflowsStartResponse string
+type PostInstanceStartRequest struct {
+	ProjectId string `json:"id"`
 
-func NewPostWorkflowsStartRequest() interface{} {
-	return &PostWorkflowsStartRequest{}
+	Config   *config.Config `json:"config"`
+	Workflow string         `json:"workflow"`
+}
+type PostInstanceStartResponse string
+
+func NewPostInstanceStartRequest() interface{} {
+	return &PostInstanceStartRequest{}
 }

@@ -55,8 +55,8 @@ func (v *VelocityClientV1) PostFirstTimeRegister(body v1types.PostFirstTimeRegis
 	return &data, v.post("/first_time_register", body, &data)
 }
 
-func (v *VelocityClientV1) PostWorkflowsStart(body v1types.PostWorkflowsStartRequest) (*v1types.PostWorkflowsStartResponse, error) {
-	var data v1types.PostWorkflowsStartResponse
+func (v *VelocityClientV1) PostWorkflowsStart(body v1types.PostInstanceStartRequest) (*v1types.PostInstanceStartResponse, error) {
+	var data v1types.PostInstanceStartResponse
 	return &data, v.post("/workflows", body, &data)
 }
 

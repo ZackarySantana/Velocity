@@ -15,15 +15,21 @@ import (
 type Job struct {
 	Id primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 
+	// Run logic
 	Name          string   `bson:"name,omitempty" json:"name"`
 	Image         string   `bson:"image,omitempty" json:"image"`
 	Command       string   `bson:"command,omitempty" json:"command"`
 	SetupCommands []string `bson:"setup_commands,omitempty" json:"setup_commands"`
 
+	// Status logic
 	Status jobtypes.JobStatus `bson:"status,omitempty" json:"status"`
 	Logs   string             `bson:"logs,omitempty" json:"logs"`
 	Error  string             `bson:"error,omitempty" json:"error"`
 
+	// For tasks attached to an instance only
+	InstanceId *primitive.ObjectID `bson:"instance_id,omitempty" json:"instance_id,omit_empty"`
+
+	// Metadata
 	CreatedAt time.Time `bson:"created_at,omitempty" json:"created_at"`
 	UpdatedAt time.Time `bson:"updated_at,omitempty" json:"updated_at"`
 }
