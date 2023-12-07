@@ -7,3 +7,7 @@ type PostFirstTimeRegisterRequest struct {
 	Email string `json:"email"`
 }
 type PostFirstTimeRegisterResponse db.User
+
+func NewPostFirstTimeRegisterRequest() interface{} {
+	return &PostFirstTimeRegisterRequest{}
+}

@@ -9,10 +9,10 @@ import (
 )
 
 func (a *V1App) PostWorkflowsStart() []gin.HandlerFunc {
-	var data v1types.PostWorkflowsStartRequest
 	return []gin.HandlerFunc{
-		middleware.ParseBody(&data),
+		middleware.ParseBody(v1types.NewPostWorkflowsStartRequest),
 		func(c *gin.Context) {
+			data := middleware.GetBody(c).(v1types.PostWorkflowsStartRequest)
 			err := data.Config.Populate()
 			if err != nil {
 				c.AbortWithStatusJSON(400, fmt.Sprintf("error populating config: %v", err))

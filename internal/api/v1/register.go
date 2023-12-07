@@ -9,10 +9,10 @@ import (
 )
 
 func (v *V1App) PostFirstTimeRegister() []gin.HandlerFunc {
-	var data v1types.PostFirstTimeRegisterRequest
 	return []gin.HandlerFunc{
-		middleware.ParseBody(&data),
+		middleware.ParseBody(v1types.NewPostFirstTimeRegisterRequest),
 		func(c *gin.Context) {
+			data := middleware.GetBody(c).(v1types.PostFirstTimeRegisterRequest)
 			anyAdminUsers, err := v.client.HasAdminUsers(c)
 			if err != nil {
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})

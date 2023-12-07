@@ -7,3 +7,7 @@ type PostUserRequest struct {
 	Email string `json:"email"`
 }
 type PostUserResponse db.User
+
+func NewPostUserRequest() interface{} {
+	return &PostUserRequest{}
+}

@@ -43,10 +43,10 @@ func (v *V1App) PostJobsDequeue(c *gin.Context) {
 }
 
 func (a *V1App) PostJobResult() []gin.HandlerFunc {
-	var data v1types.PostJobResultRequest
 	return []gin.HandlerFunc{
-		middleware.ParseBody(&data),
+		middleware.ParseBody(v1types.NewPostJobResultRequest),
 		func(c *gin.Context) {
+			data := middleware.GetBody(c).(v1types.PostJobResultRequest)
 			id, err := primitive.ObjectIDFromHex(data.Id)
 			if err != nil {
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})

@@ -8,3 +8,7 @@ type PostWorkflowsStartRequest struct {
 	Workflow string         `json:"workflow"`
 }
 type PostWorkflowsStartResponse string
+
+func NewPostWorkflowsStartRequest() interface{} {
+	return &PostWorkflowsStartRequest{}
+}

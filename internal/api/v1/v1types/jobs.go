@@ -7,11 +7,16 @@ import (
 
 // POST /api/v1/jobs/result
 type PostJobResultRequest struct {
-	Id    string  `json:"id"`
+	Id string `json:"id"`
+
 	Logs  *string `json:"logs,omitempty"`
 	Error *string `json:"error,omitempty"`
 }
 type PostJobResultResponse db.Job
+
+func NewPostJobResultRequest() interface{} {
+	return &PostJobResultRequest{}
+}
 
 // POST /api/v1/jobs/dequeue
 type PostJobsDequeueRequest struct{}
