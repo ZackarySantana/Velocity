@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -18,6 +19,10 @@ type Project struct {
 func (c *Connection) GetProject(ctx context.Context, query interface{}) (*Project, error) {
 	var project Project
 	return &project, c.col("projects").FindOne(ctx, query).Decode(&project)
+}
+
+func (c *Connection) GetProjectById(ctx context.Context, id string) (*Project, error) {
+	return c.GetProject(ctx, bson.M{"_id": id})
 }
 
 func (c *Connection) InsertProject(ctx context.Context, project *Project) (*Project, error) {

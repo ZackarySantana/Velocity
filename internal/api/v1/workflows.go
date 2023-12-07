@@ -24,7 +24,15 @@ func (a *V1App) PostInstanceStart() []gin.HandlerFunc {
 				return
 			}
 
-			// p, err := a.client.GetProject(c, )
+			p, err := a.client.GetProject(c, data.ProjectId)
+			if err != nil {
+				c.AbortWithStatusJSON(400, fmt.Sprintf("error getting project: %v", err))
+				return
+			}
+			if p == nil {
+				c.AbortWithStatusJSON(400, fmt.Sprintf("project not found %s", data.ProjectId))
+				return
+			}
 
 			// TODO: Add git repo / project to body/data
 			// Find project in mongo by git repo
