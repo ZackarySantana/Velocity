@@ -23,7 +23,7 @@ func Config(c *cli.Context) error {
 func GetConfig(c *cli.Context) (config.Config, error) {
 	config, ok := c.App.Metadata[flags.Config.Name].(config.Config)
 	if !ok {
-		return config, cli.NewExitError("config not found", 1)
+		return config, cli.Exit("config not found", 1)
 	}
 	return config, nil
 }

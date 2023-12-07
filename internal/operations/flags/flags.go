@@ -9,7 +9,13 @@ var (
 		Usage:   "location of your configuration file",
 	}
 	Sync = &cli.BoolFlag{
-		Name:  "sync",
-		Usage: "sync your configuration file with the remote",
+		Name:    "sync",
+		Aliases: []string{"s"},
+		Usage:   "sync your configuration file with the remote",
+	}
+	Velocity = &cli.StringFlag{
+		Name:    "velocity",
+		Aliases: []string{"v"},
+		Usage:   "your velocity server",
 	}
 )
