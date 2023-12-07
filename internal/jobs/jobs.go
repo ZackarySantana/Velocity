@@ -8,7 +8,7 @@ import (
 )
 
 type Job interface {
-	SetupCommand() []string
+	GetSetupCommands() []string
 	GetImage() string
 	GetCommand() string
 	GetName() string
@@ -25,7 +25,7 @@ type BaseJob struct {
 	Status        jobtypes.JobStatus
 }
 
-func (j *BaseJob) SetupCommand() []string {
+func (j *BaseJob) GetSetupCommands() []string {
 	return j.SetupCommands
 }
 

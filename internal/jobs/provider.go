@@ -12,7 +12,7 @@ import (
 )
 
 type JobProvider interface {
-	Next(num int) ([]Job, error)
+	Next(num int) ([]*Job, error)
 	Update(result JobResult) error
 	Finished() (bool, error)
 	Cleanup() error
@@ -26,17 +26,18 @@ func NewVelocityJobProvider(v *clients.VelocityClientV1) *VelocityJobProvider {
 	return &VelocityJobProvider{v}
 }
 
-func (p *VelocityJobProvider) Next(num int) ([]Job, error) {
+func (p *VelocityJobProvider) Next(num int) ([]*Job, error) {
 	resp, err := p.v.PostJobsDequeue(v1types.PostJobsDequeueRequest{}, v1types.PostJobsDequeueQueryParams{})
 	if err != nil {
 		return nil, err
 	}
 	dbJobs := resp.Jobs
 
-	jobs := []Job{}
+	jobs := []*Job{}
+	var job Job
 	for i := 0; i < len(dbJobs); i++ {
-		job := NewCommandJob(dbJobs[i].Id.Hex(), dbJobs[i].Image, dbJobs[i].Command, dbJobs[i].SetupCommands, dbJobs[i].Status, nil)
-		jobs = append(jobs, job)
+		job = NewCommandJob(dbJobs[i].Id.Hex(), dbJobs[i].Image, dbJobs[i].Command, dbJobs[i].SetupCommands, dbJobs[i].Status, nil)
+		jobs = append(jobs, &job)
 	}
 
 	return jobs, nil
@@ -121,17 +122,17 @@ func (p *MongoDBJobProvider) Finished() (bool, error) {
 }
 
 type InMemoryJobProvider struct {
-	jobs    []Job
+	jobs    []*Job
 	i       int
 	results []JobResult
 }
 
-func NewInMemoryJobProvider(jobs []Job) *InMemoryJobProvider {
+func NewInMemoryJobProvider(jobs []*Job) *InMemoryJobProvider {
 	return &InMemoryJobProvider{jobs, 0, []JobResult{}}
 }
 
-func (p *InMemoryJobProvider) Next(num int) ([]Job, error) {
-	jobs := []Job{}
+func (p *InMemoryJobProvider) Next(num int) ([]*Job, error) {
+	jobs := []*Job{}
 	for limit := p.i + num; p.i < limit && p.i < len(p.jobs); p.i++ {
 		jobs = append(jobs, p.jobs[p.i])
 	}

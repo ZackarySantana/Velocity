@@ -76,7 +76,7 @@ func (a *Agent) enqueue(queue chan<- jobs.Job, limit chan<- struct{}) {
 		}
 		fmt.Printf("Queuing %d jobs...\n", len(jobs))
 		for _, job := range jobs {
-			queue <- job
+			queue <- *job
 			limit <- struct{}{}
 		}
 

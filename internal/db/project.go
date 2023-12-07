@@ -21,7 +21,7 @@ func (c *Connection) GetProject(ctx context.Context, query interface{}) (*Projec
 	return &project, c.col("projects").FindOne(ctx, query).Decode(&project)
 }
 
-func (c *Connection) GetProjectById(ctx context.Context, id string) (*Project, error) {
+func (c *Connection) GetProjectById(ctx context.Context, id primitive.ObjectID) (*Project, error) {
 	return c.GetProject(ctx, bson.M{"_id": id})
 }
 

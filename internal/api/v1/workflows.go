@@ -6,6 +6,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/zackarysantana/velocity/internal/api/middleware"
 	"github.com/zackarysantana/velocity/internal/api/v1/v1types"
+	"github.com/zackarysantana/velocity/internal/db"
+	"github.com/zackarysantana/velocity/internal/jobs/jobtypes"
+	"github.com/zackarysantana/velocity/internal/workflows"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func (a *V1App) PostInstanceStart() []gin.HandlerFunc {
@@ -13,6 +17,7 @@ func (a *V1App) PostInstanceStart() []gin.HandlerFunc {
 		middleware.ParseBody(v1types.NewPostInstanceStartRequest),
 		func(c *gin.Context) {
 			data := middleware.GetBody(c).(v1types.PostInstanceStartRequest)
+
 			err := data.Config.Populate()
 			if err != nil {
 				c.AbortWithStatusJSON(400, fmt.Sprintf("error populating config: %v", err))
@@ -24,40 +29,68 @@ func (a *V1App) PostInstanceStart() []gin.HandlerFunc {
 				return
 			}
 
-			p, err := a.client.GetProject(c, data.ProjectId)
+			projectId, err := primitive.ObjectIDFromHex(data.ProjectId)
+			if err != nil {
+				c.AbortWithStatusJSON(400, fmt.Sprintf("error processing project id %v", err))
+				return
+			}
+
+			workflow, err := data.Config.GetWorkflow(data.Workflow)
+			if err != nil {
+				c.AbortWithStatusJSON(400, fmt.Sprintf("error getting workflow in config %v", err))
+				return
+			}
+
+			jobs, err := workflows.GetJobsForWorkflow(*data.Config, workflow)
+			if err != nil {
+				c.AbortWithStatusJSON(400, fmt.Sprintf("error getting jobs for instance", err))
+				return
+			}
+
+			project, err := a.client.GetProject(c, projectId)
 			if err != nil {
 				c.AbortWithStatusJSON(400, fmt.Sprintf("error getting project: %v", err))
 				return
 			}
-			if p == nil {
+			if project == nil {
 				c.AbortWithStatusJSON(400, fmt.Sprintf("project not found %s", data.ProjectId))
 				return
 			}
 
-			// TODO: Add git repo / project to body/data
-			// Find project in mongo by git repo
-			// If not found, create project in mongo
+			i := db.Instance{
+				ProjectId: projectId,
+				Config:    *data.Config,
+			}
+			instance, err := a.client.InsertInstance(c, &i)
+			if err != nil {
+				c.AbortWithStatusJSON(400, fmt.Sprintf("error inserting instance %v", err))
+				return
+			}
 
-			// Upload instance to mongo (connect it to the project)
-			//  - Start workflow in mongo (logic should be here, calling client.InsertJobs)
-			//  - Workflow is not it's own entity, in instance we should have a field for what workflow the instance is associated with, it's a 1-1 mapping
+			dbJobs := []*db.Job{}
+			for _, job := range jobs {
+				j := *job
+				dbJobs = append(dbJobs, &db.Job{
+					Name:          j.GetName(),
+					Image:         j.GetImage(),
+					Command:       j.GetCommand(),
+					SetupCommands: j.GetSetupCommands(),
+					Status:        jobtypes.JobStatusQueued,
+					InstanceId:    &instance.Id,
+				})
+			}
 
-			// Example database calls:
-			// ---
-			// p, err := a.client.FindProject(projectFilter)
-			// p, err := a.client.CreateProject(project)
-			// ---
-			// i, err := a.client.InsertInstance(instance)
-			// ---
-			// The jobs should all have a field that points back to the instance, like "instance_id"
-			// We can make this optional or a only db field if we want to
-			// j, err := a.client.InsertJobs(computeThoseJobs)
-			// ---
+			dbJobs, err = a.client.InsertJobs(c, dbJobs)
+			if err != nil {
+				c.AbortWithStatusJSON(400, fmt.Sprintf("error inserting jobs %v", err))
+				return
+			}
 
-			// Give user back instance id
-
-			// resp := v1types.PostWorkflowsStartResponse(w.Id.Hex())
-			// c.JSON(200, resp)
+			resp := v1types.PostInstanceStartResponse{
+				InstanceId: instance.Id.Hex(),
+				Jobs:       dbJobs,
+			}
+			c.JSON(200, resp)
 		},
 	}
 }
