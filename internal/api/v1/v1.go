@@ -13,7 +13,7 @@ type V1App struct {
 func CreateV1App(client db.Connection) (*gin.Engine, error) {
 	router := gin.Default()
 
-	a := V1App{client: client}
+	a := V1App{client}
 
 	v1 := router.Group("/api/v1")
 	v1.POST("/first_time_register", a.PostFirstTimeRegister()...)
