@@ -43,7 +43,7 @@ func (a *V1App) PostInstanceStart() []gin.HandlerFunc {
 
 			jobs, err := workflows.GetJobsForWorkflow(*data.Config, workflow)
 			if err != nil {
-				c.AbortWithStatusJSON(400, fmt.Sprintf("error getting jobs for instance", err))
+				c.AbortWithStatusJSON(400, fmt.Sprintf("error getting jobs for instance %v", err))
 				return
 			}
 
