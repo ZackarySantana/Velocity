@@ -40,7 +40,7 @@ images:
 
 builds:
     local:
-        build:
+        input:
             image: golang:1.21.4
             directory: .
             run: make build-cli
@@ -48,14 +48,16 @@ builds:
         output:
             path: $GOPATH/bin/velocity
     deploy:
-        build:
+        input:
             image: golang:1.21.4
             directory: .
             run: make build-cli
             path: $GOPATH/bin/velocity
         output:
-            url: https://google.com/
-            # TODO: authentication? options?
+            url: $DEPLOY_URL
+            method: POST
+            headers:
+                Authoriization: Bearer $DEPLOY_API_KEY
 
 workflows:
     all-tests:
