@@ -23,6 +23,7 @@ type VelocityClientV1 struct {
 func NewVelocityClientV1(baseURL string) *VelocityClientV1 {
 	return &VelocityClientV1{
 		BaseURL: strings.TrimSuffix(baseURL, "/"),
+		ApiKey:  os.Getenv("API_KEY"),
 	}
 }
 
