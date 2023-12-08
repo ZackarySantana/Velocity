@@ -35,7 +35,7 @@ func (e *DockerJobExecutor) Execute(ctx Context, job Job) (string, error) {
 		WORKDIR /app
 		%s
 		CMD %s
-	`, job.GetImage(), parseCommands(job.SetupCommand()), job.GetCommand())
+	`, job.GetImage(), parseCommands(job.GetSetupCommands()), job.GetCommand())
 	testBuildCmd.Stdin = strings.NewReader(dockerfileContent)
 	output, err = testBuildCmd.CombinedOutput()
 	if err != nil {

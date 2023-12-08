@@ -16,7 +16,7 @@ func NewCLIApp() CLIApp {
 		Name:     "velocity",
 		Version:  "0.0.1",
 		Usage:    "manage, run, and report on tests quickly",
-		Commands: appendCommands(Run, Validate),
+		Commands: appendCommands(Run, Validate, RunLocal),
 	}
 	return cliApp
 }

@@ -18,8 +18,8 @@ var Validate = []*cli.Command{
 			flags.Config,
 		},
 		Before: befores.CombineBefores(befores.Config),
-		Action: func(cCtx *cli.Context) error {
-			config, err := befores.GetConfig(cCtx)
+		Action: func(ctx *cli.Context) error {
+			config, err := befores.GetConfig(ctx)
 			if err != nil {
 				return err
 			}

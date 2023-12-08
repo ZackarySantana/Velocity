@@ -7,7 +7,6 @@ import (
 	"github.com/zackarysantana/velocity/internal/operations/befores"
 	"github.com/zackarysantana/velocity/internal/operations/flags"
 	"github.com/zackarysantana/velocity/internal/workflows"
-	"github.com/zackarysantana/velocity/src/config"
 )
 
 var Run = []*cli.Command{
@@ -18,70 +17,21 @@ var Run = []*cli.Command{
 		ArgsUsage: "[workflow]",
 		Flags: []cli.Flag{
 			flags.Config,
-			flags.Sync,
 		},
-		Before: befores.CombineBefores(befores.Config, befores.Sync),
-		Action: func(cCtx *cli.Context) error {
-			providedWorkflow := cCtx.Args().First()
-			c, err := befores.GetConfig(cCtx)
+		Before: befores.CombineBefores(befores.Config, befores.Workflow),
+		Action: func(ctx *cli.Context) error {
+			c, err := befores.GetConfig(ctx)
 			if err != nil {
 				return err
 			}
 
-			var w *config.YAMLWorkflow
-			for title, workflow := range c.Workflows {
-				if title == providedWorkflow {
-					w = &workflow
-					break
-				}
-			}
-
-			if w == nil {
-				if providedWorkflow == "" {
-					fmt.Println("No workflow provided. Selecting from list.")
-				} else {
-					fmt.Printf("Workflow %s not found. Selecting from list.\n", providedWorkflow)
-				}
-				workflow, err := workflows.GetWorkflow(c, "Please select a workflow: ")
-				if err != nil {
-					return err
-				}
-				w = &workflow
+			w, err := befores.GetWorkflow(ctx)
+			if err != nil {
+				return err
 			}
 
 			fmt.Println("Running workflow " + w.Name)
 
-			sync := befores.GetSync(cCtx)
-
-			if sync {
-				fmt.Println("-- Running synchronously --")
-				results, err := workflows.RunSyncWorkflow(c, *w)
-
-				if err != nil {
-					return err
-				}
-
-				fmt.Println("\n\nWorkflow completed: ")
-
-				for _, result := range results {
-					if result.Success != nil {
-						fmt.Print("✅")
-						fmt.Println("'" + result.Job.GetImage() + "' ran '" + (result.Job.GetCommand()) + "'")
-						fmt.Println(result.Success.Logs)
-						fmt.Println()
-					}
-
-					if result.Failed != nil {
-						fmt.Println("❌")
-						fmt.Println("'" + result.Job.GetImage() + "' ran '" + (result.Job.GetCommand()) + "'")
-						fmt.Println(result.Failed.Error)
-						fmt.Println()
-					}
-				}
-
-				return nil
-
-			}
 			return workflows.StartWorkflow(c, *w)
 		},
 	},
