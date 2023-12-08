@@ -56,9 +56,9 @@ func (v *VelocityClientV1) PostFirstTimeRegister(body v1types.PostFirstTimeRegis
 	return &data, v.post("/first_time_register", body, &data)
 }
 
-func (v *VelocityClientV1) PostWorkflowsStart(body v1types.PostInstanceStartRequest) (*v1types.PostInstanceStartResponse, error) {
+func (v *VelocityClientV1) PostInstanceStart(body v1types.PostInstanceStartRequest) (*v1types.PostInstanceStartResponse, error) {
 	var data v1types.PostInstanceStartResponse
-	return &data, v.post("/workflows", body, &data)
+	return &data, v.post("/instances/start", body, &data)
 }
 
 func (v *VelocityClientV1) PostJobsDequeue(body v1types.PostJobsDequeueRequest, opts v1types.PostJobsDequeueQueryParams) (*v1types.PostJobsDequeueResponse, error) {
