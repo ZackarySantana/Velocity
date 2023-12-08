@@ -76,17 +76,18 @@ func NewMongoDBJobProvider(client db.Connection) *MongoDBJobProvider {
 	return &MongoDBJobProvider{client}
 }
 
-func (p *MongoDBJobProvider) Next(num int) ([]Job, error) {
+func (p *MongoDBJobProvider) Next(num int) ([]*Job, error) {
 	// TODO should this be another context?
 	dbJobs, err := p.c.DequeueNJobs(context.TODO(), int64(num))
 	if err != nil {
 		return nil, err
 	}
 
-	jobs := []Job{}
+	jobs := []*Job{}
+	var job Job
 	for i := 0; i < len(dbJobs); i++ {
-		job := NewCommandJob(dbJobs[i].Id.Hex(), dbJobs[i].Image, dbJobs[i].Command, dbJobs[i].SetupCommands, dbJobs[i].Status, nil)
-		jobs = append(jobs, job)
+		job = NewCommandJob(dbJobs[i].Id.Hex(), dbJobs[i].Image, dbJobs[i].Command, dbJobs[i].SetupCommands, dbJobs[i].Status, nil)
+		jobs = append(jobs, &job)
 	}
 
 	return jobs, nil

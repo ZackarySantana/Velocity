@@ -3,9 +3,11 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 	"sync"
 
 	"github.com/zackarysantana/velocity/internal/agent"
+	"github.com/zackarysantana/velocity/internal/db"
 	"github.com/zackarysantana/velocity/internal/jobs"
 	"github.com/zackarysantana/velocity/src/clients"
 	"github.com/zackarysantana/velocity/src/config"
@@ -20,6 +22,16 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	var provider jobs.JobProvider
+	if _, ok := os.LookupEnv("MONGODB_AGENT"); ok {
+		client, err := db.Connect(nil)
+		if err != nil {
+			log.Fatal(err)
+		}
+		provider = jobs.NewMongoDBJobProvider(*client)
+	} else {
+		provider = jobs.NewVelocityJobProvider(v)
+	}
 
 	stop := make(chan bool)
 	wg := sync.WaitGroup{}
@@ -27,7 +39,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	a := agent.NewAgent(jobs.NewVelocityJobProvider(v), &jobs.DockerJobExecutor{}, ctx, stop, &wg)
+	a := agent.NewAgent(provider, &jobs.DockerJobExecutor{}, ctx, stop, &wg)
 
 	err = a.Start()
 	if err != nil {
