@@ -14,6 +14,9 @@ build-cli:
 agent:
 	$(ENV) go run cmd/agent/main.go
 
+agent-mongodb:
+	$(ENV) MONGODB_AGENT=true go run cmd/agent/main.go
+
 server:
 	$(ENV) go run cmd/server/main.go
 
