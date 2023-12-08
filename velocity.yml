@@ -39,11 +39,23 @@ images:
         image: python:latest
 
 builds:
-    golang-app:
-        image: golang:1.21.4
-        directory: .
-        build: make build-cli
-        output: $GOPATH/bin/velocity
+    local:
+        build:
+            image: golang:1.21.4
+            directory: .
+            run: make build-cli
+            path: $GOPATH/bin/velocity
+        output:
+            path: $GOPATH/bin/velocity
+    deploy:
+        build:
+            image: golang:1.21.4
+            directory: .
+            run: make build-cli
+            path: $GOPATH/bin/velocity
+        output:
+            url: https://google.com/
+            # TODO: authentication? options?
 
 workflows:
     all-tests:
