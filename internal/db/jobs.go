@@ -167,6 +167,7 @@ func (c *Connection) InsertJobs(ctx context.Context, jobs []*Job) ([]*Job, error
 	return jobs, nil
 }
 
+// TODO: can we get the ids that were truly updated? this is to prevent race conditions when dequeuing
 func (c *Connection) UpdateJobsByIds(ctx context.Context, ids []primitive.ObjectID, filter, update bson.M) (int, error) {
 	if filter == nil {
 		filter = bson.M{}

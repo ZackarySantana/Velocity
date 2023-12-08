@@ -69,7 +69,6 @@ func getLanguageAndFrameworkDefaults(language, framework string) LanguageAndFram
 }
 
 func getDirectoryCommands(directory string) []string {
-	// TODO: Should we remove a leading slash?
 	if directory == "" {
 		return []string{}
 	}
