@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	v := clients.NewVelocityClientV1WithAPIKey("http://localhost:8080", "YOUR_API_KEY")
+	v := clients.NewVelocityClientV1("http://localhost:8080")
 
 	stop := make(chan bool)
 	wg := sync.WaitGroup{}
