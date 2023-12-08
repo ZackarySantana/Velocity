@@ -4,6 +4,10 @@ import (
 	"fmt"
 )
 
+func (c *Config) validateConfig(y YAMLConfig) error {
+	return nil
+}
+
 func (c *Config) validateTest(t YAMLTest) error {
 	if t.Language == nil && t.Framework == nil {
 		if t.Run == nil {
@@ -34,6 +38,11 @@ func (c *Config) validateImage(i YAMLImage) error {
 	return nil
 }
 
+// TODO: Validate builds
+func (c *Config) validateBuild(b YAMLBuild) error {
+	return nil
+}
+
 func (c *Config) validateWorkflow(w YAMLWorkflow) error {
 	errs := []error{}
 	for image, tests := range w.Tests {
@@ -56,6 +65,11 @@ func (c *Config) validateWorkflow(w YAMLWorkflow) error {
 
 func (c *Config) Validate() error {
 	errs := []error{}
+
+	if err := c.validateConfig(c.Config); err != nil {
+		errs = append(errs, err)
+	}
+
 	for _, test := range c.Tests {
 		if err := c.validateTest(test); err != nil {
 			errs = append(errs, err)
@@ -63,6 +77,11 @@ func (c *Config) Validate() error {
 	}
 	for _, image := range c.Images {
 		if err := c.validateImage(image); err != nil {
+			errs = append(errs, err)
+		}
+	}
+	for _, build := range c.Builds {
+		if err := c.validateBuild(build); err != nil {
 			errs = append(errs, err)
 		}
 	}
