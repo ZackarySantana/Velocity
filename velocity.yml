@@ -41,7 +41,7 @@ images:
 builds:
     local:
         input:
-            image: golang:1.21.4
+            image: golang
             directory: .
             run: make build-cli
             path: $GOPATH/bin/velocity
@@ -49,7 +49,7 @@ builds:
             path: $GOPATH/bin/velocity
     deploy:
         input:
-            image: golang:1.21.4
+            image: golang
             directory: .
             run: make build-cli
             path: $GOPATH/bin/velocity
