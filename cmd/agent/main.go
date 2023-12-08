@@ -8,10 +8,18 @@ import (
 	"github.com/zackarysantana/velocity/internal/agent"
 	"github.com/zackarysantana/velocity/internal/jobs"
 	"github.com/zackarysantana/velocity/src/clients"
+	"github.com/zackarysantana/velocity/src/config"
 )
 
 func main() {
-	v := clients.NewVelocityClientV1("http://localhost:8080")
+	config, err := config.LoadConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
+	v, err := clients.NewVelocityClientV1FromConfig(config)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	stop := make(chan bool)
 	wg := sync.WaitGroup{}

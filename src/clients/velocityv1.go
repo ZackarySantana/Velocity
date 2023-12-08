@@ -43,7 +43,7 @@ func NewVelocityClientV1FromEnv() (*VelocityClientV1, error) {
 	return NewVelocityClientV1(baseURL), nil
 }
 
-func NewVelocityClientV1FromConfig(c config.Config) (*VelocityClientV1, error) {
+func NewVelocityClientV1FromConfig(c *config.Config) (*VelocityClientV1, error) {
 	if c.Config.Server == nil || *c.Config.Server == "" {
 		return nil, errors.New("config does not have a server set")
 	}
