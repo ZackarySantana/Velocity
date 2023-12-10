@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/google/go-querystring/query"
-	"github.com/zackarysantana/velocity/internal/api/v1/v1types"
+	"github.com/zackarysantana/velocity/src/clients/v1types"
 	"github.com/zackarysantana/velocity/src/config"
 )
 

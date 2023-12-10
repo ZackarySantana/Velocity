@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/zackarysantana/velocity/internal/api/middleware"
-	"github.com/zackarysantana/velocity/internal/api/v1/v1types"
+	"github.com/zackarysantana/velocity/src/clients/v1types"
 )
 
 func (v *V1App) PostUser() []gin.HandlerFunc {

@@ -5,10 +5,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/zackarysantana/velocity/internal/api/middleware"
-	"github.com/zackarysantana/velocity/internal/api/v1/v1types"
 	"github.com/zackarysantana/velocity/internal/db"
 	"github.com/zackarysantana/velocity/internal/jobs/jobtypes"
 	"github.com/zackarysantana/velocity/internal/workflows"
+	"github.com/zackarysantana/velocity/src/clients/v1types"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 

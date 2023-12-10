@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"github.com/urfave/cli/v2"
-	"github.com/zackarysantana/velocity/internal/api/v1/v1types"
 	"github.com/zackarysantana/velocity/internal/operations/befores"
 	"github.com/zackarysantana/velocity/internal/operations/flags"
+	"github.com/zackarysantana/velocity/src/clients/v1types"
 )
 
 var Run = []*cli.Command{
