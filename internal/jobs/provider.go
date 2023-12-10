@@ -34,9 +34,8 @@ func (p *VelocityJobProvider) Next(num int) ([]*Job, error) {
 	dbJobs := resp.Jobs
 
 	jobs := []*Job{}
-	var job Job
 	for i := 0; i < len(dbJobs); i++ {
-		job = NewCommandJob(dbJobs[i].Id.Hex(), dbJobs[i].Image, dbJobs[i].Command, dbJobs[i].SetupCommands, dbJobs[i].Status, nil)
+		var job Job = NewCommandJob(dbJobs[i].Id.Hex(), dbJobs[i].Image, dbJobs[i].Command, dbJobs[i].SetupCommands, dbJobs[i].Status, nil)
 		jobs = append(jobs, &job)
 	}
 
@@ -84,9 +83,8 @@ func (p *MongoDBJobProvider) Next(num int) ([]*Job, error) {
 	}
 
 	jobs := []*Job{}
-	var job Job
 	for i := 0; i < len(dbJobs); i++ {
-		job = NewCommandJob(dbJobs[i].Id.Hex(), dbJobs[i].Image, dbJobs[i].Command, dbJobs[i].SetupCommands, dbJobs[i].Status, nil)
+		var job Job = NewCommandJob(dbJobs[i].Id.Hex(), dbJobs[i].Image, dbJobs[i].Command, dbJobs[i].SetupCommands, dbJobs[i].Status, nil)
 		jobs = append(jobs, &job)
 	}
 

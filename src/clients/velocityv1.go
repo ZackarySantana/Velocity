@@ -23,7 +23,7 @@ type VelocityClientV1 struct {
 func NewVelocityClientV1(baseURL string) *VelocityClientV1 {
 	return &VelocityClientV1{
 		BaseURL: strings.TrimSuffix(baseURL, "/"),
-		ApiKey:  os.Getenv("API_KEY"),
+		ApiKey:  "YOUR_API_KEY",
 	}
 }
 
@@ -94,9 +94,15 @@ func (v *VelocityClientV1) post(route string, body, resp interface{}) error {
 		return err
 	}
 	defer response.Body.Close()
+
 	if response.StatusCode != 200 {
 		b, _ := ioutil.ReadAll(response.Body)
 		return errors.New(path + " - " + response.Status + ": " + string(b))
+	}
+
+	ct := response.Header.Get("Content-Type")
+	if !strings.Contains(ct, "application/json") {
+		return errors.New(path + " - " + ct + ": invalid content type")
 	}
 
 	return json.NewDecoder(response.Body).Decode(&resp)

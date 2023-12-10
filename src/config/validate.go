@@ -5,6 +5,9 @@ import (
 )
 
 func (c *Config) validateConfig(y YAMLConfig) error {
+	if y.Project == "" {
+		return fmt.Errorf("project must be defined")
+	}
 	return nil
 }
 

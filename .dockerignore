@@ -1,0 +1,6 @@
+.env
+.gitignore
+fly.toml
+README.md
+client
+Dockerfile

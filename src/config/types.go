@@ -3,8 +3,10 @@ package config
 type Env map[string]string
 
 type YAMLConfig struct {
+	Project  string  `yaml:"project,omitempty" json:"project,omitempty" bson:"project,omitempty"`
 	Registry *string `yaml:"registry,omitempty" json:"registry,omitempty" bson:"registry,omitempty"`
 	Server   *string `yaml:"server,omitempty" json:"server,omitempty" bson:"server,omitempty"`
+	UI       *string `yaml:"ui,omitempty" json:"ui,omitempty" bson:"ui,omitempty"`
 }
 
 type YAMLTests map[string]YAMLTest

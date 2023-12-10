@@ -10,10 +10,12 @@ import (
 type Project struct {
 	Id primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 
+	Name string `bson:"name,omitempty" json:"name"`
+
 	Git struct {
-		Owner      string `bson:"owner" json:"owner"`
-		Repository string `bson:"repository" json:"repository"`
-	} `bson:"git" json:"git"`
+		Owner      string `bson:"owner,omitempty" json:"owner"`
+		Repository string `bson:"repository,omitempty" json:"repository"`
+	} `bson:"git,omitempty" json:"git"`
 }
 
 func (c *Connection) GetProject(ctx context.Context, query interface{}) (*Project, error) {
@@ -23,6 +25,11 @@ func (c *Connection) GetProject(ctx context.Context, query interface{}) (*Projec
 
 func (c *Connection) GetProjectById(ctx context.Context, id primitive.ObjectID) (*Project, error) {
 	return c.GetProject(ctx, bson.M{"_id": id})
+}
+
+// By name
+func (c *Connection) GetProjectByName(ctx context.Context, name string) (*Project, error) {
+	return c.GetProject(ctx, bson.M{"name": name})
 }
 
 func (c *Connection) InsertProject(ctx context.Context, project *Project) (*Project, error) {

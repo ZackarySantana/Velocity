@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -46,7 +47,7 @@ func (a *V1App) PostJobResult() []gin.HandlerFunc {
 	return []gin.HandlerFunc{
 		middleware.ParseBody(v1types.NewPostJobResultRequest),
 		func(c *gin.Context) {
-			data := middleware.GetBody(c).(v1types.PostJobResultRequest)
+			data := middleware.GetBody(c).(*v1types.PostJobResultRequest)
 			id, err := primitive.ObjectIDFromHex(data.Id)
 			if err != nil {
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
@@ -63,11 +64,14 @@ func (a *V1App) PostJobResult() []gin.HandlerFunc {
 			if data.Error != nil {
 				j.Error = *data.Error
 			}
+			fmt.Println("Updating job", j)
 			j, err = a.client.UpdateJob(c, j)
 			if err != nil {
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
 				return
 			}
+
+			fmt.Println("Updated job", j)
 
 			resp := v1types.PostJobResultResponse(*j)
 			c.JSON(200, resp)

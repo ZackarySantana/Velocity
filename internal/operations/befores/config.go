@@ -16,14 +16,14 @@ func Config(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	c.App.Metadata[flags.Config.Name] = *config
+	c.App.Metadata[flags.Config.Name] = config
 	return err
 }
 
-func GetConfig(c *cli.Context) (config.Config, error) {
-	config, ok := c.App.Metadata[flags.Config.Name].(config.Config)
+func GetConfig(c *cli.Context) (*config.Config, error) {
+	config, ok := c.App.Metadata[flags.Config.Name].(*config.Config)
 	if !ok {
-		return config, cli.Exit("config not found", 1)
+		return nil, cli.Exit("config not found", 1)
 	}
 	return config, nil
 }

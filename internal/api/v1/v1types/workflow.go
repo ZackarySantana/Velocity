@@ -5,9 +5,10 @@ import (
 	"github.com/zackarysantana/velocity/src/config"
 )
 
-// POST /api/v1/workflows/start
+// POST /api/v1/instances/start
 type PostInstanceStartRequest struct {
-	ProjectId string `json:"project_id"`
+	ProjectId   *string `json:"project_id"`
+	ProjectName *string `json:"project_name"`
 
 	Config   *config.Config `json:"config"`
 	Workflow string         `json:"workflow"`

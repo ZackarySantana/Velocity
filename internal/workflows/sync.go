@@ -9,7 +9,7 @@ import (
 	"github.com/zackarysantana/velocity/src/config"
 )
 
-func RunSyncWorkflow(c config.Config, workflow config.YAMLWorkflow) ([]jobs.JobResult, error) {
+func RunSyncWorkflow(c *config.Config, workflow config.YAMLWorkflow) ([]jobs.JobResult, error) {
 	j, err := GetJobsForWorkflow(c, workflow)
 	if err != nil {
 		return nil, err

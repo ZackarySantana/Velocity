@@ -44,6 +44,7 @@ func (a *Agent) runJobs(queue <-chan jobs.Job, results chan<- jobs.JobResult, li
 			}()
 			logs, err := a.Executor.Execute(a.Context, job)
 			job.SetStatus(jobtypes.JobStatusCompleted)
+			fmt.Println("Job complete (", len(limit)-1, " jobs running)")
 			if err != nil {
 				results <- jobs.JobResult{
 					Job:    job,

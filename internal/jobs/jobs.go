@@ -99,7 +99,7 @@ func NewCommandJob(name string, image string, command string, setupCommands []st
 	}
 
 	if opts.Directory != nil {
-		j.SetupCommands = append(j.SetupCommands, getDirectoryCommands(*opts.Directory)...)
+		j.SetupCommands = append(getDirectoryCommands(*opts.Directory), j.SetupCommands...)
 	}
 
 	return j
@@ -132,7 +132,8 @@ func NewFrameworkJob(name, language, framework string, status jobtypes.JobStatus
 
 	if opts.Directory != nil {
 		// Reverse the order of the setup commands so that the directory is cd'd into first
-		j.SetupCommands = append(i.SetupCommands, j.SetupCommands...)
+		fmt.Println("Setting up directory")
+		j.SetupCommands = append(getDirectoryCommands(*opts.Directory), j.SetupCommands...)
 	}
 
 	if opts.Image != nil {

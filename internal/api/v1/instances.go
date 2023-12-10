@@ -16,7 +16,7 @@ func (a *V1App) PostInstanceStart() []gin.HandlerFunc {
 	return []gin.HandlerFunc{
 		middleware.ParseBody(v1types.NewPostInstanceStartRequest),
 		func(c *gin.Context) {
-			data := middleware.GetBody(c).(v1types.PostInstanceStartRequest)
+			data := middleware.GetBody(c).(*v1types.PostInstanceStartRequest)
 
 			err := data.Config.Populate()
 			if err != nil {
@@ -29,9 +29,30 @@ func (a *V1App) PostInstanceStart() []gin.HandlerFunc {
 				return
 			}
 
-			projectId, err := primitive.ObjectIDFromHex(data.ProjectId)
-			if err != nil {
-				c.AbortWithStatusJSON(400, fmt.Sprintf("error processing project id %v", err))
+			var getProject func() (*db.Project, error)
+			if data.ProjectId != nil {
+				projectId, err := primitive.ObjectIDFromHex(*data.ProjectId)
+				if err != nil {
+					c.AbortWithStatusJSON(400, fmt.Sprint("error validating config: ", err))
+					return
+				}
+				getProject = func() (*db.Project, error) {
+					p, err := a.client.GetProjectById(c, projectId)
+					if err != nil {
+						return nil, fmt.Errorf("error getting project by id %v", err)
+					}
+					return p, nil
+				}
+			} else if data.ProjectName != nil {
+				getProject = func() (*db.Project, error) {
+					p, err := a.client.GetProjectByName(c, *data.ProjectName)
+					if err != nil {
+						return nil, fmt.Errorf("error getting project by name %s - %v", *data.ProjectName, err)
+					}
+					return p, nil
+				}
+			} else {
+				c.AbortWithStatusJSON(400, "project name or id required")
 				return
 			}
 
@@ -41,24 +62,24 @@ func (a *V1App) PostInstanceStart() []gin.HandlerFunc {
 				return
 			}
 
-			jobs, err := workflows.GetJobsForWorkflow(*data.Config, workflow)
+			jobs, err := workflows.GetJobsForWorkflow(data.Config, workflow)
 			if err != nil {
 				c.AbortWithStatusJSON(400, fmt.Sprintf("error getting jobs for instance %v", err))
 				return
 			}
 
-			project, err := a.client.GetProject(c, projectId)
+			project, err := getProject()
 			if err != nil {
 				c.AbortWithStatusJSON(400, fmt.Sprintf("error getting project: %v", err))
 				return
 			}
 			if project == nil {
-				c.AbortWithStatusJSON(400, fmt.Sprintf("project not found %s", data.ProjectId))
+				c.AbortWithStatusJSON(400, fmt.Sprintf("project not found %v", data.ProjectId))
 				return
 			}
 
 			i := db.Instance{
-				ProjectId: projectId,
+				ProjectId: project.Id,
 				Config:    *data.Config,
 			}
 			instance, err := a.client.InsertInstance(c, &i)

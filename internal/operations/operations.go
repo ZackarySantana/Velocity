@@ -1,6 +1,7 @@
 package operations
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/urfave/cli/v2"
@@ -17,6 +18,13 @@ func NewCLIApp() CLIApp {
 		Version:  "0.0.1",
 		Usage:    "manage, run, and report on tests quickly",
 		Commands: appendCommands(Run, Validate, RunLocal),
+		ExitErrHandler: func(c *cli.Context, err error) {
+			if err == nil {
+				return
+			}
+			fmt.Println("TESTING")
+			fmt.Println(err)
+		},
 	}
 	return cliApp
 }

@@ -18,7 +18,7 @@ func WithInstanceId(instanceId string) func(*getJobsForWorkflowOpts) {
 	}
 }
 
-func GetJobsForWorkflow(c config.Config, workflow config.YAMLWorkflow, opts ...func(*getJobsForWorkflowOpts)) ([]*jobs.Job, error) {
+func GetJobsForWorkflow(c *config.Config, workflow config.YAMLWorkflow, opts ...func(*getJobsForWorkflowOpts)) ([]*jobs.Job, error) {
 	o := &getJobsForWorkflowOpts{}
 
 	for _, opt := range opts {

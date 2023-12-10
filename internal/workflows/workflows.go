@@ -10,7 +10,7 @@ import (
 	"github.com/zackarysantana/velocity/src/uicli"
 )
 
-func GetWorkflow(c config.Config, title string) (config.YAMLWorkflow, error) {
+func GetWorkflow(c *config.Config, title string) (config.YAMLWorkflow, error) {
 	items := []uicli.SimpleItem{}
 	for name, workflow := range c.Workflows {
 		desc := workflow.Description
