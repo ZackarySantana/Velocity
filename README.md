@@ -1,6 +1,6 @@
 # Velocity
 
-Welcome to your own CI/CD system! This is suppose to be a basic example in which you can run a series of tests defined in [velocity.yml](velocity.yml) either locally or pushed to a database to be ran on an agent. The main components of this system are:
+Welcome to your own CI/CD system! This is suppose to be a basic example in which you can run a series of tests defined in [velocity.yml](velocity.yml) which are either locally ran or pushed to a database to be ran on an agent. The main components of this system are:
 
 -   [CLI](internal/operations/operations.go): User-facing tool that talks to the API
 
@@ -57,29 +57,29 @@ Welcome to your own CI/CD system! This is suppose to be a basic example in which
 
     -   `tests`:
 
-        -   [test-name] (using language + framework):
+        -   `[test-name]` (using language + framework):
 
             -   `language`: [Supported](internal/jobs/defaults.go)
             -   `framework`: [Supported](internal/jobs/defaults.go)
 
-        -   [test-name] (using bash script)
+        -   `[test-name]` (using bash script)
 
             -   `run`: A shell command
             -   `image`: The docker image to run with
 
-        -   [test-name] (general options)
+        -   `[test-name]` (general options)
 
             -   `directory`: The directory to run the test in
 
     -   `images`:
 
-        -   [image-name]:
+        -   `[image-name]`:
 
             -   `image`: The docker image to build
 
     -   `builds`:
 
-        -   [build-name]:
+        -   `[build-name]`:
 
             -   `input`:
 
@@ -97,6 +97,6 @@ Welcome to your own CI/CD system! This is suppose to be a basic example in which
 
     -   `workflows`:
 
-        -   [workflow-name]:
+        -   `[workflow-name]`:
 
             -   `tests`: An array of the tests to run
