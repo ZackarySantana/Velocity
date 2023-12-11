@@ -2,101 +2,102 @@
 
 Welcome to your own CI/CD system! This is suppose to be a basic example in which you can run a series of tests defined in [velocity.yml](velocity.yml) which are either locally ran or pushed to a database to be ran on an agent. The main components of this system are:
 
--   [CLI](internal/operations/operations.go): User-facing tool that talks to the API
+## [CLI](internal/operations/operations.go): User-facing tool that talks to the API
 
-    -   Use cases:
+-   Use cases:
 
-        -   `velocity run-local`: Runs tests locally
-        -   `velocity run`: Posts tests to the API
-        -   `velocity validate`: Validates the velocity.yml file
+    -   `velocity run-local`: Runs tests locally
+    -   `velocity run`: Posts tests to the API
+    -   `velocity validate`: Validates the velocity.yml file
 
-    -   Build:
+-   Build:
 
-        -   `make build-cli` creates the cli at $GOPATH/bin/velocity
+    -   `make build-cli` creates the cli at $GOPATH/bin/velocity
 
-    -   Architectural Decision Record (ADR):
+-   Architectural Decision Record (ADR):
 
-        -   The CLI reads off of the velocity.yml the CWD holds (overriden by flags)
-        -   When posting to the API, attempts to authentication with credentials at ~/.velocityrc
+    -   The CLI reads off of the velocity.yml the CWD holds (overriden by flags)
+    -   When posting to the API, attempts to authentication with credentials at ~/.velocityrc
 
--   [Client](client) (TBA): A UI that displays the status of the tests
+## [Client](client) (TBA): A UI that displays the status of the tests
 
-    -   TBA
+-   TBA
 
--   [Agent](internal/agent/agent.go): Runs tests and reports back to the API
+## [Agent](internal/agent/agent.go): Runs tests and reports back to the API
 
-    -   Build:
+-   Build:
 
-        -   `make agent` runs the agent with a velocity provider
-        -   `make agent-mongodb` runs the agent with a mongodb provider
+    -   `make agent` runs the agent with a velocity provider
+    -   `make agent-mongodb` runs the agent with a mongodb provider
 
-    -   ADR:
-        -   The agent can have different [providers](internal/jobs/provider.go), like:
-            -   `InMemoryJobProvider`: Runs jobs that are in memory of the system. This is a finite number of jobs- great for local runs
-            -   `VelocityJobProvider`: Queries your API for jobs and posts them to the API. Great for distributed runs
-            -   `MongoDBJobProvider`: Directly queries MongoDB for jobs and posts them to MongoDB. Previews flexibility of providers, can be used in proof of concept
+-   ADR:
 
--   [API v1](internal/api/v1/v1.go): Handles requests from the CLI, Agent, and Client
+    -   The agent can have different [providers](internal/jobs/provider.go), like:
+        -   `InMemoryJobProvider`: Runs jobs that are in memory of the system. This is a finite number of jobs- great for local runs
+        -   `VelocityJobProvider`: Queries your API for jobs and posts them to the API. Great for distributed runs
+        -   `MongoDBJobProvider`: Directly queries MongoDB for jobs and posts them to MongoDB. Previews flexibility of providers, can be used in proof of concept
 
-    -   Build:
+## [API v1](internal/api/v1/v1.go): Handles requests from the CLI, Agent, and Client
 
-        -   `make server` starts the server
+-   Build:
 
-    -   ADR:
+    -   `make server` starts the server
 
-        -   The API is built with versioning and has a contract with these [types](src/clients/v1types)
+-   ADR:
 
--   [Config](src/config/types.go): The [velocity.yml](velocity.yml) is opinionated in how you should architect your tests
+    -   The API is built with versioning and has a contract with these [types](src/clients/v1types)
 
-    -   `config`:
+## [Config](src/config/types.go): The [velocity.yml](velocity.yml) is opinionated in how you should architect your tests
 
-        -   `project`: The project id of the repository
-        -   `registry`: The docker registry to pull your images from
-        -   `server`: The velocity server
-        -   `ui`: The ui server
+-   `config`:
 
-    -   `tests`:
+    -   `project`: The project id of the repository
+    -   `registry`: The docker registry to pull your images from
+    -   `server`: The velocity server
+    -   `ui`: The ui server
 
-        -   `[test-name]` (using language + framework):
+-   `tests`:
 
-            -   `language`: [Supported](internal/jobs/defaults.go)
-            -   `framework`: [Supported](internal/jobs/defaults.go)
+    -   `[test-name]` (using language + framework):
 
-        -   `[test-name]` (using bash script)
+        -   `language`: [Supported](internal/jobs/defaults.go)
+        -   `framework`: [Supported](internal/jobs/defaults.go)
 
-            -   `run`: A shell command
-            -   `image`: The docker image to run with
+    -   `[test-name]` (using bash script)
 
-        -   `[test-name]` (general options)
+        -   `run`: A shell command
+        -   `image`: The docker image to run with
 
-            -   `directory`: The directory to run the test in
+    -   `[test-name]` (general options)
 
-    -   `images`:
+        -   `directory`: The directory to run the test in
 
-        -   `[image-name]`:
+-   `images`:
 
-            -   `image`: The docker image to build
+    -   `[image-name]`:
 
-    -   `builds`:
+        -   `image`: The docker image to build
 
-        -   `[build-name]`:
+-   `builds`:
 
-            -   `input`:
+    -   `[build-name]`:
 
-                -   `image`: The image (specified above) to build
-                -   `directory`: The directory to run the build in
-                -   `run`: A shell command to run that creates the build
-                -   `path`: The path to the build artifact
+        -   `input`:
 
-            -   `output` (to local or remote):
+            -   `image`: The image (specified above) to build
+            -   `directory`: The directory to run the build in
+            -   `run`: A shell command to run that creates the build
+            -   `path`: The path to the build artifact
 
-                -   `path`: A local path, if wanted
-                -   `url`: The url to post the build artifact to
-                -   `method`: The method to post the build artifact with
-                -   `headers`: The headers to post the build artifact with
+        -   `output` (to local or remote):
 
-    -   `workflows`:
+            -   `path`: A local path, if wanted
+            -   `url`: The url to post the build artifact to
+            -   `method`: The method to post the build artifact with
+            -   `headers`: The headers to post the build artifact with
 
-        -   `[workflow-name]`:
+-   `workflows`:
 
-            -   `tests`: An array of the tests to run
+    -   `[workflow-name]`:
+
+        -   `tests`: An array of the tests to run
