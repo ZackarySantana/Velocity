@@ -28,7 +28,7 @@ func (e *DockerJobExecutor) Execute(ctx Context, job Job) (string, error) {
 	}
 
 	// Build the test image
-	testBuildCmd := exec.Command("docker", "build", "-t", "velocity_test_name", "-")
+	testBuildCmd := exec.Command("docker", "build", "-t", "velocity"+job.GetName(), "-")
 	dockerfileContent = fmt.Sprintf(`
 		FROM %s
 		COPY --from=velocity_repository_clone /git/app /app
@@ -43,7 +43,7 @@ func (e *DockerJobExecutor) Execute(ctx Context, job Job) (string, error) {
 	}
 
 	// Run the test image
-	testCmd := exec.Command("docker", "run", "--rm", "velocity_test_name")
+	testCmd := exec.Command("docker", "run", "--rm", "velocity"+job.GetName())
 	testOutput, err := testCmd.CombinedOutput()
 	if err != nil {
 		return "", fmt.Errorf("error running test image: error '%s' output '%s'", err, testOutput)
