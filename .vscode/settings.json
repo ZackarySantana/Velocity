@@ -1,0 +1,17 @@
+{
+    "rest-client.environmentVariables": {
+        "$shared": {},
+        "local": {
+            "host": "http://localhost:8080",
+            "token": "YOUR_API_KEY"
+        },
+        "production": {
+            "host": "https://velocity-ci.com",
+            "token": "PRODUCTION_API_KEY"
+        }
+    },
+    "rest-client.defaultHeaders": {
+        "User-Agent": "vscode-restclient",
+        "Content-type": "application/json"
+    }
+}

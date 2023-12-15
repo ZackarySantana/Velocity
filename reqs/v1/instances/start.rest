@@ -1,0 +1,6 @@
+POST {{host}}/api/v1/instances/start HTTP/1.1
+Authorization: Bearer {{token}}
+
+{
+    "project_name": "",
+}
