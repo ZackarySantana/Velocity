@@ -12,6 +12,38 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+// Get instance
+func (a *V1App) GetInstance() []gin.HandlerFunc {
+	return []gin.HandlerFunc{
+		middleware.InstanceId(),
+		func(c *gin.Context) {
+			instance_id := middleware.GetInstanceId(c)
+
+			instance, err := a.client.GetInstanceById(c, instance_id)
+			if err != nil {
+				c.AbortWithStatusJSON(400, fmt.Sprintf("error getting instance %v", err))
+				return
+			}
+
+			jobs, err := a.client.GetJobsByInstanceId(c, instance_id)
+			if err != nil {
+				c.AbortWithStatusJSON(400, fmt.Sprintf("error getting jobs for instance %v", err))
+				return
+			}
+
+			j := []db.Job{}
+			for _, job := range jobs {
+				j = append(j, *job)
+			}
+			res := v1types.GetInstanceResponse{
+				Instance: *instance,
+				Jobs:     j,
+			}
+			c.JSON(200, res)
+		},
+	}
+}
+
 func (a *V1App) PostInstanceStart() []gin.HandlerFunc {
 	return []gin.HandlerFunc{
 		middleware.ParseBody(v1types.NewPostInstanceStartRequest),

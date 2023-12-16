@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/zackarysantana/velocity/src/config"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -18,6 +19,10 @@ type Instance struct {
 func (c *Connection) GetInstance(ctx context.Context, query interface{}) (*Instance, error) {
 	var Instance Instance
 	return &Instance, c.col("instances").FindOne(ctx, query).Decode(&Instance)
+}
+
+func (c *Connection) GetInstanceById(ctx context.Context, id primitive.ObjectID) (*Instance, error) {
+	return c.GetInstance(ctx, bson.M{"_id": id})
 }
 
 func (c *Connection) InsertInstance(ctx context.Context, instance *Instance) (*Instance, error) {

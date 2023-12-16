@@ -125,6 +125,11 @@ func (c *Connection) DequeueNJobs(ctx context.Context, n int64) ([]*Job, error) 
 	return jobs, nil
 }
 
+func (c *Connection) GetJobsByInstanceId(ctx context.Context, instanceId primitive.ObjectID) ([]*Job, error) {
+	query := bson.M{"instance_id": instanceId}
+	return c.GetJobs(ctx, query)
+}
+
 func (c *Connection) InsertJob(ctx context.Context, job *Job) (*Job, error) {
 	if err := job.validate(); err != nil {
 		return nil, err

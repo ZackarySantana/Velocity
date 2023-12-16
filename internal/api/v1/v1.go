@@ -27,8 +27,8 @@ func CreateV1App(client db.Connection) (*gin.Engine, error) {
 
 	// /api/v1/instances
 	instances := authorizedV1.Group("/instances")
+	instances.GET("", a.GetInstance()...)
 	instances.POST("/start", a.PostInstanceStart()...)
-	instances.GET("/GET", a.PostInstanceStart()...)
 
 	// /api/v1/jobs
 	// TODO: Agent routes? should we separate these out?
