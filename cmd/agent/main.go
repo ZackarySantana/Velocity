@@ -35,11 +35,7 @@ func main() {
 
 	stop := make(chan bool)
 	wg := sync.WaitGroup{}
-	ctx, err := jobs.NewCurrentContext()
-	if err != nil {
-		log.Fatal(err)
-	}
-	a := agent.NewAgent(provider, &jobs.DockerJobExecutor{}, ctx, stop, &wg)
+	a := agent.NewAgent(provider, &jobs.DockerJobExecutor{}, stop, &wg)
 
 	err = a.Start()
 	if err != nil {
