@@ -1,0 +1,13 @@
+### Start
+# @prompt project_name
+POST {{host}}/api/v1/instances/start HTTP/1.1
+Authorization: Bearer {{token}}
+
+{
+    "project_name": "{{project_name}}"
+}
+
+### Get
+# @prompt instance_id
+GET {{host}}/api/v1/instances/{{instance_id}} HTTP/1.1
+Authorization: Bearer {{token}}
