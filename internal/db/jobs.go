@@ -16,17 +16,24 @@ type Job struct {
 	Id primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 
 	// Run logic
-	Name          string   `bson:"name,omitempty" json:"name"`
-	Image         string   `bson:"image,omitempty" json:"image"`
-	Command       string   `bson:"command,omitempty" json:"command"`
+	Name    string `bson:"name,omitempty" json:"name"`
+	Image   string `bson:"image,omitempty" json:"image"`
+	Command string `bson:"command,omitempty" json:"command"`
+
+	// Setup logic
 	SetupCommands []string `bson:"setup_commands,omitempty" json:"setup_commands"`
+	Git           struct {
+		Owner      string `bson:"owner,omitempty" json:"owner"`
+		Repository string `bson:"repository,omitempty" json:"repository"`
+		Hash       string `bson:"hash,omitempty" json:"hash"`
+	} `bson:"git,omitempty" json:"git"`
 
 	// Status logic
 	Status jobtypes.JobStatus `bson:"status,omitempty" json:"status"`
 	Logs   string             `bson:"logs,omitempty" json:"logs"`
 	Error  string             `bson:"error,omitempty" json:"error"`
 
-	// For tasks attached to an instance only
+	// Instance spawned tasks
 	InstanceId *primitive.ObjectID `bson:"instance_id,omitempty" json:"instance_id,omit_empty"`
 
 	// Metadata

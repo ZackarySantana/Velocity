@@ -25,6 +25,16 @@ func GetJobsForWorkflow(c *config.Config, workflow config.YAMLWorkflow, opts ...
 		opt(o)
 	}
 
+	ctx, err := jobs.NewCurrentContext()
+	if err != nil {
+		return nil, err
+	}
+
+	gitCtx := jobs.GitContext{
+		URL:  ctx.RepositoryURL,
+		Hash: ctx.CommitHash,
+	}
+
 	j := []*jobs.Job{}
 	for imageName, testNames := range workflow.Tests {
 		for _, testName := range testNames {
@@ -39,9 +49,9 @@ func GetJobsForWorkflow(c *config.Config, workflow config.YAMLWorkflow, opts ...
 
 			var job jobs.Job
 			if test.Run != nil {
-				job = jobs.NewCommandJob(string(testName), *image.Image, *test.Run, nil, jobtypes.JobStatusQueued, nil)
+				job = jobs.NewCommandJob(string(testName), *image.Image, *test.Run, gitCtx, jobtypes.JobStatusQueued, nil)
 			} else if test.Framework != nil && test.Language != nil {
-				job = jobs.NewFrameworkJob(string(testName), *test.Language, *test.Framework, jobtypes.JobStatusQueued, &jobs.FrameworkJobOptions{
+				job = jobs.NewFrameworkJob(string(testName), *test.Language, *test.Framework, gitCtx, jobtypes.JobStatusQueued, &jobs.FrameworkJobOptions{
 					Image:     image.Image,
 					Directory: test.Directory,
 				})

@@ -42,7 +42,12 @@ func (a *Agent) runJobs(queue <-chan jobs.Job, results chan<- jobs.JobResult, li
 				a.wg.Done()
 				<-limit
 			}()
-			logs, err := a.Executor.Execute(a.Context, job)
+			g := job.GetGitContext()
+			ctx := jobs.NewContext(fmt.Sprintf("https://github.com/%s/%s", g.Owner, g.Repository), g.Hash)
+			if g.URL != "" {
+				ctx = jobs.NewContext(g.URL, g.Hash)
+			}
+			logs, err := a.Executor.Execute(ctx, job)
 			job.SetStatus(jobtypes.JobStatusCompleted)
 			fmt.Printf("Job complete (%d jobs running)\n", len(limit)-1)
 			if err != nil {

@@ -7,22 +7,42 @@ import (
 	"github.com/zackarysantana/velocity/internal/jobs/jobtypes"
 )
 
+type GitContext struct {
+	Owner      string
+	Repository string
+	// The above can be provided or the URL directly
+	URL string
+
+	Hash string
+}
+
 type Job interface {
+	GetGitContext() GitContext
 	GetSetupCommands() []string
+
 	GetImage() string
 	GetCommand() string
 	GetName() string
+
 	GetStatus() jobtypes.JobStatus
 	SetStatus(jobtypes.JobStatus)
+
 	Validate() error
 }
 
 type BaseJob struct {
+	GitContext    GitContext
 	SetupCommands []string
-	Image         string
-	Command       string
-	Name          string
-	Status        jobtypes.JobStatus
+
+	Image   string
+	Command string
+	Name    string
+
+	Status jobtypes.JobStatus
+}
+
+func (j *BaseJob) GetGitContext() GitContext {
+	return j.GitContext
 }
 
 func (j *BaseJob) GetSetupCommands() []string {
@@ -83,14 +103,14 @@ type CommandJobOptions struct {
 	Directory *string
 }
 
-func NewCommandJob(name string, image string, command string, setupCommands []string, status jobtypes.JobStatus, opts *CommandJobOptions) *CommandJob {
+func NewCommandJob(name, image, command string, setupContext GitContext, status jobtypes.JobStatus, opts *CommandJobOptions) *CommandJob {
 	j := &CommandJob{
 		BaseJob: BaseJob{
-			SetupCommands: setupCommands,
-			Image:         image,
-			Command:       command,
-			Name:          name,
-			Status:        status,
+			GitContext: setupContext,
+			Image:      image,
+			Command:    command,
+			Name:       name,
+			Status:     status,
 		},
 	}
 	j.Populate()
@@ -114,15 +134,15 @@ type FrameworkJobOptions struct {
 	Image     *string
 }
 
-func NewFrameworkJob(name, language, framework string, status jobtypes.JobStatus, opts *FrameworkJobOptions) *FrameworkJob {
+func NewFrameworkJob(name, language, framework string, setupContext GitContext, status jobtypes.JobStatus, opts *FrameworkJobOptions) *FrameworkJob {
 	i := getLanguageAndFrameworkDefaults(language, framework)
 	j := &FrameworkJob{
 		BaseJob: BaseJob{
-			SetupCommands: i.SetupCommands,
-			Image:         i.Image,
-			Command:       i.Command,
-			Name:          name,
-			Status:        status,
+			GitContext: setupContext,
+			Image:      i.Image,
+			Command:    i.Command,
+			Name:       name,
+			Status:     status,
 		},
 	}
 	j.Populate()
