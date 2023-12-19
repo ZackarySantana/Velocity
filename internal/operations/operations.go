@@ -22,7 +22,6 @@ func NewCLIApp() CLIApp {
 			if err == nil {
 				return
 			}
-			fmt.Println("TESTING")
 			fmt.Println(err)
 		},
 	}
