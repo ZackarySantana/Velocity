@@ -12,6 +12,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+type Git struct {
+	Owner      string `bson:"owner,omitempty" json:"owner"`
+	Repository string `bson:"repository,omitempty" json:"repository"`
+	Hash       string `bson:"hash,omitempty" json:"hash"`
+}
+
 type Job struct {
 	Id primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 
@@ -22,11 +28,7 @@ type Job struct {
 
 	// Setup logic
 	SetupCommands []string `bson:"setup_commands,omitempty" json:"setup_commands"`
-	Git           struct {
-		Owner      string `bson:"owner,omitempty" json:"owner"`
-		Repository string `bson:"repository,omitempty" json:"repository"`
-		Hash       string `bson:"hash,omitempty" json:"hash"`
-	} `bson:"git,omitempty" json:"git"`
+	Git           Git      `bson:"git,omitempty" json:"git"`
 
 	// Status logic
 	Status jobtypes.JobStatus `bson:"status,omitempty" json:"status"`

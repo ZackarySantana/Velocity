@@ -73,6 +73,9 @@ func (a *V1App) PostInstanceStart() []gin.HandlerFunc {
 					if err != nil {
 						return nil, fmt.Errorf("error getting project by id %v", err)
 					}
+					if p == nil {
+						return nil, fmt.Errorf("project not found %v", projectId)
+					}
 					return p, nil
 				}
 			} else if data.ProjectName != nil {
@@ -80,6 +83,9 @@ func (a *V1App) PostInstanceStart() []gin.HandlerFunc {
 					p, err := a.client.GetProjectByName(c, *data.ProjectName)
 					if err != nil {
 						return nil, fmt.Errorf("error getting project by name %s - %v", *data.ProjectName, err)
+					}
+					if p == nil {
+						return nil, fmt.Errorf("project not found %v", data.ProjectName)
 					}
 					return p, nil
 				}
@@ -130,6 +136,11 @@ func (a *V1App) PostInstanceStart() []gin.HandlerFunc {
 					SetupCommands: j.GetSetupCommands(),
 					Status:        jobtypes.JobStatusQueued,
 					InstanceId:    &instance.Id,
+					Git: db.Git{
+						Owner:      project.Git.Owner,
+						Repository: project.Git.Repository,
+						Hash:       data.GitHash,
+					},
 				})
 			}
 

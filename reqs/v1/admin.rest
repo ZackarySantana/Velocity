@@ -1,0 +1,7 @@
+### First time user
+# @prompt email
+POST {{host}}/api/v1/first_time_register
+
+{
+    "email": "{{email}}"
+}

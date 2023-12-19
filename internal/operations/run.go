@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/urfave/cli/v2"
+	"github.com/zackarysantana/velocity/internal/jobs"
 	"github.com/zackarysantana/velocity/internal/operations/befores"
 	"github.com/zackarysantana/velocity/internal/operations/flags"
 	"github.com/zackarysantana/velocity/src/clients/v1types"
@@ -35,11 +36,17 @@ var Run = []*cli.Command{
 				return err
 			}
 
+			gitCtx, err := jobs.NewCurrentContext()
+			if err != nil {
+				return err
+			}
+
 			fmt.Println("Running workflow " + w.Name)
 			req := v1types.PostInstanceStartRequest{
 				ProjectName: &c.Config.Project,
 				Config:      c,
 				Workflow:    w.Name,
+				GitHash:     gitCtx.CommitHash,
 			}
 			resp, err := client.PostInstanceStart(req)
 			if err != nil {

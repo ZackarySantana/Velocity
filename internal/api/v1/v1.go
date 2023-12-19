@@ -27,7 +27,7 @@ func CreateV1App(client db.Connection) (*gin.Engine, error) {
 
 	// /api/v1/instances
 	instances := authorizedV1.Group("/instances")
-	instances.GET("", a.GetInstance()...)
+	instances.GET("/:instance_id", a.GetInstance()...)
 	instances.POST("/start", a.PostInstanceStart()...)
 
 	// /api/v1/jobs

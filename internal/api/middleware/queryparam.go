@@ -34,10 +34,13 @@ func InstanceId() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		instanceId := c.Query("instance_id")
 		if instanceId == "" {
-			c.AbortWithStatusJSON(400, gin.H{
-				"message": "instance_id required",
-			})
-			return
+			instanceId = c.Param("instance_id")
+			if instanceId == "" {
+				c.AbortWithStatusJSON(400, gin.H{
+					"message": "instance_id required",
+				})
+				return
+			}
 		}
 		// convert to objectid
 		i, err := primitive.ObjectIDFromHex(instanceId)

@@ -20,6 +20,7 @@ type PostInstanceStartRequest struct {
 
 	Config   *config.Config `json:"config"`
 	Workflow string         `json:"workflow"`
+	GitHash  string         `json:"git_hash"`
 }
 type PostInstanceStartResponse struct {
 	InstanceId string `json:"instance_id"`
