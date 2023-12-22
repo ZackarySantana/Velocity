@@ -6,6 +6,7 @@ import (
 	"github.com/zackarysantana/velocity/src/config"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Instance struct {
@@ -14,6 +15,13 @@ type Instance struct {
 	ProjectId primitive.ObjectID `bson:"project_id,omitempty" json:"project_id"`
 
 	Config config.Config `bson:"config,omitempty" json:"config"`
+}
+
+func (c *Connection) ApplyInstanceIndexes(ctx context.Context) error {
+	_, err := c.col("instances").Indexes().CreateOne(ctx, mongo.IndexModel{
+		Keys: bson.M{"project_id": 1},
+	})
+	return err
 }
 
 func (c *Connection) GetInstance(ctx context.Context, query interface{}) (*Instance, error) {

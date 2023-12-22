@@ -27,7 +27,14 @@ type Permissions struct {
 
 func (c *Connection) ApplyUserIndexes(ctx context.Context) error {
 	_, err := c.col("users").Indexes().CreateOne(ctx, mongo.IndexModel{
-		Keys: bson.M{"email": 1},
+		Keys: bson.M{"email": 1, "api_key": 1},
+	})
+	return err
+}
+
+func (c *Connection) ApplyPermissionIndexes(ctx context.Context) error {
+	_, err := c.col("permissions").Indexes().CreateOne(ctx, mongo.IndexModel{
+		Keys: bson.M{"user_id": 1, "api_key": 1},
 	})
 	return err
 }

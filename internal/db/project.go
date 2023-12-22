@@ -5,6 +5,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Project struct {
@@ -16,6 +17,13 @@ type Project struct {
 		Owner      string `bson:"owner,omitempty" json:"owner"`
 		Repository string `bson:"repository,omitempty" json:"repository"`
 	} `bson:"git,omitempty" json:"git"`
+}
+
+func (c *Connection) ApplyProjectIndexes(ctx context.Context) error {
+	_, err := c.col("projects").Indexes().CreateOne(ctx, mongo.IndexModel{
+		Keys: bson.M{"name": 1},
+	})
+	return err
 }
 
 func (c *Connection) GetProject(ctx context.Context, query interface{}) (*Project, error) {

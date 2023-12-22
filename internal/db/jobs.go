@@ -62,6 +62,13 @@ func (j *Job) validate() error {
 	return nil
 }
 
+func (c *Connection) ApplyJobIndexes(ctx context.Context) error {
+	_, err := c.col("jobs").Indexes().CreateOne(ctx, mongo.IndexModel{
+		Keys: bson.M{"created_at": 1, "instance_id": 1},
+	})
+	return err
+}
+
 func (c *Connection) GetJob(ctx context.Context, query interface{}, opts ...*options.FindOneOptions) (*Job, error) {
 	var job Job
 	return &job, c.col("jobs").FindOne(ctx, query, opts...).Decode(&job)
