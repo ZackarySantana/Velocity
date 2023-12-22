@@ -36,7 +36,7 @@ type Job struct {
 	Error  string             `bson:"error,omitempty" json:"error"`
 
 	// Instance spawned tasks
-	InstanceId *primitive.ObjectID `bson:"instance_id,omitempty" json:"instance_id,omit_empty"`
+	InstanceId *primitive.ObjectID `bson:"instance_id,omitempty" json:"instance_id,omitempty"`
 
 	// Metadata
 	CreatedAt time.Time `bson:"created_at,omitempty" json:"created_at"`
