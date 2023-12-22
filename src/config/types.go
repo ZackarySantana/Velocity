@@ -20,7 +20,7 @@ type YAMLTest struct {
 
 	Run *string `yaml:"run,omitempty" json:"run,omitempty" bson:"run,omitempty"`
 
-	Env *map[string]string `yaml:"env,omitempty" json:"env,omitempty" bson:"env,omitempty"`
+	Env *Env `yaml:"env,omitempty" json:"env,omitempty" bson:"env,omitempty"`
 
 	// Computed
 	Name string `yaml:"-" json:"-" bson:"-"`
@@ -30,7 +30,7 @@ type YAMLImages map[string]YAMLImage
 type YAMLImage struct {
 	Image *string `yaml:"image,omitempty" json:"image,omitempty" bson:"image,omitempty"`
 
-	Env *map[string]string `yaml:"env,omitempty" json:"env,omitempty" bson:"env,omitempty"`
+	Env *Env `yaml:"env,omitempty" json:"env,omitempty" bson:"env,omitempty"`
 
 	// Computed
 	Name string `yaml:"-" json:"-" bson:"-"`
@@ -50,7 +50,7 @@ type YAMLBuildInput struct {
 	Build     *string `yaml:"build,omitempty" json:"build,omitempty" bson:"build,omitempty"`
 	Output    *string `yaml:"output,omitempty" json:"output,omitempty" bson:"output,omitempty"`
 
-	Env *map[string]string `yaml:"env,omitempty" json:"env,omitempty" bson:"env,omitempty"`
+	Env *Env `yaml:"env,omitempty" json:"env,omitempty" bson:"env,omitempty"`
 }
 type YAMLBuildOutput struct {
 	Url     *string            `yaml:"url,omitempty" json:"url,omitempty" bson:"url,omitempty"`
@@ -72,7 +72,7 @@ type YAMLWorkflow struct {
 
 	Description *string `yaml:"description,omitempty" json:"description,omitempty" bson:"description,omitempty"`
 
-	Env *map[string]string `yaml:"env,omitempty" json:"env,omitempty" bson:"env,omitempty"`
+	Env *Env `yaml:"env,omitempty" json:"env,omitempty" bson:"env,omitempty"`
 
 	// Computed
 	Name string `yaml:"-" json:"-" bson:"-"`
