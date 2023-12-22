@@ -33,7 +33,7 @@ func CreateV1App(client db.Connection) (*gin.Engine, error) {
 	// /api/v1/jobs
 	// TODO: Agent routes? should we separate these out?
 	jobs := authorizedV1.Group("/jobs")
-	jobs.POST("/dequeue", append(middleware.JobsFilter(postJobsDequeueOptsDefault), a.PostJobsDequeue)...)
+	jobs.POST("/dequeue", a.PostJobsDequeue()...)
 	jobs.POST("/result", a.PostJobResult()...)
 
 	return router, nil

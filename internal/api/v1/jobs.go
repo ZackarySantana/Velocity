@@ -19,28 +19,33 @@ var (
 	}
 )
 
-func (v *V1App) PostJobsDequeue(c *gin.Context) {
-	opts := middleware.GetJobsFilter(c)
+func (v *V1App) PostJobsDequeue() []gin.HandlerFunc {
+	return append(
+		middleware.JobsFilter(postJobsDequeueOptsDefault),
+		func(c *gin.Context) {
+			opts := middleware.GetJobsFilter(c)
 
-	dbJobs, err := v.client.DequeueNJobs(c, int64(opts.Amount))
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
-		return
-	}
-	if len(dbJobs) == 0 {
-		c.JSON(200, gin.H{
-			"jobs": []interface{}{},
-		})
-		return
-	}
+			dbJobs, err := v.client.DequeueNJobs(c, int64(opts.Amount))
+			if err != nil {
+				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
+				return
+			}
+			if len(dbJobs) == 0 {
+				c.JSON(200, gin.H{
+					"jobs": []interface{}{},
+				})
+				return
+			}
 
-	jobs := []db.Job{}
-	for _, job := range dbJobs {
-		jobs = append(jobs, *job)
-	}
+			jobs := []db.Job{}
+			for _, job := range dbJobs {
+				jobs = append(jobs, *job)
+			}
 
-	resp := v1types.PostJobsDequeueResponse{Jobs: jobs}
-	c.JSON(200, resp)
+			resp := v1types.PostJobsDequeueResponse{Jobs: jobs}
+			c.JSON(200, resp)
+		},
+	)
 }
 
 func (a *V1App) PostJobResult() []gin.HandlerFunc {
