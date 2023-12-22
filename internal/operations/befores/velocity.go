@@ -43,6 +43,23 @@ func VelocityClient(c *cli.Context) error {
 	return nil
 }
 
+func VelocityClientNoAPIKey(c *cli.Context) error {
+	var velocity *string
+	for _, provider := range velocityServerProviders {
+		v, err := provider(c)
+		if err == nil && v != "" {
+			velocity = &v
+		}
+	}
+
+	if velocity == nil {
+		return errors.New("no velocity server was found. please include it in your yaml or as a flag option")
+	}
+
+	c.App.Metadata[flags.Velocity.Name] = *velocity
+	return nil
+}
+
 func velocityServerFromFlag(c *cli.Context) (string, error) {
 	if c.String(flags.Velocity.Name) != "" {
 		return c.String(flags.Velocity.Name), nil
@@ -73,6 +90,17 @@ func GetVelocityClient(c *cli.Context) (*clients.VelocityClientV1, error) {
 	}
 
 	client := clients.NewVelocityClientV1WithAPIKey(velocity, api_key)
+
+	return client, nil
+}
+
+func GetVelocityClientNoAPIKey(c *cli.Context) (*clients.VelocityClientV1, error) {
+	velocity, ok := c.App.Metadata[flags.Velocity.Name].(string)
+	if !ok {
+		return nil, cli.Exit("velocity not found", 1)
+	}
+
+	client := clients.NewVelocityClientV1WithAPIKey(velocity, "")
 
 	return client, nil
 }

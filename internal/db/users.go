@@ -25,6 +25,13 @@ type Permissions struct {
 	Admin bool `bson:"admin,omitempty" json:"admin"`
 }
 
+func (c *Connection) ApplyUserIndexes(ctx context.Context) error {
+	_, err := c.col("users").Indexes().CreateOne(ctx, mongo.IndexModel{
+		Keys: bson.M{"email": 1},
+	})
+	return err
+}
+
 func (c *Connection) GetUser(ctx context.Context, query interface{}) (*User, error) {
 	var user User
 	return &user, c.col("users").FindOne(ctx, query).Decode(&user)

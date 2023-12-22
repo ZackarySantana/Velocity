@@ -20,6 +20,9 @@ agent-mongodb:
 server:
 	$(ENV) go run cmd/server/main.go
 
+indexes:
+	$(ENV) go run cmd/indexes/main.go
+
 packages:
 	echo $(PACKAGES)
 

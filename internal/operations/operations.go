@@ -17,7 +17,7 @@ func NewCLIApp() CLIApp {
 		Name:     "velocity",
 		Version:  "0.0.1",
 		Usage:    "manage, run, and report on tests quickly",
-		Commands: appendCommands(Run, Validate, RunLocal),
+		Commands: appendCommands(Run, Validate, RunLocal, FirstTimeRegister),
 		ExitErrHandler: func(c *cli.Context, err error) {
 			if err == nil {
 				return
