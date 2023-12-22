@@ -15,6 +15,29 @@ type Connection struct {
 	db string
 }
 
+func (c *Connection) ApplyIndexes(ctx context.Context) error {
+	i := []func(context.Context) error{
+		c.ApplyUserIndexes,
+		c.ApplyPermissionIndexes,
+		c.ApplyProjectIndexes,
+		c.ApplyInstanceIndexes,
+		c.ApplyJobIndexes,
+	}
+
+	errs := []error{}
+	for _, f := range i {
+		if e := f(ctx); e != nil {
+			errs = append(errs, e)
+		}
+	}
+
+	if len(errs) > 0 {
+		return fmt.Errorf("errors applying indexes: %v", errs)
+	}
+
+	return nil
+}
+
 func Connect(ctx *context.Context) (*Connection, error) {
 	if ctx == nil {
 		defaultContext := context.TODO()

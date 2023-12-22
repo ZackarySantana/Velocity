@@ -14,9 +14,8 @@ func main() {
 		log.Fatal(err)
 	}
 	// Apply all indexes
-	client.ApplyUserIndexes(ctx)
-	client.ApplyPermissionIndexes(ctx)
-	client.ApplyJobIndexes(ctx)
-	client.ApplyProjectIndexes(ctx)
-	client.ApplyInstanceIndexes(ctx)
+	err = client.ApplyIndexes(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
