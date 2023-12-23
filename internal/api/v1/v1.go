@@ -22,8 +22,16 @@ func CreateV1App(client db.Connection) (*gin.Engine, error) {
 	// /api/v1/admin
 	adminV1 := v1.Group("/admin", middleware.AdminAuth(client))
 	adminV1.POST("/user", a.PostUser()...)
+	adminV1.POST("/project", a.Health()...) // TODO: Create project endpoint
 
 	authorizedV1 := v1.Group("/", middleware.Auth(client))
+
+	// /api/v1/health
+	authorizedV1.GET("/health", a.Health()...)
+
+	// /api/v1/projects
+	projects := authorizedV1.Group("/projects")
+	projects.GET("/:project_id", a.Health()...) // TODO: get project
 
 	// /api/v1/instances
 	instances := authorizedV1.Group("/instances")

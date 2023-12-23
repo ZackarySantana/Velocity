@@ -48,6 +48,11 @@ func Auth(db db.Connection) gin.HandlerFunc {
 	}
 }
 
+func GetUser(c *gin.Context) *db.User {
+	user, _ := c.Get("user")
+	return user.(*db.User)
+}
+
 func AdminAuth(client db.Connection) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var permissions *db.Permissions
@@ -77,6 +82,11 @@ func AdminAuth(client db.Connection) gin.HandlerFunc {
 
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized- no authentication found"})
 	}
+}
+
+func GetPermissions(c *gin.Context) *db.Permissions {
+	permissions, _ := c.Get("permissions")
+	return permissions.(*db.Permissions)
 }
 
 func authByAPIKey[T any](c *gin.Context, retrieve func(ctx context.Context, apiKey string) (*T, error)) (*T, *authError) {

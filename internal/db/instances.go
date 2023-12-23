@@ -9,12 +9,19 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+type UserInfo struct {
+	Id    string `bson:"id,omitempty" json:"id,omitempty"`
+	Email string `bson:"email,omitempty" json:"email,omitempty"`
+}
+
 type Instance struct {
 	Id primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 
 	ProjectId primitive.ObjectID `bson:"project_id,omitempty" json:"project_id"`
+	Config    config.Config      `bson:"config,omitempty" json:"config"`
 
-	Config config.Config `bson:"config,omitempty" json:"config"`
+	// Metadata
+	UserInfo *UserInfo `bson:"user_info,omitempty" json:"user_info,omitempty"`
 }
 
 func (c *Connection) ApplyInstanceIndexes(ctx context.Context) error {

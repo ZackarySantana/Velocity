@@ -116,9 +116,15 @@ func (a *V1App) PostInstanceStart() []gin.HandlerFunc {
 				return
 			}
 
+			user := middleware.GetUser(c)
+
 			i := db.Instance{
 				ProjectId: project.Id,
 				Config:    *data.Config,
+				UserInfo: &db.UserInfo{
+					Id:    user.Id.Hex(),
+					Email: user.Email,
+				},
 			}
 			instance, err := a.client.InsertInstance(c, &i)
 			if err != nil {
