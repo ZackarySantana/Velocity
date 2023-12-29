@@ -1,0 +1,8 @@
+node_modules
+build
+vendor
+
+*.db
+*.db-journal
+
+.env
