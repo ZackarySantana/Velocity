@@ -31,15 +31,15 @@ Velocity is a self-hosted testing platform.
 
 Velocity starts in the 'velocity.yml' file. This file contains:
 
--   Images
+-   [Images](#images)
     -   Docker images that are used in tests and builds
--   Tests
+-   [Tests](#tests)
     -   Units of process that can be used in a workflow
--   Builds
+-   [Builds](#builds)
     -   The process of building your app
--   Workflows
+-   [Workflows](#workflows)
     -   A series of tests that are ran
--   Config
+-   [Config](#config)
     -   Options to connect your local environment to the platform
 
 ### Images
