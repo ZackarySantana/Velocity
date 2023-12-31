@@ -80,7 +80,7 @@ There are a couple different types of commands that can be used in a test.
     -   A command that is defined in the velocity.yml file
     -   This is used to create reusable components that can be used in multiple tests
 
-#### Example
+#### Examples
 
 ##### Shell command
 
@@ -109,7 +109,7 @@ Operations are command(s) that are defined in the velocity.yml file. They are us
 
 It is recommended to use operations for commands that are used in multiple tests. It makes it easier to refactor a common use-case.
 
-### Example
+#### Example
 
 ```yaml
 operations:
@@ -120,6 +120,8 @@ operations:
 ```
 
 ### Builds
+
+Builds are a unit of process that compiles an output. This output could be code, a tarball, json, or anything else. Builds can be used in tests and deployments. Builds are ran in a separate container than the test container, using it's own image. The runtime_image is only used if the test uses the [run.[build-name]](#run) command.
 
 #### Example
 
@@ -138,6 +140,8 @@ builds:
 ```
 
 ### Deployments
+
+Deployments is deploying your application. These get access to secrets you can configure on a per-project basis (separate from the workflow secrets). These are simple automations that might help you deploy your applications.
 
 #### Example
 
