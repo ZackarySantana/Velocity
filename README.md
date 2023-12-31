@@ -76,6 +76,9 @@ There are a couple different types of commands that can be used in a test.
 -   [Prebuilt command](#prebuilt-command)
     -   A command that is built in to the platform
     -   A list of prebuilt commands can be found [here](#prebuilt-commands)
+-   [Operation](#operation)
+    -   A command that is defined in the velocity.yml file
+    -   This is used to create reusable components that can be used in multiple tests
 
 #### Example
 
