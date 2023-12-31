@@ -5,20 +5,24 @@ Velocity is a self-hosted testing platform.
 ## Table of Contents
 
 -   [Overview](#overview)
+
     -   [Concepts](#concepts)
     -   [Images](#images)
         -   [Example](#example)
     -   [Tests](#tests)
         -   [Example](#example-1)
-    -   [Builds](#builds)
+    -   [Operations](#operations)
         -   [Example](#example-2)
-    -   [Deployments](#deployments)
+    -   [Builds](#builds)
         -   [Example](#example-3)
-    -   [Workflows](#workflows)
+    -   [Deployments](#deployments)
         -   [Example](#example-4)
-    -   [Config](#config)
+    -   [Workflows](#workflows)
         -   [Example](#example-5)
+    -   [Config](#config)
+        -   [Example](#example-6)
     -   [Prebuilt commands](#prebuilt-commands)
+
 -   [Installation](#installation)
 -   [Components](#components)
     -   [CLI](#cli)
@@ -94,6 +98,22 @@ tests:
     - name: test
       commands:
           - prebuilt: git.clone
+```
+
+### Operations
+
+Operations are command(s) that are defined in the velocity.yml file. They are used to create reusable components that can be used in multiple tests.
+
+It is recommended to use operations for commands that are used in multiple tests. It makes it easier to refactor a common use-case.
+
+### Example
+
+```yaml
+operations:
+    - name: prechecks
+      commands:
+          - command: npm run lint
+          - command: npm run test
 ```
 
 ### Builds
@@ -347,10 +367,3 @@ tests:
 ### API
 
 ### Agent
-
-````
-
-```
-
-```
-````
