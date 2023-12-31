@@ -201,12 +201,12 @@ workflows:
 
 ### Config
 
-TBA
+TODO
 
 #### Example
 
 ```yaml
-TBA
+TODO
 ```
 
 ### Prebuilt commands
@@ -377,7 +377,7 @@ tests:
 
 ## Installation
 
-TBA
+TODO
 
 ## Components
 
@@ -385,16 +385,16 @@ These are the code components of the platform, where they are located, and what 
 
 ### CLI
 
-TBA
+TODO
 
 ### Client
 
-TBA
+TODO
 
 ### API
 
-TBA
+TODO
 
 ### Agent
 
-TBA
+TODO
