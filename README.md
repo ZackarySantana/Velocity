@@ -183,13 +183,25 @@ deployments:
 
 ### Workflows
 
+Workflows are an array of tests that are ran out of order. If any of the tests fail, the workflow fails. This is useful for running multiple tests in parallel. These can connect to webhooks or be ran via the CLI.
+
 #### Example
 
 ```yaml
-TBA
+workflows:
+    - name: local
+      tests:
+          - test1
+          - test2
+          - test3
+    - name: lint
+      tests:
+          - deploy
 ```
 
 ### Config
+
+TBA
 
 #### Example
 
@@ -365,12 +377,24 @@ tests:
 
 ## Installation
 
+TBA
+
 ## Components
+
+These are the code components of the platform, where they are located, and what they are responsible for.
 
 ### CLI
 
+TBA
+
 ### Client
+
+TBA
 
 ### API
 
+TBA
+
 ### Agent
+
+TBA
