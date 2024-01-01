@@ -5,7 +5,6 @@ Velocity is a self-hosted testing platform.
 ## Table of Contents
 
 -   [Overview](#overview)
-
     -   [Concepts](#concepts)
     -   [Images](#images)
         -   [Example](#example)
@@ -22,13 +21,13 @@ Velocity is a self-hosted testing platform.
     -   [Config](#config)
         -   [Example](#example-6)
     -   [Prebuilt commands](#prebuilt-commands)
-
 -   [Installation](#installation)
 -   [Components](#components)
     -   [CLI](#cli)
     -   [Client](#client)
     -   [API](#api)
     -   [Agent](#agent)
+-   [ADR](#adr)
 
 ## Overview
 
@@ -398,3 +397,7 @@ TODO
 ### Agent
 
 TODO
+
+## ADR
+
+ADR's for this project can be found on the docs site.
