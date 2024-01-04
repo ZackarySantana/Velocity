@@ -10,7 +10,7 @@ Velocity is a self-hosted testing platform. It's designed that you can easily cl
 
 -   **Self-hosted** - Velocity is designed to be self-hosted. You can deploy it to your own server and run your tests.
 -   **Docker-first** - Velocity by default runs tests in a Docker container.
--   **Extensible** - 734
+-   **Extensible** - Adding new types of jobs, job runners, and more is easy and simple.
 
 ## Getting Started
 
