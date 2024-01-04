@@ -2,46 +2,31 @@
 sidebar_position: 1
 ---
 
-# Tutorial Intro
+# Velocity Intro
 
-Let's discover **Docusaurus in less than 5 minutes**.
+Velocity is a self-hosted testing platform. It's designed that you can easily clone, deploy, and run your tests as fast as possible.
+
+## Features
+
+-   **Self-hosted** - Velocity is designed to be self-hosted. You can deploy it to your own server and run your tests.
+-   **Docker-first** - Velocity by default runs tests in a Docker container.
+-   **Extensible** - 734
 
 ## Getting Started
 
-Get started by **creating a new site**.
+Get started by **cloning this [repository](https://github.com/zackarysantana/velocity)**.
 
-Or **try Docusaurus immediately** with **[docusaurus.new](https://docusaurus.new)**.
+Or **try Velocity immediately** with **[velocity-ci.com](https://velocity-ci.com)**.
 
 ### What you'll need
 
-- [Node.js](https://nodejs.org/en/download/) version 18.0 or above:
-  - When installing Node.js, you are recommended to check all checkboxes related to dependencies.
+-   [Node.js](https://nodejs.org/en/download/) version 18.0 or above
+-   [Golang](https://golang.org/doc/install) version 1.20 or above
 
-## Generate a new site
+### Deployment
 
-Generate a new Docusaurus site using the **classic template**.
+TODO deployment instructions
 
-The classic template will automatically be added to your project after you run the command:
+### Concepts
 
-```bash
-npm init docusaurus@latest my-website classic
-```
-
-You can type this command into Command Prompt, Powershell, Terminal, or any other integrated terminal of your code editor.
-
-The command also installs all necessary dependencies you need to run Docusaurus.
-
-## Start your site
-
-Run the development server:
-
-```bash
-cd my-website
-npm run start
-```
-
-The `cd` command changes the directory you're working with. In order to work with your newly created Docusaurus site, you'll need to navigate the terminal there.
-
-The `npm run start` command builds your website locally and serves it through a development server, ready for you to view at http://localhost:3000/.
-
-Open `docs/intro.md` (this page) and edit some lines: the site **reloads automatically** and displays your changes.
+Move over to the [concepts](./concepts) section to learn more about Velocity.
