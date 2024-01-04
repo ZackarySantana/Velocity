@@ -29,4 +29,4 @@ TODO deployment instructions
 
 ### Concepts
 
-Move over to the [concepts](./concepts) section to learn more about Velocity.
+Move over to the [concepts](./category/concepts) section to learn more about Velocity.
