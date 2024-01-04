@@ -20,20 +20,29 @@ const config: Config = {
             {
                 docs: {
                     sidebarPath: "./sidebars.ts",
-                    // TODO: Change to my repo and make that template
                     editUrl:
-                        "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/",
+                        "https://github.com/zackarysantana/velocity/tree/main/docs",
                 },
                 blog: {
                     showReadingTime: true,
-                    // TODO: Above
                     editUrl:
-                        "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/",
+                        "https://github.com/zackarysantana/velocity/tree/main/docs",
                 },
                 theme: {
                     customCss: "./src/css/custom.css",
                 },
             } satisfies Preset.Options,
+        ],
+    ],
+    plugins: [
+        [
+            "@docusaurus/plugin-content-blog",
+            {
+                id: "changelog",
+                routeBasePath: "changelog",
+                path: "./changelog",
+                blogSidebarTitle: "Changelog",
+            },
         ],
     ],
     themeConfig: {
@@ -52,6 +61,7 @@ const config: Config = {
                     position: "left",
                     label: "Docs",
                 },
+                { to: "/changelog", label: "Changelog", position: "left" },
                 { to: "/blog", label: "Blog", position: "left" },
                 {
                     href: "https://github.com/zackarysantana/velocity",
@@ -92,6 +102,10 @@ const config: Config = {
                 {
                     title: "More",
                     items: [
+                        {
+                            label: "Changelog",
+                            to: "/changelog",
+                        },
                         {
                             label: "Blog",
                             to: "/blog",
