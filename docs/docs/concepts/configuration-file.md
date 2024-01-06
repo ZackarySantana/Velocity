@@ -2,7 +2,7 @@
 sidebar_position: 6
 ---
 
-# Configuration File
+# Configuration file
 
 A version-controlled YAML file that holds all the configuration for your project. It defines the tests, images, builds, deployments, workflows, and config.
 
