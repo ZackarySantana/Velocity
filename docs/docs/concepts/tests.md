@@ -186,3 +186,39 @@ Prebuilt commands are separated in to packages.
             -   Type: array
             -   Default: None
             -   Format: Array of strings in the format `key=value`
+
+### command
+
+-   #### command.tar
+    -   Description: Tars a directory
+    -   Params:
+        -   directory
+            -   Description: The directory to tar
+            -   Type: string
+            -   Default: None
+        -   output
+            -   Description: The output file
+            -   Type: string
+            -   Default: None
+-   #### command.gzip
+    -   Description: Gzips a file
+    -   Params:
+        -   file
+            -   Description: The file to gzip
+            -   Type: string
+            -   Default: None
+        -   output
+            -   Description: The output file
+            -   Type: string
+            -   Default: None
+-   #### command.targzip
+    -   Description: Gzip and tar a directory
+    -   Params:
+        -   directory
+            -   Description: The directory to tar
+            -   Type: string
+            -   Default: None
+        -   output
+            -   Description: The output file
+            -   Type: string
+            -   Default: None

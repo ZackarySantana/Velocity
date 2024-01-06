@@ -41,8 +41,10 @@ Velocity starts in the 'velocity.yml' file. This file contains:
     -   Docker images that are used in tests and deployments
 -   [Tests](#tests)
     -   Units of process that can be used in a workflow
--   [Deployments](#deployments)
+-   [Builds](#builds)
     -   The process of building your app
+-   [Deployments](#deployments)
+    -   The process of deploying your app
 -   [Workflows](#workflows)
     -   A series of tests that are ran
 -   [Config](#config)
