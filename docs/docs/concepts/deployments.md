@@ -10,7 +10,7 @@ Deployments can list workflows they depend on passing before running. This can h
 
 The following assumes there is some build called 'app' that outputs a directory called 'dist'.
 
-```yaml
+```yaml title="velocity.yml"
 deployments:
     - name: Deploy to staging
       workflows:

@@ -19,7 +19,7 @@ Tests are a wrapper around a list of commands, there are different tyypes of tes
 
 Tests are defined in the `test` section. Every test has the following structure (an example of the commands as well):
 
-```yaml
+```yaml title="velocity.yml"
 tests:
     - name: Test name
       commands:
@@ -34,13 +34,22 @@ tests:
 
 Here might be the operation definition:
 
-```yaml
-operations:
-    - name: my-operation
+```yaml title="velocity.yml"
+tests:
+    - name: Test name
       commands:
-          - command: npm run lint
-          - command: npm run prechecks
+          - prebuilt: git.clone
+          - command: npm run test
+            working_dir: ./backend #optional
+            env: #optional
+                - NODE_ENV=test
+                - PORT=3000
+          - operation: my-operation
 ```
+
+Here might be the operation definition:
+operations: - name: my-operation
+commands: - command: npm run lint - command: npm run prechecks
 
 ## All commands
 
@@ -222,3 +231,7 @@ Prebuilt commands are separated in to packages.
             -   Description: The output file
             -   Type: string
             -   Default: None
+
+```
+
+```

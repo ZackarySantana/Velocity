@@ -8,7 +8,7 @@ Images are self-labeled docker images that are used in [workflows](./workflows),
 
 You can optionally change the docker registry that is pulled from, by default it is `docker.io`. View the [configuration sectiion](./config) for more information.
 
-```yaml
+```yaml title="velocity.yml"
 images:
     - name: node
       image: node:latest

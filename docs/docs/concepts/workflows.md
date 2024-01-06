@@ -6,7 +6,7 @@ sidebar_position: 5
 
 Workflows are sets of images and tests that are ran in any order. They are used in CI pipelines to run tests.
 
-```yaml
+```yaml title="velocity.yml"
 workflows:
     - name: Backwards compatibility tests for Nodejs
       groups:

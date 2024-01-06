@@ -10,7 +10,7 @@ A unit of process that compiles an artifact. This artifact can be a binary, a ta
 
 Builds can be used with the [build](./tests#build) prebuilt command package.
 
-```yaml
+```yaml title="velocity.yml"
 builds:
     - name: app
       build_image: node

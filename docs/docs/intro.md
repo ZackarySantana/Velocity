@@ -23,10 +23,10 @@ Or **try Velocity immediately** with **[velocity-ci.com](https://velocity-ci.com
 -   [Node.js](https://nodejs.org/en/download/) version 18.0 or above
 -   [Golang](https://golang.org/doc/install) version 1.20 or above
 
+### Concepts
+
+Move over to the [concepts](./category/concepts) section to learn more about velocity-ci.
+
 ### Deployment
 
 TODO deployment instructions
-
-### Concepts
-
-Move over to the [concepts](./category/concepts) section to learn more about Velocity.
