@@ -25,8 +25,8 @@ tests:
       commands:
           - prebuilt: git.clone
           - command: npm run test
-            working_dir: ./backend
-            env:
+            working_dir: ./backend #optional
+            env: #optional
                 - NODE_ENV=test
                 - PORT=3000
           - operation: my-operation
