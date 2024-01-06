@@ -6,11 +6,15 @@ sidebar_position: 4
 
 A unit of process that handles a deployment of some kind. This is similar to [workflows](./workflows) but is given different permissions as well as only running a list of commands.
 
+Deployments can list workflows they depend on passing before running. This can help prevent deploying broken code. This is done by listing the workflow names in the `workflows` field. The workflow name is lowercased and spaces are replaced with dashes (e.g. 'Workflow test NAME' -> 'workflow-test-name').
+
 The following assumes there is some build called 'app' that outputs a directory called 'dist'.
 
 ```yaml
 deployments:
     - name: Deploy to staging
+      workflows:
+          - node-test
       commands:
           - prebuilt: build.app
           - prebuilt: command.targzip
