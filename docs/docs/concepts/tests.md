@@ -212,10 +212,10 @@ Prebuilt commands are separated in to packages.
             -   Type: string
             -   Default: None
 -   #### command.targzip
-    -   Description: Gzip and tar a directory
+    -   Description: Tar and gzip a directory
     -   Params:
         -   directory
-            -   Description: The directory to tar
+            -   Description: The directory to tar and then gzip
             -   Type: string
             -   Default: None
         -   output
