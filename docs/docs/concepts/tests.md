@@ -57,7 +57,7 @@ You can include `env`, `working_dir` in every command, they are optional.
 
 ## Shell command
 
-A shell command dependant on the image you provide. Images are provided where you use the tests, view [images](./images) for more information. For example, if the image the test should run on does not include git, then the test will fail to find the command. Prebuilt commands are recommended over shell commands when possible.
+A shell command dependant on the image you provide. For example, if the image the test should run on does not include git, then the test will fail to find the command. Prebuilt commands are recommended over shell commands when possible.
 
 ## Prebuilt command
 

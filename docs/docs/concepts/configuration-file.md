@@ -4,7 +4,7 @@ sidebar_position: 6
 
 # Configuration file
 
-A version-controlled YAML file that holds all the configuration for your project. It defines the tests, images, builds, deployments, workflows, and config.
+A version-controlled YAML file that holds all the configuration for your project. It defines the tests, runtimes, builds, deployments, workflows, and config.
 
 By default, the CLI will look for a velocity.yml in the current working directory. You can specify a different file with the --config flag.
 

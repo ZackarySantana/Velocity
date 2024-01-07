@@ -4,14 +4,14 @@ sidebar_position: 5
 
 # Workflows
 
-Workflows are sets of images and tests that are ran in any order. They are used in CI pipelines to run tests.
+Workflows are sets of runtimes and tests that are ran in any order. They are used in CI pipelines to run tests.
 
 ```yaml title="velocity.yml"
 workflows:
     - name: Backwards compatibility tests for Nodejs
       groups:
           - name: Node
-            images:
+            runtimes:
                 - node-16
                 - node-17
                 - node-18
@@ -22,7 +22,7 @@ workflows:
     - name: Python tests
       groups:
           - name: Python
-            images:
+            runtimes:
                 - python-3.9
             tests:
                 - test-python
