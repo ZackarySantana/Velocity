@@ -31,6 +31,16 @@ type RawTest struct {
 
 type RawTestSection []RawTest
 
+type RawOperation struct {
+	Name     string       `yaml:"name"`
+	Commands []RawCommand `yaml:"commands"`
+
+	WorkingDirectory *string `yaml:"working_dir"`
+	Env              *RawEnv `yaml:"env"`
+}
+
+type RawOperationSection []RawOperation
+
 type RawRuntime struct {
 	Name string `yaml:"name"`
 
@@ -91,6 +101,7 @@ type RawConfigSection struct {
 
 type RawConfiguration struct {
 	TestSection       RawTestSection       `yaml:"tests"`
+	OperationSection  RawOperationSection  `yaml:"operations"`
 	RuntimeSection    RawRuntimeSection    `yaml:"runtimes"`
 	BuildSection      RawBuildSection      `yaml:"builds"`
 	DeploymentSection RawDeploymentSection `yaml:"deployments"`
