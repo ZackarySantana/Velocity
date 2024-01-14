@@ -65,7 +65,7 @@ A command that is built in to the platform. It performs the task as best as poss
 
 ## Operation
 
-A user-defined command that is a list of other commands, these commands can be of any type.
+A user-defined command that is a list of other commands, these commands can be of any type. Refer to [operations](./operations) for more information.
 
 ## Prebuilt commands
 
