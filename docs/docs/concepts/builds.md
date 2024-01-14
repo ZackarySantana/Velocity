@@ -13,7 +13,7 @@ Builds can be used with the [build](./tests#build) prebuilt command package.
 ```yaml title="velocity.yml"
 builds:
     - name: app
-      build_image: node
+      build_runtime: node
       output: dist # specifies what directory or file is the build output
       runtime_image: node # optional. used in build-run
       runtime_cmd: node index.js # optional. used in build-run
@@ -23,7 +23,7 @@ builds:
             env:
                 - NODE_ENV=production
     - name: json
-      build_image: node
+      build_runtime: node
       output: output.csv
       commands:
           - command: npm install
