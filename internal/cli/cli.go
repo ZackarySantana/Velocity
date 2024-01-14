@@ -9,10 +9,12 @@ import (
 
 func Run() error {
 	cli := cli.App{
-		Name:           "velocity",
-		Version:        "0.0.1",
-		Usage:          "manage, run, and report on tests quickly",
-		Commands:       []*cli.Command{},
+		Name:    "velocity",
+		Version: "0.0.1",
+		Usage:   "manage, run, and report on tests quickly",
+		Commands: []*cli.Command{
+			&Validate,
+		},
 		ExitErrHandler: exitErrHandler,
 	}
 	return cli.Run(os.Args)

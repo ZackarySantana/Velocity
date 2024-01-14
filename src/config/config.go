@@ -58,7 +58,7 @@ func (o OperationCommand) Env() *Env {
 func (o OperationCommand) Validate(c Configuration) error {
 	for _, op := range c.OperationSection {
 		if op.Name == o.Operation {
-			return ValidateCommands(c, op.Commands)
+			return ValidateCommandsPartial(c, op.Commands)
 		}
 	}
 	return fmt.Errorf("operation '%s' not found", o.Operation)

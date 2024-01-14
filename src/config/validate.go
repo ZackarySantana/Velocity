@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/zackarysantana/velocity/internal/utils/errors2"
 	"github.com/zackarysantana/velocity/internal/utils/slices"
 )
 
@@ -18,7 +19,7 @@ func ValidateConfiguration(c Configuration) error {
 	errs = append(errs, ValidateWorkflowSectionPartial(c))
 	errs = append(errs, ValidateConfigSectionPartial(c))
 
-	return errors.Join(errs...)
+	return errors2.JoinWithHead(errors.New("validating configuration"), errs...)
 }
 
 func ValidateTestSectionPartial(c Configuration) error {
@@ -28,7 +29,7 @@ func ValidateTestSectionPartial(c Configuration) error {
 		errs = append(errs, ValidateTestPartial(c, t))
 	}
 
-	return errors.Join(errs...)
+	return errors2.JoinWithHead(errors.New("test section"), errs...)
 }
 
 func ValidateTestPartial(c Configuration, t Test) error {
@@ -38,17 +39,38 @@ func ValidateTestPartial(c Configuration, t Test) error {
 		errs = append(errs, ValidateCommandPartial(c, cmd))
 	}
 
-	return errors.Join(errs...)
+	if err := errors2.JoinWithHead(fmt.Errorf("validating test '%s'", t.Name), errs...); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func ValidateCommandsPartial(c Configuration, cmds []Command) error {
+	var errs []error
+	for _, cmd := range cmds {
+		if err := ValidateCommandPartial(c, cmd); err != nil {
+			errs = append(errs, err)
+		}
+	}
+	return errors2.JoinWithHead(errors.New("commands have errors"), errs...)
 }
 
 func ValidateCommandPartial(c Configuration, cmd Command) error {
+	if cmd == nil {
+		return fmt.Errorf("command is nil")
+	}
 	return cmd.Validate(c)
 }
 
 func ValidateOperationSectionPartial(c Configuration) error {
 	var errs []error
 
-	return errors.Join(errs...)
+	for _, o := range c.OperationSection {
+		errs = append(errs, ValidateOperationPartial(c, o))
+	}
+
+	return errors2.JoinWithHead(errors.New("operation section"), errs...)
 }
 
 func ValidateOperationPartial(c Configuration, o Operation) error {
@@ -58,7 +80,11 @@ func ValidateOperationPartial(c Configuration, o Operation) error {
 		errs = append(errs, ValidateCommandPartial(c, cmd))
 	}
 
-	return errors.Join(errs...)
+	if err := errors2.JoinWithHead(fmt.Errorf("validating operation '%s'", o.Name), errs...); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func ValidateRuntimeSectionPartial(c Configuration) error {
@@ -68,11 +94,14 @@ func ValidateRuntimeSectionPartial(c Configuration) error {
 		errs = append(errs, ValidateRuntimePartial(c, r))
 	}
 
-	return errors.Join(errs...)
+	return errors2.JoinWithHead(errors.New("runtime section"), errs...)
 }
 
 func ValidateRuntimePartial(c Configuration, r Runtime) error {
-	return r.Validate(c)
+	if err := r.Validate(c); err != nil {
+		return errors2.JoinWithHead(fmt.Errorf("validating runtime '%s': %w", r.Name(), err), err)
+	}
+	return nil
 }
 
 func ValidateBuildSectionPartial(c Configuration) error {
@@ -82,7 +111,7 @@ func ValidateBuildSectionPartial(c Configuration) error {
 		errs = append(errs, ValidateBuildPartial(c, b))
 	}
 
-	return errors.Join(errs...)
+	return errors2.JoinWithHead(errors.New("build section"), errs...)
 }
 
 func ValidateBuildPartial(c Configuration, b Build) error {
@@ -107,11 +136,13 @@ func ValidateBuildPartial(c Configuration, b Build) error {
 		errs = append(errs, fmt.Errorf("output runtime '%s' not found", *b.OutputRuntime))
 	}
 
-	for _, cmd := range b.Commands {
-		errs = append(errs, ValidateCommandPartial(c, cmd))
+	errs = append(errs, ValidateCommandsPartial(c, b.Commands))
+
+	if err := errors2.JoinWithHead(fmt.Errorf("validating build '%s'", b.Name), errs...); err != nil {
+		return err
 	}
 
-	return errors.Join(errs...)
+	return nil
 }
 
 func ValidateDeploymentSectionPartial(c Configuration) error {
@@ -121,7 +152,7 @@ func ValidateDeploymentSectionPartial(c Configuration) error {
 		errs = append(errs, ValidateDeploymentPartial(c, d))
 	}
 
-	return errors.Join(errs...)
+	return errors2.JoinWithHead(errors.New("deployment section"), errs...)
 }
 
 func ValidateDeploymentPartial(c Configuration, d Deployment) error {
@@ -142,7 +173,11 @@ func ValidateDeploymentPartial(c Configuration, d Deployment) error {
 		errs = append(errs, ValidateCommandPartial(c, cmd))
 	}
 
-	return errors.Join(errs...)
+	if err := errors2.JoinWithHead(fmt.Errorf("validating deployment '%s'", d.Name), errs...); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func ValidateWorkflowSectionPartial(c Configuration) error {
@@ -152,7 +187,7 @@ func ValidateWorkflowSectionPartial(c Configuration) error {
 		errs = append(errs, ValidateWorkflowPartial(c, w))
 	}
 
-	return errors.Join(errs...)
+	return errors2.JoinWithHead(errors.New("workflow section"), errs...)
 }
 
 func ValidateWorkflowPartial(c Configuration, w Workflow) error {
@@ -179,53 +214,15 @@ func ValidateWorkflowPartial(c Configuration, w Workflow) error {
 		errs = append(errs, slices.ProcessSubsetDifference(existingT, g.Tests, processRuntimeNotFound)...)
 	}
 
-	return errors.Join(errs...)
+	if err := errors2.JoinWithHead(fmt.Errorf("validating workflow '%s'", w.Name), errs...); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func ValidateConfigSectionPartial(c Configuration) error {
 	var errs []error
 
-	return errors.Join(errs...)
-}
-
-type Commands []Command
-
-func IsPrebuiltCommand(name string) bool {
-	fmt.Println("IsPrebuiltCommand", name)
-	return true
-}
-
-func (o Operation) Validate(c Configuration) error {
-	return ValidateCommands(c, o.Commands)
-}
-
-func (d *Deployment) Validate(c Configuration) error {
-	var errs []error
-
-	// Validate workflows inside of deployment
-	for _, w := range d.Workflows {
-		found := false
-		for _, w2 := range c.WorkflowSection {
-			if w == w2.Name {
-				found = true
-				break
-			}
-		}
-		if !found {
-			errs = append(errs, fmt.Errorf("workflow '%s' not found", w))
-		}
-	}
-
-	// Validate commands inside of deployment
-	errs = append(errs, ValidateCommands(c, d.Commands))
-
-	return errors.Join(errs...)
-}
-
-func ValidateCommands(c Configuration, cmds []Command) error {
-	var errs []error
-	for _, w := range cmds {
-		errs = append(errs, w.Validate(c))
-	}
-	return errors.Join(errs...)
+	return errors2.JoinWithHead(errors.New("config section"), errs...)
 }

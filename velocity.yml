@@ -4,6 +4,11 @@ tests:
           - prebuilt: git.clone
           - command: go test ./...
 
+    - name: python tests
+      commands:
+          - prebuilt: git.clone
+          - command: go test ./...
+
 runtimes:
     - name: golang
       image: golang:1.21.6
