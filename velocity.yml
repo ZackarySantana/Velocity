@@ -1,0 +1,18 @@
+tests:
+    - name: Golang tests
+      commands:
+          - prebuilt: git.clone
+          - command: go test ./...
+
+runtimes:
+    - name: golang
+      image: golang:1.21.6
+
+workflows:
+    - name: Velocity
+      groups:
+          - name: Golang tests
+            runtimes:
+                - golang
+            tests:
+                - Golang tests

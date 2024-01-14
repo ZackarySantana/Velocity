@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/zackarysantana/velocity/internal/ptr"
+	"github.com/zackarysantana/velocity/internal/utils/ptr"
 	"github.com/zackarysantana/velocity/src/config"
 )
 
@@ -502,6 +502,135 @@ func TestHydrateTest(t *testing.T) {
 			assert := assert.New(t)
 			require := require.New(t)
 			hydrated, err := config.HydrateTest(tt.raw)
+			if tt.err != nil {
+				require.EqualError(err, tt.err.Error())
+				return
+			} else {
+				require.NoError(err)
+			}
+			assert.Equal(tt.hydrated, hydrated)
+		})
+	}
+}
+
+func TestHydrateOperation(t *testing.T) {
+	tests := []struct {
+		name     string
+		raw      config.RawOperation
+		hydrated config.Operation
+		err      error
+	}{
+		{
+			name:     "empty",
+			raw:      config.RawOperation{},
+			hydrated: config.Operation{},
+		},
+		{
+			name: "only name",
+			raw: config.RawOperation{
+				Name: "test",
+			},
+			hydrated: config.Operation{
+				Name: "test",
+			},
+		},
+		{
+			name: "with env",
+			raw: config.RawOperation{
+				Name: "test",
+				Env:  &config.RawEnv{"APP=app"},
+			},
+			hydrated: config.Operation{
+				Name: "test",
+				Env:  &config.Env{"APP": "app"},
+			},
+		},
+		{
+			name: "with wd",
+			raw: config.RawOperation{
+				Name:             "test",
+				WorkingDirectory: ptr.To("/app"),
+			},
+			hydrated: config.Operation{
+				Name:             "test",
+				WorkingDirectory: ptr.To("/app"),
+			},
+		},
+		{
+			name: "with env and wd",
+			raw: config.RawOperation{
+				Name:             "test",
+				Env:              &config.RawEnv{"APP=app"},
+				WorkingDirectory: ptr.To("/app"),
+			},
+			hydrated: config.Operation{
+				Name:             "test",
+				Env:              &config.Env{"APP": "app"},
+				WorkingDirectory: ptr.To("/app"),
+			},
+		},
+		{
+			name: "with commands",
+			raw: config.RawOperation{
+				Name: "test",
+				Commands: []config.RawCommand{
+					{
+						Command: ptr.To("echo 'hello world'"),
+					},
+					{
+						Command: ptr.To("echo '2nd command'"),
+					},
+				},
+			},
+			hydrated: config.Operation{
+				Name: "test",
+				Commands: []config.Command{
+					config.ShellCommand{
+						Command: "echo 'hello world'",
+					},
+					config.ShellCommand{
+						Command: "echo '2nd command'",
+					},
+				},
+			},
+		},
+		{
+			name: "with env, wd, and commands",
+			raw: config.RawOperation{
+				Name:             "test",
+				Env:              &config.RawEnv{"APP=app"},
+				WorkingDirectory: ptr.To("/app"),
+				Commands: []config.RawCommand{
+					{
+						Command: ptr.To("echo 'hello world'"),
+					},
+					{
+						Command: ptr.To("echo '2nd command'"),
+					},
+				},
+			},
+			hydrated: config.Operation{
+				Name:             "test",
+				Env:              &config.Env{"APP": "app"},
+				WorkingDirectory: ptr.To("/app"),
+				Commands: []config.Command{
+					config.ShellCommand{
+						Command: "echo 'hello world'",
+					},
+					config.ShellCommand{
+						Command: "echo '2nd command'",
+					},
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			assert := assert.New(t)
+			require := require.New(t)
+			hydrated, err := config.HydrateOperation(tt.raw)
 			if tt.err != nil {
 				require.EqualError(err, tt.err.Error())
 				return

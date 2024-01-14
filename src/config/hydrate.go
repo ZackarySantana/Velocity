@@ -6,151 +6,6 @@ import (
 	"strings"
 )
 
-type Env map[string]string
-
-type Command interface {
-	WorkingDirectory() *string
-	Env() *Env
-}
-
-type PrebuiltCommand interface {
-	WorkingDirectory() *string
-	Env() *Env
-
-	Prebuilt() string
-	Params() []map[string]string
-}
-
-type ShellCommand struct {
-	WorkingDirectory_ *string
-	Env_              *Env
-
-	Command string
-}
-
-func (s ShellCommand) WorkingDirectory() *string {
-	return s.WorkingDirectory_
-}
-
-func (s ShellCommand) Env() *Env {
-	return s.Env_
-}
-
-type OperationCommand struct {
-	WorkingDirectory_ *string
-	Env_              *Env
-
-	Operation string
-}
-
-func (o OperationCommand) WorkingDirectory() *string {
-	return o.WorkingDirectory_
-}
-
-func (o OperationCommand) Env() *Env {
-	return o.Env_
-}
-
-type Test struct {
-	Name     string
-	Commands []Command
-
-	WorkingDirectory *string
-	Env              *Env
-}
-
-type TestSection []Test
-
-type Runtime interface {
-	Name() string
-	Env() *Env
-}
-
-type DockerRuntime struct {
-	Name_ string
-	Env_  *Env
-
-	Image string
-}
-
-func (r DockerRuntime) Name() string {
-	return r.Name_
-}
-
-func (r DockerRuntime) Env() *Env {
-	return r.Env_
-}
-
-type BareMetalRuntime struct {
-	Name_ string
-	Env_  *Env
-
-	Machine *string
-}
-
-func (r BareMetalRuntime) Name() string {
-	return r.Name_
-}
-
-func (r BareMetalRuntime) Env() *Env {
-	return r.Env_
-}
-
-type RuntimeSection []Runtime
-
-type Build struct {
-	Name         string
-	BuildRuntime string
-	Output       string
-	Commands     []Command
-
-	OutputRuntime *string
-	OutputCmd     *string
-}
-
-type BuildSection []Build
-
-type Deployment struct {
-	Name     string
-	Commands []Command
-
-	Workflows []string
-}
-
-type DeploymentSection []Deployment
-
-type WorkflowGroup struct {
-	Name string
-
-	Runtimes []string
-
-	Tests []string
-}
-
-type Workflow struct {
-	Name string
-
-	Groups []WorkflowGroup
-}
-
-type WorkflowSection []Workflow
-
-type ConfigSection struct {
-	Project string
-
-	Server *string
-	UI     *string
-}
-
-type Configuration struct {
-	TestSection       TestSection
-	RuntimeSection    RuntimeSection
-	BuildSection      BuildSection
-	DeploymentSection DeploymentSection
-	WorkflowSection   WorkflowSection
-	ConfigSection     ConfigSection
-}
-
 func HydrateConfiguration(raw *RawConfiguration) (*Configuration, error) {
 	var errs []error
 	var err error
@@ -158,6 +13,11 @@ func HydrateConfiguration(raw *RawConfiguration) (*Configuration, error) {
 	config := &Configuration{}
 
 	config.TestSection, err = HydrateTestSection(raw.TestSection)
+	if err != nil {
+		errs = append(errs, err)
+	}
+
+	config.OperationSection, err = HydrateOperationSection(raw.OperationSection)
 	if err != nil {
 		errs = append(errs, err)
 	}
@@ -207,8 +67,8 @@ func HydrateTestSection(raw RawTestSection) (TestSection, error) {
 		}
 	}
 
-	if len(errs) > 0 {
-		return nil, errors.Join(errs...)
+	if err := errors.Join(errs...); err != nil {
+		return nil, err
 	}
 
 	return testSection, nil
@@ -233,6 +93,45 @@ func HydrateTest(raw RawTest) (Test, error) {
 	return test, nil
 }
 
+func HydrateOperationSection(raw RawOperationSection) (OperationSection, error) {
+	var errs []error
+	var err error
+
+	operationSection := make(OperationSection, len(raw))
+
+	for i, rawOperation := range raw {
+		operationSection[i], err = HydrateOperation(rawOperation)
+		if err != nil {
+			errs = append(errs, err)
+		}
+	}
+
+	if err := errors.Join(errs...); err != nil {
+		return nil, err
+	}
+
+	return operationSection, nil
+}
+
+func HydrateOperation(raw RawOperation) (Operation, error) {
+	env, err := HydrateEnv(raw.Env)
+	if err != nil {
+		return Operation{}, err
+	}
+
+	operation := Operation{
+		Name:             raw.Name,
+		WorkingDirectory: raw.WorkingDirectory,
+		Env:              env,
+	}
+	operation.Commands, err = HydrateCommands(raw.Commands)
+	if err != nil {
+		return Operation{}, err
+	}
+
+	return operation, nil
+}
+
 func HydrateCommands(raw []RawCommand) ([]Command, error) {
 	if len(raw) == 0 {
 		return nil, nil
@@ -250,8 +149,8 @@ func HydrateCommands(raw []RawCommand) ([]Command, error) {
 		}
 	}
 
-	if len(errs) > 0 {
-		return nil, errors.Join(errs...)
+	if err := errors.Join(errs...); err != nil {
+		return nil, err
 	}
 
 	return commands, nil
@@ -316,8 +215,8 @@ func HydrateRuntimeSection(raw RawRuntimeSection) (RuntimeSection, error) {
 		}
 	}
 
-	if len(errs) > 0 {
-		return nil, errors.Join(errs...)
+	if err := errors.Join(errs...); err != nil {
+		return nil, err
 	}
 
 	return runtimeSection, nil
@@ -361,8 +260,8 @@ func HydrateBuildSection(raw RawBuildSection) (BuildSection, error) {
 		}
 	}
 
-	if len(errs) > 0 {
-		return nil, errors.Join(errs...)
+	if err := errors.Join(errs...); err != nil {
+		return nil, err
 	}
 
 	return buildSection, nil
@@ -401,8 +300,8 @@ func HydrateDeploymentSection(raw RawDeploymentSection) (DeploymentSection, erro
 		}
 	}
 
-	if len(errs) > 0 {
-		return nil, errors.Join(errs...)
+	if err := errors.Join(errs...); err != nil {
+		return nil, err
 	}
 
 	return deploymentSection, nil
@@ -437,8 +336,8 @@ func HydrateWorkflowSection(raw RawWorkflowSection) (WorkflowSection, error) {
 		}
 	}
 
-	if len(errs) > 0 {
-		return nil, errors.Join(errs...)
+	if err := errors.Join(errs...); err != nil {
+		return nil, err
 	}
 
 	return workflowSection, nil
@@ -475,8 +374,8 @@ func HydrateWorkflowGroups(raw []RawWorkflowGroup) ([]WorkflowGroup, error) {
 		}
 	}
 
-	if len(errs) > 0 {
-		return nil, errors.Join(errs...)
+	if err := errors.Join(errs...); err != nil {
+		return nil, err
 	}
 
 	return workflowGroups, nil
@@ -506,8 +405,8 @@ func HydrateEnv(raw *RawEnv) (*Env, error) {
 		envs[name] = value
 	}
 
-	if len(errs) > 0 {
-		return nil, errors.Join(errs...)
+	if err := errors.Join(errs...); err != nil {
+		return nil, err
 	}
 
 	return &envs, nil
