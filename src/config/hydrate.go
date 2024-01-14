@@ -4,13 +4,17 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+
+	"github.com/zackarysantana/velocity/src/config/configuration"
+	"github.com/zackarysantana/velocity/src/env"
+	"github.com/zackarysantana/velocity/src/prebuilt"
 )
 
-func HydrateConfiguration(raw *RawConfiguration) (*Configuration, error) {
+func HydrateConfiguration(raw *RawConfiguration) (*configuration.Configuration, error) {
 	var errs []error
 	var err error
 
-	config := &Configuration{}
+	config := &configuration.Configuration{}
 
 	config.TestSection, err = HydrateTestSection(raw.TestSection)
 	if err != nil {
@@ -54,11 +58,11 @@ func HydrateConfiguration(raw *RawConfiguration) (*Configuration, error) {
 	return config, nil
 }
 
-func HydrateTestSection(raw RawTestSection) (TestSection, error) {
+func HydrateTestSection(raw RawTestSection) (configuration.TestSection, error) {
 	var errs []error
 	var err error
 
-	testSection := make(TestSection, len(raw))
+	testSection := make(configuration.TestSection, len(raw))
 
 	for i, rawTest := range raw {
 		testSection[i], err = HydrateTest(rawTest)
@@ -74,30 +78,30 @@ func HydrateTestSection(raw RawTestSection) (TestSection, error) {
 	return testSection, nil
 }
 
-func HydrateTest(raw RawTest) (Test, error) {
+func HydrateTest(raw RawTest) (configuration.Test, error) {
 	env, err := HydrateEnv(raw.Env)
 	if err != nil {
-		return Test{}, err
+		return configuration.Test{}, err
 	}
 
-	test := Test{
+	test := configuration.Test{
 		Name:             raw.Name,
 		WorkingDirectory: raw.WorkingDirectory,
 		Env:              env,
 	}
 	test.Commands, err = HydrateCommands(raw.Commands)
 	if err != nil {
-		return Test{}, err
+		return configuration.Test{}, err
 	}
 
 	return test, nil
 }
 
-func HydrateOperationSection(raw RawOperationSection) (OperationSection, error) {
+func HydrateOperationSection(raw RawOperationSection) (configuration.OperationSection, error) {
 	var errs []error
 	var err error
 
-	operationSection := make(OperationSection, len(raw))
+	operationSection := make(configuration.OperationSection, len(raw))
 
 	for i, rawOperation := range raw {
 		operationSection[i], err = HydrateOperation(rawOperation)
@@ -113,26 +117,26 @@ func HydrateOperationSection(raw RawOperationSection) (OperationSection, error) 
 	return operationSection, nil
 }
 
-func HydrateOperation(raw RawOperation) (Operation, error) {
+func HydrateOperation(raw RawOperation) (configuration.Operation, error) {
 	env, err := HydrateEnv(raw.Env)
 	if err != nil {
-		return Operation{}, err
+		return configuration.Operation{}, err
 	}
 
-	operation := Operation{
+	operation := configuration.Operation{
 		Name:             raw.Name,
 		WorkingDirectory: raw.WorkingDirectory,
 		Env:              env,
 	}
 	operation.Commands, err = HydrateCommands(raw.Commands)
 	if err != nil {
-		return Operation{}, err
+		return configuration.Operation{}, err
 	}
 
 	return operation, nil
 }
 
-func HydrateCommands(raw []RawCommand) ([]Command, error) {
+func HydrateCommands(raw []RawCommand) ([]configuration.Command, error) {
 	if len(raw) == 0 {
 		return nil, nil
 	}
@@ -140,7 +144,7 @@ func HydrateCommands(raw []RawCommand) ([]Command, error) {
 	var errs []error
 	var err error
 
-	commands := make([]Command, len(raw))
+	commands := make([]configuration.Command, len(raw))
 
 	for i, rawCommand := range raw {
 		commands[i], err = HydrateCommand(rawCommand)
@@ -156,7 +160,7 @@ func HydrateCommands(raw []RawCommand) ([]Command, error) {
 	return commands, nil
 }
 
-func HydrateCommand(raw RawCommand) (Command, error) {
+func HydrateCommand(raw RawCommand) (configuration.Command, error) {
 	if raw.Prebuilt != nil {
 		return HydratePrebuiltCommand(raw)
 	} else if raw.Operation != nil {
@@ -168,45 +172,48 @@ func HydrateCommand(raw RawCommand) (Command, error) {
 	return nil, fmt.Errorf("invalid command: %v", raw)
 }
 
-func HydratePrebuiltCommand(raw RawCommand) (PrebuiltCommand, error) {
-	return nil, nil // TODO: implement
+func HydratePrebuiltCommand(raw RawCommand) (configuration.PrebuiltCommand, error) {
+	if raw.Prebuilt == nil {
+		return nil, fmt.Errorf("invalid command: %v", raw)
+	}
+	return prebuilt.GetPrebuilt(*raw.Prebuilt)
 }
 
-func HydrateOperationCommand(raw RawCommand) (OperationCommand, error) {
+func HydrateOperationCommand(raw RawCommand) (configuration.OperationCommand, error) {
 	if raw.Operation == nil {
-		return OperationCommand{}, fmt.Errorf("invalid command: %v", raw)
+		return configuration.OperationCommand{}, fmt.Errorf("invalid command: %v", raw)
 	}
 	env, err := HydrateEnv(raw.Env)
 	if err != nil {
-		return OperationCommand{}, err
+		return configuration.OperationCommand{}, err
 	}
-	return OperationCommand{
+	return configuration.OperationCommand{
 		WorkingDirectory_: raw.WorkingDirectory,
 		Env_:              env,
 		Operation:         *raw.Operation,
 	}, nil
 }
 
-func HydrateShellCommand(raw RawCommand) (ShellCommand, error) {
+func HydrateShellCommand(raw RawCommand) (configuration.ShellCommand, error) {
 	if raw.Command == nil {
-		return ShellCommand{}, fmt.Errorf("invalid command: %v", raw)
+		return configuration.ShellCommand{}, fmt.Errorf("invalid command: %v", raw)
 	}
 	env, err := HydrateEnv(raw.Env)
 	if err != nil {
-		return ShellCommand{}, err
+		return configuration.ShellCommand{}, err
 	}
-	return ShellCommand{
+	return configuration.ShellCommand{
 		WorkingDirectory_: raw.WorkingDirectory,
 		Env_:              env,
 		Command:           *raw.Command,
 	}, nil
 }
 
-func HydrateRuntimeSection(raw RawRuntimeSection) (RuntimeSection, error) {
+func HydrateRuntimeSection(raw RawRuntimeSection) (configuration.RuntimeSection, error) {
 	var errs []error
 	var err error
 
-	runtimeSection := make(RuntimeSection, len(raw))
+	runtimeSection := make(configuration.RuntimeSection, len(raw))
 
 	for i, rawRuntime := range raw {
 		runtimeSection[i], err = HydrateRuntime(rawRuntime)
@@ -222,21 +229,21 @@ func HydrateRuntimeSection(raw RawRuntimeSection) (RuntimeSection, error) {
 	return runtimeSection, nil
 }
 
-func HydrateRuntime(raw RawRuntime) (Runtime, error) {
+func HydrateRuntime(raw RawRuntime) (configuration.Runtime, error) {
 	env, err := HydrateEnv(raw.Env)
 	if err != nil {
 		return nil, err
 	}
 
 	if raw.Image != nil {
-		return DockerRuntime{
+		return configuration.DockerRuntime{
 			Name_: raw.Name,
 			Env_:  env,
 
 			Image: *raw.Image,
 		}, nil
 	} else if raw.Machine != nil {
-		return BareMetalRuntime{
+		return configuration.BareMetalRuntime{
 			Name_: raw.Name,
 			Env_:  env,
 
@@ -247,11 +254,11 @@ func HydrateRuntime(raw RawRuntime) (Runtime, error) {
 	return nil, fmt.Errorf("invalid runtime: %v", raw)
 }
 
-func HydrateBuildSection(raw RawBuildSection) (BuildSection, error) {
+func HydrateBuildSection(raw RawBuildSection) (configuration.BuildSection, error) {
 	var errs []error
 	var err error
 
-	buildSection := make(BuildSection, len(raw))
+	buildSection := make(configuration.BuildSection, len(raw))
 
 	for i, rawBuild := range raw {
 		buildSection[i], err = HydrateBuild(rawBuild)
@@ -267,10 +274,10 @@ func HydrateBuildSection(raw RawBuildSection) (BuildSection, error) {
 	return buildSection, nil
 }
 
-func HydrateBuild(raw RawBuild) (Build, error) {
+func HydrateBuild(raw RawBuild) (configuration.Build, error) {
 	var err error
 
-	build := Build{
+	build := configuration.Build{
 		Name:         raw.Name,
 		BuildRuntime: raw.BuildRuntime,
 		Output:       raw.Output,
@@ -281,17 +288,17 @@ func HydrateBuild(raw RawBuild) (Build, error) {
 
 	build.Commands, err = HydrateCommands(raw.Commands)
 	if err != nil {
-		return Build{}, err
+		return configuration.Build{}, err
 	}
 
 	return build, nil
 }
 
-func HydrateDeploymentSection(raw RawDeploymentSection) (DeploymentSection, error) {
+func HydrateDeploymentSection(raw RawDeploymentSection) (configuration.DeploymentSection, error) {
 	var errs []error
 	var err error
 
-	deploymentSection := make(DeploymentSection, len(raw))
+	deploymentSection := make(configuration.DeploymentSection, len(raw))
 
 	for i, rawDeployment := range raw {
 		deploymentSection[i], err = HydrateDeployment(rawDeployment)
@@ -307,27 +314,27 @@ func HydrateDeploymentSection(raw RawDeploymentSection) (DeploymentSection, erro
 	return deploymentSection, nil
 }
 
-func HydrateDeployment(raw RawDeployment) (Deployment, error) {
+func HydrateDeployment(raw RawDeployment) (configuration.Deployment, error) {
 	var err error
 
-	deployment := Deployment{
+	deployment := configuration.Deployment{
 		Name:      raw.Name,
 		Workflows: raw.Workflows,
 	}
 
 	deployment.Commands, err = HydrateCommands(raw.Commands)
 	if err != nil {
-		return Deployment{}, err
+		return configuration.Deployment{}, err
 	}
 
 	return deployment, nil
 }
 
-func HydrateWorkflowSection(raw RawWorkflowSection) (WorkflowSection, error) {
+func HydrateWorkflowSection(raw RawWorkflowSection) (configuration.WorkflowSection, error) {
 	var errs []error
 	var err error
 
-	workflowSection := make(WorkflowSection, len(raw))
+	workflowSection := make(configuration.WorkflowSection, len(raw))
 
 	for i, rawWorkflow := range raw {
 		workflowSection[i], err = HydrateWorkflow(rawWorkflow)
@@ -343,29 +350,29 @@ func HydrateWorkflowSection(raw RawWorkflowSection) (WorkflowSection, error) {
 	return workflowSection, nil
 }
 
-func HydrateWorkflow(raw RawWorkflow) (Workflow, error) {
+func HydrateWorkflow(raw RawWorkflow) (configuration.Workflow, error) {
 	var err error
 
-	workflow := Workflow{
+	workflow := configuration.Workflow{
 		Name: raw.Name,
 	}
 
 	workflow.Groups, err = HydrateWorkflowGroups(raw.Groups)
 	if err != nil {
-		return Workflow{}, err
+		return configuration.Workflow{}, err
 	}
 
 	return workflow, nil
 }
 
-func HydrateWorkflowGroups(raw []RawWorkflowGroup) ([]WorkflowGroup, error) {
+func HydrateWorkflowGroups(raw []RawWorkflowGroup) ([]configuration.WorkflowGroup, error) {
 	if len(raw) == 0 {
 		return nil, nil
 	}
 	var errs []error
 	var err error
 
-	workflowGroups := make([]WorkflowGroup, len(raw))
+	workflowGroups := make([]configuration.WorkflowGroup, len(raw))
 
 	for i, rawWorkflowGroup := range raw {
 		workflowGroups[i], err = HydrateWorkflowGroup(rawWorkflowGroup)
@@ -381,20 +388,20 @@ func HydrateWorkflowGroups(raw []RawWorkflowGroup) ([]WorkflowGroup, error) {
 	return workflowGroups, nil
 }
 
-func HydrateWorkflowGroup(raw RawWorkflowGroup) (WorkflowGroup, error) {
-	return WorkflowGroup(raw), nil
+func HydrateWorkflowGroup(raw RawWorkflowGroup) (configuration.WorkflowGroup, error) {
+	return configuration.WorkflowGroup(raw), nil
 }
 
-func HydrateConfigSection(raw RawConfigSection) (ConfigSection, error) {
-	return ConfigSection(raw), nil
+func HydrateConfigSection(raw RawConfigSection) (configuration.ConfigSection, error) {
+	return configuration.ConfigSection(raw), nil
 }
 
-func HydrateEnv(raw *RawEnv) (*Env, error) {
+func HydrateEnv(raw *RawEnv) (*env.Env, error) {
 	if raw == nil {
 		return nil, nil
 	}
 	var errs []error
-	envs := make(Env, len(*raw))
+	envs := make(env.Env, len(*raw))
 
 	for _, rawEnv := range *raw {
 		name, value, err := HydrateEnvLine(rawEnv)

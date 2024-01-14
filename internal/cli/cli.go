@@ -7,13 +7,17 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+type app struct {
+}
+
 func Run() error {
+	app := app{}
 	cli := cli.App{
 		Name:    "velocity",
 		Version: "0.0.1",
 		Usage:   "manage, run, and report on tests quickly",
 		Commands: []*cli.Command{
-			&Validate,
+			CreateValidate(app),
 		},
 		ExitErrHandler: exitErrHandler,
 	}

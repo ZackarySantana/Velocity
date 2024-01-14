@@ -84,7 +84,7 @@ Prebuilt commands are separated in to packages.
         -   branch
             -   Description: The branch to clone
             -   Type: string
-            -   Default: main branch
+            -   Default: current branch
         -   directory
             -   Description: The directory to clone the repository to
             -   Type: string

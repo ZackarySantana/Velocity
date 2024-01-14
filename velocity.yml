@@ -8,6 +8,12 @@ tests:
       commands:
           - prebuilt: git.clone
           - command: go test ./...
+          - operation: testing operations
+
+operations:
+    - name: testing operations
+      commands:
+          - command: echo "testing operations"
 
 runtimes:
     - name: golang

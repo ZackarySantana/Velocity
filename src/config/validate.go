@@ -6,9 +6,10 @@ import (
 
 	"github.com/zackarysantana/velocity/internal/utils/errors2"
 	"github.com/zackarysantana/velocity/internal/utils/slices"
+	"github.com/zackarysantana/velocity/src/config/configuration"
 )
 
-func ValidateConfiguration(c Configuration) error {
+func ValidateConfiguration(c configuration.Configuration) error {
 	var errs []error
 
 	errs = append(errs, ValidateTestSectionPartial(c))
@@ -22,7 +23,7 @@ func ValidateConfiguration(c Configuration) error {
 	return errors2.JoinWithHead(errors.New("validating configuration"), errs...)
 }
 
-func ValidateTestSectionPartial(c Configuration) error {
+func ValidateTestSectionPartial(c configuration.Configuration) error {
 	var errs []error
 
 	for _, t := range c.TestSection {
@@ -32,7 +33,7 @@ func ValidateTestSectionPartial(c Configuration) error {
 	return errors2.JoinWithHead(errors.New("test section"), errs...)
 }
 
-func ValidateTestPartial(c Configuration, t Test) error {
+func ValidateTestPartial(c configuration.Configuration, t configuration.Test) error {
 	var errs []error
 
 	for _, cmd := range t.Commands {
@@ -46,7 +47,7 @@ func ValidateTestPartial(c Configuration, t Test) error {
 	return nil
 }
 
-func ValidateCommandsPartial(c Configuration, cmds []Command) error {
+func ValidateCommandsPartial(c configuration.Configuration, cmds []configuration.Command) error {
 	var errs []error
 	for _, cmd := range cmds {
 		if err := ValidateCommandPartial(c, cmd); err != nil {
@@ -56,14 +57,14 @@ func ValidateCommandsPartial(c Configuration, cmds []Command) error {
 	return errors2.JoinWithHead(errors.New("commands have errors"), errs...)
 }
 
-func ValidateCommandPartial(c Configuration, cmd Command) error {
+func ValidateCommandPartial(c configuration.Configuration, cmd configuration.Command) error {
 	if cmd == nil {
 		return fmt.Errorf("command is nil")
 	}
 	return cmd.Validate(c)
 }
 
-func ValidateOperationSectionPartial(c Configuration) error {
+func ValidateOperationSectionPartial(c configuration.Configuration) error {
 	var errs []error
 
 	for _, o := range c.OperationSection {
@@ -73,7 +74,7 @@ func ValidateOperationSectionPartial(c Configuration) error {
 	return errors2.JoinWithHead(errors.New("operation section"), errs...)
 }
 
-func ValidateOperationPartial(c Configuration, o Operation) error {
+func ValidateOperationPartial(c configuration.Configuration, o configuration.Operation) error {
 	var errs []error
 
 	for _, cmd := range o.Commands {
@@ -87,7 +88,7 @@ func ValidateOperationPartial(c Configuration, o Operation) error {
 	return nil
 }
 
-func ValidateRuntimeSectionPartial(c Configuration) error {
+func ValidateRuntimeSectionPartial(c configuration.Configuration) error {
 	var errs []error
 
 	for _, r := range c.RuntimeSection {
@@ -97,14 +98,14 @@ func ValidateRuntimeSectionPartial(c Configuration) error {
 	return errors2.JoinWithHead(errors.New("runtime section"), errs...)
 }
 
-func ValidateRuntimePartial(c Configuration, r Runtime) error {
+func ValidateRuntimePartial(c configuration.Configuration, r configuration.Runtime) error {
 	if err := r.Validate(c); err != nil {
 		return errors2.JoinWithHead(fmt.Errorf("validating runtime '%s': %w", r.Name(), err), err)
 	}
 	return nil
 }
 
-func ValidateBuildSectionPartial(c Configuration) error {
+func ValidateBuildSectionPartial(c configuration.Configuration) error {
 	var errs []error
 
 	for _, b := range c.BuildSection {
@@ -114,7 +115,7 @@ func ValidateBuildSectionPartial(c Configuration) error {
 	return errors2.JoinWithHead(errors.New("build section"), errs...)
 }
 
-func ValidateBuildPartial(c Configuration, b Build) error {
+func ValidateBuildPartial(c configuration.Configuration, b configuration.Build) error {
 	var errs []error
 
 	foundBuildRuntime := false
@@ -145,7 +146,7 @@ func ValidateBuildPartial(c Configuration, b Build) error {
 	return nil
 }
 
-func ValidateDeploymentSectionPartial(c Configuration) error {
+func ValidateDeploymentSectionPartial(c configuration.Configuration) error {
 	var errs []error
 
 	for _, d := range c.DeploymentSection {
@@ -155,7 +156,7 @@ func ValidateDeploymentSectionPartial(c Configuration) error {
 	return errors2.JoinWithHead(errors.New("deployment section"), errs...)
 }
 
-func ValidateDeploymentPartial(c Configuration, d Deployment) error {
+func ValidateDeploymentPartial(c configuration.Configuration, d configuration.Deployment) error {
 	var errs []error
 
 	existing := make([]string, len(c.WorkflowSection))
@@ -180,7 +181,7 @@ func ValidateDeploymentPartial(c Configuration, d Deployment) error {
 	return nil
 }
 
-func ValidateWorkflowSectionPartial(c Configuration) error {
+func ValidateWorkflowSectionPartial(c configuration.Configuration) error {
 	var errs []error
 
 	for _, w := range c.WorkflowSection {
@@ -190,7 +191,7 @@ func ValidateWorkflowSectionPartial(c Configuration) error {
 	return errors2.JoinWithHead(errors.New("workflow section"), errs...)
 }
 
-func ValidateWorkflowPartial(c Configuration, w Workflow) error {
+func ValidateWorkflowPartial(c configuration.Configuration, w configuration.Workflow) error {
 	var errs []error
 
 	existingR := make([]string, len(c.RuntimeSection))
@@ -221,7 +222,7 @@ func ValidateWorkflowPartial(c Configuration, w Workflow) error {
 	return nil
 }
 
-func ValidateConfigSectionPartial(c Configuration) error {
+func ValidateConfigSectionPartial(c configuration.Configuration) error {
 	var errs []error
 
 	return errors2.JoinWithHead(errors.New("config section"), errs...)

@@ -8,6 +8,6 @@ import (
 
 func main() {
 	if err := cli.Run(); err != nil {
-		fmt.Println("It seems like there was an error. If you think this is a bug, please open an issue at https://github.com/zackarysantana/velocity/issues/new")
+		fmt.Println("It seems like there was an error. If you think this is a bug, please open an issue at https://github.com/zackarysantana/velocity/issues/new/choose")
 	}
 }

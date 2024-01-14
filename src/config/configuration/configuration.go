@@ -1,19 +1,21 @@
-package config
+package configuration
 
-import "fmt"
+import (
+	"fmt"
 
-type Env map[string]string
+	"github.com/zackarysantana/velocity/src/env"
+)
 
 type Command interface {
 	WorkingDirectory() *string
-	Env() *Env
+	Env() *env.Env
 
 	Validate(c Configuration) error
 }
 
 type PrebuiltCommand interface {
 	WorkingDirectory() *string
-	Env() *Env
+	Env() *env.Env
 
 	Prebuilt() string
 	Params() []map[string]string
@@ -23,7 +25,7 @@ type PrebuiltCommand interface {
 
 type ShellCommand struct {
 	WorkingDirectory_ *string
-	Env_              *Env
+	Env_              *env.Env
 
 	Command string
 }
@@ -32,7 +34,7 @@ func (s ShellCommand) WorkingDirectory() *string {
 	return s.WorkingDirectory_
 }
 
-func (s ShellCommand) Env() *Env {
+func (s ShellCommand) Env() *env.Env {
 	return s.Env_
 }
 
@@ -42,7 +44,7 @@ func (s ShellCommand) Validate(c Configuration) error {
 
 type OperationCommand struct {
 	WorkingDirectory_ *string
-	Env_              *Env
+	Env_              *env.Env
 
 	Operation string
 }
@@ -51,14 +53,14 @@ func (o OperationCommand) WorkingDirectory() *string {
 	return o.WorkingDirectory_
 }
 
-func (o OperationCommand) Env() *Env {
+func (o OperationCommand) Env() *env.Env {
 	return o.Env_
 }
 
 func (o OperationCommand) Validate(c Configuration) error {
 	for _, op := range c.OperationSection {
 		if op.Name == o.Operation {
-			return ValidateCommandsPartial(c, op.Commands)
+			return nil
 		}
 	}
 	return fmt.Errorf("operation '%s' not found", o.Operation)
@@ -69,7 +71,7 @@ type Test struct {
 	Commands []Command
 
 	WorkingDirectory *string
-	Env              *Env
+	Env              *env.Env
 }
 
 type TestSection []Test
@@ -79,21 +81,21 @@ type Operation struct {
 	Commands []Command
 
 	WorkingDirectory *string
-	Env              *Env
+	Env              *env.Env
 }
 
 type OperationSection []Operation
 
 type Runtime interface {
 	Name() string
-	Env() *Env
+	Env() *env.Env
 
 	Validate(c Configuration) error
 }
 
 type DockerRuntime struct {
 	Name_ string
-	Env_  *Env
+	Env_  *env.Env
 
 	Image string
 }
@@ -102,7 +104,7 @@ func (r DockerRuntime) Name() string {
 	return r.Name_
 }
 
-func (r DockerRuntime) Env() *Env {
+func (r DockerRuntime) Env() *env.Env {
 	return r.Env_
 }
 
@@ -112,7 +114,7 @@ func (r DockerRuntime) Validate(c Configuration) error {
 
 type BareMetalRuntime struct {
 	Name_ string
-	Env_  *Env
+	Env_  *env.Env
 
 	Machine *string
 }
@@ -121,7 +123,7 @@ func (r BareMetalRuntime) Name() string {
 	return r.Name_
 }
 
-func (r BareMetalRuntime) Env() *Env {
+func (r BareMetalRuntime) Env() *env.Env {
 	return r.Env_
 }
 
