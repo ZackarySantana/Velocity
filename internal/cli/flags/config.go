@@ -4,22 +4,21 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+const ConfigFlagName = "config"
+
 type config struct {
-	sf cli.StringFlag
+	stringFlag
 }
 
 func Config() config {
-	cf := config{
-		sf: cli.StringFlag{
-			Name:    "config",
-			Aliases: []string{"c"},
-			Usage:   "location of your configuration file",
-			Value:   "velocity.yml",
+	return config{
+		stringFlag: stringFlag{
+			StringFlag: cli.StringFlag{
+				Name:    ConfigFlagName,
+				Aliases: []string{"c"},
+				Usage:   "location of your configuration file",
+				Value:   "velocity.yml",
+			},
 		},
 	}
-	return cf
-}
-
-func (cf config) Flag() *cli.StringFlag {
-	return &cf.sf
 }
