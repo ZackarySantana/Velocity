@@ -9,26 +9,28 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/zackarysantana/velocity/internal/utils/ptr"
 	"github.com/zackarysantana/velocity/src/config"
+	"github.com/zackarysantana/velocity/src/config/configuration"
+	"github.com/zackarysantana/velocity/src/env"
 )
 
 func TestHydrateWorkflowGroup(t *testing.T) {
 	tests := []struct {
 		name     string
 		raw      config.RawWorkflowGroup
-		hydrated config.WorkflowGroup
+		hydrated configuration.WorkflowGroup
 		err      error
 	}{
 		{
 			name:     "empty",
 			raw:      config.RawWorkflowGroup{},
-			hydrated: config.WorkflowGroup{},
+			hydrated: configuration.WorkflowGroup{},
 		},
 		{
 			name: "with name",
 			raw: config.RawWorkflowGroup{
 				Name: "node group",
 			},
-			hydrated: config.WorkflowGroup{
+			hydrated: configuration.WorkflowGroup{
 				Name: "node group",
 			},
 		},
@@ -38,7 +40,7 @@ func TestHydrateWorkflowGroup(t *testing.T) {
 				Name:     "node group",
 				Runtimes: []string{"node"},
 			},
-			hydrated: config.WorkflowGroup{
+			hydrated: configuration.WorkflowGroup{
 				Name:     "node group",
 				Runtimes: []string{"node"},
 			},
@@ -49,7 +51,7 @@ func TestHydrateWorkflowGroup(t *testing.T) {
 				Name:  "node group",
 				Tests: []string{"test"},
 			},
-			hydrated: config.WorkflowGroup{
+			hydrated: configuration.WorkflowGroup{
 				Name:  "node group",
 				Tests: []string{"test"},
 			},
@@ -61,7 +63,7 @@ func TestHydrateWorkflowGroup(t *testing.T) {
 				Runtimes: []string{"node"},
 				Tests:    []string{"test"},
 			},
-			hydrated: config.WorkflowGroup{
+			hydrated: configuration.WorkflowGroup{
 				Name:     "node group",
 				Runtimes: []string{"node"},
 				Tests:    []string{"test"},
@@ -90,20 +92,20 @@ func TestHydrateWorkflow(t *testing.T) {
 	tests := []struct {
 		name     string
 		raw      config.RawWorkflow
-		hydrated config.Workflow
+		hydrated configuration.Workflow
 		err      error
 	}{
 		{
 			name:     "empty",
 			raw:      config.RawWorkflow{},
-			hydrated: config.Workflow{},
+			hydrated: configuration.Workflow{},
 		},
 		{
 			name: "with name",
 			raw: config.RawWorkflow{
 				Name: "workflow",
 			},
-			hydrated: config.Workflow{
+			hydrated: configuration.Workflow{
 				Name: "workflow",
 			},
 		},
@@ -119,9 +121,9 @@ func TestHydrateWorkflow(t *testing.T) {
 					},
 				},
 			},
-			hydrated: config.Workflow{
+			hydrated: configuration.Workflow{
 				Name: "workflow",
-				Groups: []config.WorkflowGroup{
+				Groups: []configuration.WorkflowGroup{
 					{
 						Name:     "node group",
 						Runtimes: []string{"node"},
@@ -154,20 +156,20 @@ func TestHydrateDeployment(t *testing.T) {
 	tests := []struct {
 		name     string
 		raw      config.RawDeployment
-		hydrated config.Deployment
+		hydrated configuration.Deployment
 		err      error
 	}{
 		{
 			name:     "empty",
 			raw:      config.RawDeployment{},
-			hydrated: config.Deployment{},
+			hydrated: configuration.Deployment{},
 		},
 		{
 			name: "with required arguments",
 			raw: config.RawDeployment{
 				Name: "deploy",
 			},
-			hydrated: config.Deployment{
+			hydrated: configuration.Deployment{
 				Name: "deploy",
 			},
 		},
@@ -177,7 +179,7 @@ func TestHydrateDeployment(t *testing.T) {
 				Name:      "deploy",
 				Workflows: []string{"workflow"},
 			},
-			hydrated: config.Deployment{
+			hydrated: configuration.Deployment{
 				Name:      "deploy",
 				Workflows: []string{"workflow"},
 			},
@@ -195,13 +197,13 @@ func TestHydrateDeployment(t *testing.T) {
 					},
 				},
 			},
-			hydrated: config.Deployment{
+			hydrated: configuration.Deployment{
 				Name: "deploy",
-				Commands: []config.Command{
-					config.ShellCommand{
+				Commands: []configuration.Command{
+					configuration.ShellCommand{
 						Command: "echo 'hello world'",
 					},
-					config.ShellCommand{
+					configuration.ShellCommand{
 						Command: "echo '2nd command'",
 					},
 				},
@@ -230,13 +232,13 @@ func TestHydrateBuild(t *testing.T) {
 	tests := []struct {
 		name     string
 		raw      config.RawBuild
-		hydrated config.Build
+		hydrated configuration.Build
 		err      error
 	}{
 		{
 			name:     "empty",
 			raw:      config.RawBuild{},
-			hydrated: config.Build{},
+			hydrated: configuration.Build{},
 		},
 		{
 			name: "with required arguments",
@@ -245,7 +247,7 @@ func TestHydrateBuild(t *testing.T) {
 				BuildRuntime: "node",
 				Output:       "dist",
 			},
-			hydrated: config.Build{
+			hydrated: configuration.Build{
 				Name:         "build",
 				BuildRuntime: "node",
 				Output:       "dist",
@@ -260,7 +262,7 @@ func TestHydrateBuild(t *testing.T) {
 				OutputRuntime: ptr.To("node2"),
 				OutputCmd:     ptr.To("npm start"),
 			},
-			hydrated: config.Build{
+			hydrated: configuration.Build{
 				Name:          "build",
 				BuildRuntime:  "node",
 				Output:        "dist",
@@ -283,15 +285,15 @@ func TestHydrateBuild(t *testing.T) {
 					},
 				},
 			},
-			hydrated: config.Build{
+			hydrated: configuration.Build{
 				Name:         "build",
 				BuildRuntime: "node",
 				Output:       "dist",
-				Commands: []config.Command{
-					config.ShellCommand{
+				Commands: []configuration.Command{
+					configuration.ShellCommand{
 						Command: "echo 'hello world'",
 					},
-					config.ShellCommand{
+					configuration.ShellCommand{
 						Command: "echo '2nd command'",
 					},
 				},
@@ -320,7 +322,7 @@ func TestHydrateRuntime(t *testing.T) {
 	tests := []struct {
 		name     string
 		raw      config.RawRuntime
-		hydrated config.Runtime
+		hydrated configuration.Runtime
 		err      error
 	}{
 		{
@@ -334,7 +336,7 @@ func TestHydrateRuntime(t *testing.T) {
 				Name:  "docker",
 				Image: ptr.To("node:latest"),
 			},
-			hydrated: config.DockerRuntime{
+			hydrated: configuration.DockerRuntime{
 				Name_: "docker",
 				Image: "node:latest",
 			},
@@ -345,7 +347,7 @@ func TestHydrateRuntime(t *testing.T) {
 				Name:    "machine",
 				Machine: ptr.To("linux"),
 			},
-			hydrated: config.BareMetalRuntime{
+			hydrated: configuration.BareMetalRuntime{
 				Name_:   "machine",
 				Machine: ptr.To("linux"),
 			},
@@ -357,10 +359,10 @@ func TestHydrateRuntime(t *testing.T) {
 				Image: ptr.To("node:latest"),
 				Env:   &config.RawEnv{"APP=app"},
 			},
-			hydrated: config.DockerRuntime{
+			hydrated: configuration.DockerRuntime{
 				Name_: "docker",
 				Image: "node:latest",
-				Env_: &config.Env{
+				Env_: &env.Env{
 					"APP": "app",
 				},
 			},
@@ -388,20 +390,20 @@ func TestHydrateTest(t *testing.T) {
 	tests := []struct {
 		name     string
 		raw      config.RawTest
-		hydrated config.Test
+		hydrated configuration.Test
 		err      error
 	}{
 		{
 			name:     "empty",
 			raw:      config.RawTest{},
-			hydrated: config.Test{},
+			hydrated: configuration.Test{},
 		},
 		{
 			name: "only name",
 			raw: config.RawTest{
 				Name: "test",
 			},
-			hydrated: config.Test{
+			hydrated: configuration.Test{
 				Name: "test",
 			},
 		},
@@ -411,9 +413,9 @@ func TestHydrateTest(t *testing.T) {
 				Name: "test",
 				Env:  &config.RawEnv{"APP=app"},
 			},
-			hydrated: config.Test{
+			hydrated: configuration.Test{
 				Name: "test",
-				Env:  &config.Env{"APP": "app"},
+				Env:  &env.Env{"APP": "app"},
 			},
 		},
 		{
@@ -422,7 +424,7 @@ func TestHydrateTest(t *testing.T) {
 				Name:             "test",
 				WorkingDirectory: ptr.To("/app"),
 			},
-			hydrated: config.Test{
+			hydrated: configuration.Test{
 				Name:             "test",
 				WorkingDirectory: ptr.To("/app"),
 			},
@@ -434,9 +436,9 @@ func TestHydrateTest(t *testing.T) {
 				Env:              &config.RawEnv{"APP=app"},
 				WorkingDirectory: ptr.To("/app"),
 			},
-			hydrated: config.Test{
+			hydrated: configuration.Test{
 				Name:             "test",
-				Env:              &config.Env{"APP": "app"},
+				Env:              &env.Env{"APP": "app"},
 				WorkingDirectory: ptr.To("/app"),
 			},
 		},
@@ -453,13 +455,13 @@ func TestHydrateTest(t *testing.T) {
 					},
 				},
 			},
-			hydrated: config.Test{
+			hydrated: configuration.Test{
 				Name: "test",
-				Commands: []config.Command{
-					config.ShellCommand{
+				Commands: []configuration.Command{
+					configuration.ShellCommand{
 						Command: "echo 'hello world'",
 					},
-					config.ShellCommand{
+					configuration.ShellCommand{
 						Command: "echo '2nd command'",
 					},
 				},
@@ -480,15 +482,15 @@ func TestHydrateTest(t *testing.T) {
 					},
 				},
 			},
-			hydrated: config.Test{
+			hydrated: configuration.Test{
 				Name:             "test",
-				Env:              &config.Env{"APP": "app"},
+				Env:              &env.Env{"APP": "app"},
 				WorkingDirectory: ptr.To("/app"),
-				Commands: []config.Command{
-					config.ShellCommand{
+				Commands: []configuration.Command{
+					configuration.ShellCommand{
 						Command: "echo 'hello world'",
 					},
-					config.ShellCommand{
+					configuration.ShellCommand{
 						Command: "echo '2nd command'",
 					},
 				},
@@ -517,20 +519,20 @@ func TestHydrateOperation(t *testing.T) {
 	tests := []struct {
 		name     string
 		raw      config.RawOperation
-		hydrated config.Operation
+		hydrated configuration.Operation
 		err      error
 	}{
 		{
 			name:     "empty",
 			raw:      config.RawOperation{},
-			hydrated: config.Operation{},
+			hydrated: configuration.Operation{},
 		},
 		{
 			name: "only name",
 			raw: config.RawOperation{
 				Name: "test",
 			},
-			hydrated: config.Operation{
+			hydrated: configuration.Operation{
 				Name: "test",
 			},
 		},
@@ -540,9 +542,9 @@ func TestHydrateOperation(t *testing.T) {
 				Name: "test",
 				Env:  &config.RawEnv{"APP=app"},
 			},
-			hydrated: config.Operation{
+			hydrated: configuration.Operation{
 				Name: "test",
-				Env:  &config.Env{"APP": "app"},
+				Env:  &env.Env{"APP": "app"},
 			},
 		},
 		{
@@ -551,7 +553,7 @@ func TestHydrateOperation(t *testing.T) {
 				Name:             "test",
 				WorkingDirectory: ptr.To("/app"),
 			},
-			hydrated: config.Operation{
+			hydrated: configuration.Operation{
 				Name:             "test",
 				WorkingDirectory: ptr.To("/app"),
 			},
@@ -563,9 +565,9 @@ func TestHydrateOperation(t *testing.T) {
 				Env:              &config.RawEnv{"APP=app"},
 				WorkingDirectory: ptr.To("/app"),
 			},
-			hydrated: config.Operation{
+			hydrated: configuration.Operation{
 				Name:             "test",
-				Env:              &config.Env{"APP": "app"},
+				Env:              &env.Env{"APP": "app"},
 				WorkingDirectory: ptr.To("/app"),
 			},
 		},
@@ -582,13 +584,13 @@ func TestHydrateOperation(t *testing.T) {
 					},
 				},
 			},
-			hydrated: config.Operation{
+			hydrated: configuration.Operation{
 				Name: "test",
-				Commands: []config.Command{
-					config.ShellCommand{
+				Commands: []configuration.Command{
+					configuration.ShellCommand{
 						Command: "echo 'hello world'",
 					},
-					config.ShellCommand{
+					configuration.ShellCommand{
 						Command: "echo '2nd command'",
 					},
 				},
@@ -609,15 +611,15 @@ func TestHydrateOperation(t *testing.T) {
 					},
 				},
 			},
-			hydrated: config.Operation{
+			hydrated: configuration.Operation{
 				Name:             "test",
-				Env:              &config.Env{"APP": "app"},
+				Env:              &env.Env{"APP": "app"},
 				WorkingDirectory: ptr.To("/app"),
-				Commands: []config.Command{
-					config.ShellCommand{
+				Commands: []configuration.Command{
+					configuration.ShellCommand{
 						Command: "echo 'hello world'",
 					},
-					config.ShellCommand{
+					configuration.ShellCommand{
 						Command: "echo '2nd command'",
 					},
 				},
@@ -646,7 +648,7 @@ func TestHydrateOperationCommand(t *testing.T) {
 	tests := []struct {
 		name     string
 		raw      config.RawCommand
-		hydrated config.OperationCommand
+		hydrated configuration.OperationCommand
 		err      error
 	}{
 		{
@@ -659,7 +661,7 @@ func TestHydrateOperationCommand(t *testing.T) {
 			raw: config.RawCommand{
 				Operation: ptr.To("echo 'hello world'"),
 			},
-			hydrated: config.OperationCommand{
+			hydrated: configuration.OperationCommand{
 				Operation: "echo 'hello world'",
 			},
 		},
@@ -669,9 +671,11 @@ func TestHydrateOperationCommand(t *testing.T) {
 				Operation: ptr.To("echo 'hello world'"),
 				Env:       &config.RawEnv{"APP=app"},
 			},
-			hydrated: config.OperationCommand{
+			hydrated: configuration.OperationCommand{
 				Operation: "echo 'hello world'",
-				Env_:      &config.Env{"APP": "app"},
+				Info: configuration.CommandInfo{
+					Env: &env.Env{"APP": "app"},
+				},
 			},
 		},
 		{
@@ -680,9 +684,11 @@ func TestHydrateOperationCommand(t *testing.T) {
 				Operation:        ptr.To("echo 'hello world'"),
 				WorkingDirectory: ptr.To("/app"),
 			},
-			hydrated: config.OperationCommand{
-				Operation:         "echo 'hello world'",
-				WorkingDirectory_: ptr.To("/app"),
+			hydrated: configuration.OperationCommand{
+				Operation: "echo 'hello world'",
+				Info: configuration.CommandInfo{
+					WorkingDirectory: ptr.To("/app"),
+				},
 			},
 		},
 		{
@@ -692,10 +698,12 @@ func TestHydrateOperationCommand(t *testing.T) {
 				Env:              &config.RawEnv{"APP=app"},
 				WorkingDirectory: ptr.To("/app"),
 			},
-			hydrated: config.OperationCommand{
-				Operation:         "echo 'hello world'",
-				Env_:              &config.Env{"APP": "app"},
-				WorkingDirectory_: ptr.To("/app"),
+			hydrated: configuration.OperationCommand{
+				Operation: "echo 'hello world'",
+				Info: configuration.CommandInfo{
+					Env:              &env.Env{"APP": "app"},
+					WorkingDirectory: ptr.To("/app"),
+				},
 			},
 		},
 	}
@@ -721,7 +729,7 @@ func TestHydrateShellCommand(t *testing.T) {
 	tests := []struct {
 		name     string
 		raw      config.RawCommand
-		hydrated config.ShellCommand
+		hydrated configuration.ShellCommand
 		err      error
 	}{
 		{
@@ -734,7 +742,7 @@ func TestHydrateShellCommand(t *testing.T) {
 			raw: config.RawCommand{
 				Command: ptr.To("echo 'hello world'"),
 			},
-			hydrated: config.ShellCommand{
+			hydrated: configuration.ShellCommand{
 				Command: "echo 'hello world'",
 			},
 		},
@@ -744,9 +752,11 @@ func TestHydrateShellCommand(t *testing.T) {
 				Command: ptr.To("echo 'hello world'"),
 				Env:     &config.RawEnv{"APP=app"},
 			},
-			hydrated: config.ShellCommand{
+			hydrated: configuration.ShellCommand{
 				Command: "echo 'hello world'",
-				Env_:    &config.Env{"APP": "app"},
+				Info: configuration.CommandInfo{
+					Env: &env.Env{"APP": "app"},
+				},
 			},
 		},
 		{
@@ -755,9 +765,11 @@ func TestHydrateShellCommand(t *testing.T) {
 				Command:          ptr.To("echo 'hello world'"),
 				WorkingDirectory: ptr.To("/app"),
 			},
-			hydrated: config.ShellCommand{
-				Command:           "echo 'hello world'",
-				WorkingDirectory_: ptr.To("/app"),
+			hydrated: configuration.ShellCommand{
+				Command: "echo 'hello world'",
+				Info: configuration.CommandInfo{
+					WorkingDirectory: ptr.To("/app"),
+				},
 			},
 		},
 		{
@@ -767,10 +779,12 @@ func TestHydrateShellCommand(t *testing.T) {
 				Env:              &config.RawEnv{"APP=app"},
 				WorkingDirectory: ptr.To("/app"),
 			},
-			hydrated: config.ShellCommand{
-				Command:           "echo 'hello world'",
-				Env_:              &config.Env{"APP": "app"},
-				WorkingDirectory_: ptr.To("/app"),
+			hydrated: configuration.ShellCommand{
+				Command: "echo 'hello world'",
+				Info: configuration.CommandInfo{
+					Env:              &env.Env{"APP": "app"},
+					WorkingDirectory: ptr.To("/app"),
+				},
 			},
 		},
 	}
@@ -796,20 +810,20 @@ func TestHydrateEnv(t *testing.T) {
 	tests := []struct {
 		name     string
 		raw      config.RawEnv
-		hydrated config.Env
+		hydrated env.Env
 		err      error
 	}{
 		{
 			name:     "empty",
 			raw:      config.RawEnv{},
-			hydrated: config.Env{},
+			hydrated: env.Env{},
 		},
 		{
 			name: "with env",
 			raw: config.RawEnv{
 				"APP=app",
 			},
-			hydrated: config.Env{
+			hydrated: env.Env{
 				"APP": "app",
 			},
 		},
@@ -818,7 +832,7 @@ func TestHydrateEnv(t *testing.T) {
 			raw: config.RawEnv{
 				"APP= app app",
 			},
-			hydrated: config.Env{
+			hydrated: env.Env{
 				"APP": " app app",
 			},
 		},
@@ -827,7 +841,7 @@ func TestHydrateEnv(t *testing.T) {
 			raw: config.RawEnv{
 				"APP=\\\"app\\\"",
 			},
-			hydrated: config.Env{
+			hydrated: env.Env{
 				"APP": "\\\"app\\\"",
 			},
 		},
@@ -836,7 +850,7 @@ func TestHydrateEnv(t *testing.T) {
 			raw: config.RawEnv{
 				"APP=\"\\\"app\\\"\"",
 			},
-			hydrated: config.Env{
+			hydrated: env.Env{
 				"APP": "\\\"app\\\"",
 			},
 		},
@@ -846,7 +860,7 @@ func TestHydrateEnv(t *testing.T) {
 				"APP=app",
 				"APP2=app2",
 			},
-			hydrated: config.Env{
+			hydrated: env.Env{
 				"APP":  "app",
 				"APP2": "app2",
 			},
@@ -856,7 +870,7 @@ func TestHydrateEnv(t *testing.T) {
 			raw: config.RawEnv{
 				"APP='app'",
 			},
-			hydrated: config.Env{
+			hydrated: env.Env{
 				"APP": "app",
 			},
 		},
@@ -865,7 +879,7 @@ func TestHydrateEnv(t *testing.T) {
 			raw: config.RawEnv{
 				"APP=\"app\"",
 			},
-			hydrated: config.Env{
+			hydrated: env.Env{
 				"APP": "app",
 			},
 		},
@@ -881,7 +895,7 @@ func TestHydrateEnv(t *testing.T) {
 			raw: config.RawEnv{
 				"APP=",
 			},
-			hydrated: config.Env{
+			hydrated: env.Env{
 				"APP": "",
 			},
 		},

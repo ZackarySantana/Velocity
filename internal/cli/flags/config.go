@@ -11,11 +11,10 @@ type config struct {
 func Config() config {
 	cf := config{
 		sf: cli.StringFlag{
-			Name:      "config",
-			Aliases:   []string{"c"},
-			Usage:     "location of your configuration file",
-			TakesFile: true,
-			Value:     "velocity.yml",
+			Name:    "config",
+			Aliases: []string{"c"},
+			Usage:   "location of your configuration file",
+			Value:   "velocity.yml",
 		},
 	}
 	return cf

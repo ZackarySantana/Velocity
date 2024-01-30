@@ -2,32 +2,26 @@ package prebuilt
 
 import (
 	"github.com/zackarysantana/velocity/src/config/configuration"
-	"github.com/zackarysantana/velocity/src/env"
 )
 
 type GitCloneCommand struct {
-	WorkingDirectory_ *string
-	Env_              *env.Env
+	Info         configuration.CommandInfo
+	PrebuiltInfo PrebuiltInfo
 
 	Prebuilt_ string
 	Params_   []map[string]string
 }
 
-func NewGitClone(wd *string, env *env.Env, params []map[string]string) GitCloneCommand {
+func NewGitClone(info configuration.CommandInfo, prebuiltInfo PrebuiltInfo) configuration.PrebuiltCommand {
 	return GitCloneCommand{
-		WorkingDirectory_: wd,
-		Env_:              env,
-		Prebuilt_:         "git-clone",
-		Params_:           params,
+		Info:         info,
+		PrebuiltInfo: prebuiltInfo,
+		Prebuilt_:    "git-clone",
 	}
 }
 
-func (g GitCloneCommand) WorkingDirectory() *string {
-	return g.WorkingDirectory_
-}
-
-func (g GitCloneCommand) Env() *env.Env {
-	return g.Env_
+func (g GitCloneCommand) GetInfo() configuration.CommandInfo {
+	return g.Info
 }
 
 func (g GitCloneCommand) Prebuilt() string {

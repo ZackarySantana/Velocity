@@ -176,7 +176,27 @@ func HydratePrebuiltCommand(raw RawCommand) (configuration.PrebuiltCommand, erro
 	if raw.Prebuilt == nil {
 		return nil, fmt.Errorf("invalid command: %v", raw)
 	}
-	return prebuilt.GetPrebuilt(*raw.Prebuilt)
+	constructor, err := prebuilt.GetPrebuiltConstructor(*raw.Prebuilt)
+	if err != nil {
+		return nil, fmt.Errorf("invalid prebuilt command '%s': %w", *raw.Prebuilt, err)
+	}
+	env, err := HydrateEnv(raw.Env)
+	if err != nil {
+		return nil, err
+	}
+	params := []map[string]string{}
+	if raw.Params != nil {
+		params = *raw.Params
+	}
+	return constructor(
+		configuration.CommandInfo{
+			WorkingDirectory: raw.WorkingDirectory,
+			Env:              env,
+		},
+		prebuilt.PrebuiltInfo{
+			Params: params,
+		},
+	), err
 }
 
 func HydrateOperationCommand(raw RawCommand) (configuration.OperationCommand, error) {
@@ -188,9 +208,11 @@ func HydrateOperationCommand(raw RawCommand) (configuration.OperationCommand, er
 		return configuration.OperationCommand{}, err
 	}
 	return configuration.OperationCommand{
-		WorkingDirectory_: raw.WorkingDirectory,
-		Env_:              env,
-		Operation:         *raw.Operation,
+		Info: configuration.CommandInfo{
+			WorkingDirectory: raw.WorkingDirectory,
+			Env:              env,
+		},
+		Operation: *raw.Operation,
 	}, nil
 }
 
@@ -203,9 +225,11 @@ func HydrateShellCommand(raw RawCommand) (configuration.ShellCommand, error) {
 		return configuration.ShellCommand{}, err
 	}
 	return configuration.ShellCommand{
-		WorkingDirectory_: raw.WorkingDirectory,
-		Env_:              env,
-		Command:           *raw.Command,
+		Info: configuration.CommandInfo{
+			WorkingDirectory: raw.WorkingDirectory,
+			Env:              env,
+		},
+		Command: *raw.Command,
 	}, nil
 }
 

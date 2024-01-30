@@ -6,36 +6,33 @@ import (
 	"github.com/zackarysantana/velocity/src/env"
 )
 
-type Command interface {
-	WorkingDirectory() *string
-	Env() *env.Env
+type CommandInfo struct {
+	WorkingDirectory *string
+	Env              *env.Env
 
+	Params []map[string]string
+}
+
+type Command interface {
+	GetInfo() CommandInfo
 	Validate(c Configuration) error
 }
 
 type PrebuiltCommand interface {
-	WorkingDirectory() *string
-	Env() *env.Env
+	GetInfo() CommandInfo
+	Validate(c Configuration) error
 
 	Prebuilt() string
-	Params() []map[string]string
-
-	Validate(c Configuration) error
 }
 
 type ShellCommand struct {
-	WorkingDirectory_ *string
-	Env_              *env.Env
+	Info CommandInfo
 
 	Command string
 }
 
-func (s ShellCommand) WorkingDirectory() *string {
-	return s.WorkingDirectory_
-}
-
-func (s ShellCommand) Env() *env.Env {
-	return s.Env_
+func (s ShellCommand) GetInfo() CommandInfo {
+	return s.Info
 }
 
 func (s ShellCommand) Validate(c Configuration) error {
@@ -43,18 +40,13 @@ func (s ShellCommand) Validate(c Configuration) error {
 }
 
 type OperationCommand struct {
-	WorkingDirectory_ *string
-	Env_              *env.Env
+	Info CommandInfo
 
 	Operation string
 }
 
-func (o OperationCommand) WorkingDirectory() *string {
-	return o.WorkingDirectory_
-}
-
-func (o OperationCommand) Env() *env.Env {
-	return o.Env_
+func (o OperationCommand) GetInfo() CommandInfo {
+	return o.Info
 }
 
 func (o OperationCommand) Validate(c Configuration) error {
