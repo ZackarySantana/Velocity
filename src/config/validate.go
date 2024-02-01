@@ -81,11 +81,7 @@ func ValidateOperationPartial(c configuration.Configuration, o configuration.Ope
 		errs = append(errs, ValidateCommandPartial(c, cmd))
 	}
 
-	if err := errors2.JoinWithHead(fmt.Errorf("validating operation '%s'", o.Name), errs...); err != nil {
-		return err
-	}
-
-	return nil
+	return errors2.JoinWithHead(fmt.Errorf("validating operation '%s'", o.Name), errs...)
 }
 
 func ValidateRuntimeSectionPartial(c configuration.Configuration) error {
@@ -99,10 +95,7 @@ func ValidateRuntimeSectionPartial(c configuration.Configuration) error {
 }
 
 func ValidateRuntimePartial(c configuration.Configuration, r configuration.Runtime) error {
-	if err := r.Validate(c); err != nil {
-		return errors2.JoinWithHead(fmt.Errorf("validating runtime '%s': %w", r.Name(), err), err)
-	}
-	return nil
+	return errors2.JoinWithHead(fmt.Errorf("validating runtime '%s'", r.Name()), r.Validate(c))
 }
 
 func ValidateBuildSectionPartial(c configuration.Configuration) error {
@@ -139,11 +132,7 @@ func ValidateBuildPartial(c configuration.Configuration, b configuration.Build) 
 
 	errs = append(errs, ValidateCommandsPartial(c, b.Commands))
 
-	if err := errors2.JoinWithHead(fmt.Errorf("validating build '%s'", b.Name), errs...); err != nil {
-		return err
-	}
-
-	return nil
+	return errors2.JoinWithHead(fmt.Errorf("validating build '%s'", b.Name), errs...)
 }
 
 func ValidateDeploymentSectionPartial(c configuration.Configuration) error {
@@ -174,11 +163,7 @@ func ValidateDeploymentPartial(c configuration.Configuration, d configuration.De
 		errs = append(errs, ValidateCommandPartial(c, cmd))
 	}
 
-	if err := errors2.JoinWithHead(fmt.Errorf("validating deployment '%s'", d.Name), errs...); err != nil {
-		return err
-	}
-
-	return nil
+	return errors2.JoinWithHead(fmt.Errorf("validating deployment '%s'", d.Name), errs...)
 }
 
 func ValidateWorkflowSectionPartial(c configuration.Configuration) error {
@@ -215,11 +200,7 @@ func ValidateWorkflowPartial(c configuration.Configuration, w configuration.Work
 		errs = append(errs, slices.ProcessSubsetDifference(existingT, g.Tests, processRuntimeNotFound)...)
 	}
 
-	if err := errors2.JoinWithHead(fmt.Errorf("validating workflow '%s'", w.Name), errs...); err != nil {
-		return err
-	}
-
-	return nil
+	return errors2.JoinWithHead(fmt.Errorf("validating workflow '%s'", w.Name), errs...)
 }
 
 func ValidateConfigSectionPartial(c configuration.Configuration) error {
