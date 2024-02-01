@@ -1,13 +1,11 @@
 package cli
 
 import (
-	"fmt"
-
 	"github.com/urfave/cli/v2"
 	"github.com/zackarysantana/velocity/internal/cli/flags"
 )
 
-func CreateValidate(app app) *cli.Command {
+func CreateValidate(app *app) *cli.Command {
 	return &cli.Command{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -21,7 +19,7 @@ func CreateValidate(app app) *cli.Command {
 				return err
 			}
 
-			fmt.Printf("Configuration (%s) is valid!\n", ctx.String("config"))
+			app.logf(ctx, "Configuration (%s) is valid!", ctx.String("config"))
 
 			return nil
 		},

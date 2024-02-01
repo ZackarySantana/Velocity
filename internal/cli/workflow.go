@@ -1,13 +1,11 @@
 package cli
 
 import (
-	"fmt"
-
 	"github.com/urfave/cli/v2"
 	"github.com/zackarysantana/velocity/internal/cli/flags"
 )
 
-func CreateWorkflowList(app app) *cli.Command {
+func CreateWorkflowList(app *app) *cli.Command {
 	return &cli.Command{
 		Name:    "list",
 		Aliases: []string{"l"},
@@ -22,11 +20,11 @@ func CreateWorkflowList(app app) *cli.Command {
 			}
 
 			for _, w := range config.WorkflowSection {
-				fmt.Printf("Workflow: %s\n", w.Name)
+				app.logf(ctx, "Workflow: %s", w.Name)
 				for _, g := range w.Groups {
-					fmt.Printf("    Group: %s\n", g.Name)
-					fmt.Printf("        Images: %s\n", g.Runtimes)
-					fmt.Printf("        Tests: %s\n", g.Tests)
+					app.logf(ctx, "    Group: %s", g.Name)
+					app.logf(ctx, "        Images: %s", g.Runtimes)
+					app.logf(ctx, "        Tests: %s", g.Tests)
 				}
 			}
 
@@ -35,7 +33,7 @@ func CreateWorkflowList(app app) *cli.Command {
 	}
 }
 
-func CreateWorkflow(app app) *cli.Command {
+func CreateWorkflow(app *app) *cli.Command {
 	return &cli.Command{
 		Name:    "workflow",
 		Aliases: []string{"w"},
