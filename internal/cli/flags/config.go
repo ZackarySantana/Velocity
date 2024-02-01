@@ -1,7 +1,12 @@
 package flags
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/urfave/cli/v2"
+	configPackage "github.com/zackarysantana/velocity/src/config"
+	"github.com/zackarysantana/velocity/src/config/configuration"
 )
 
 const ConfigFlagName = "config"
@@ -21,4 +26,29 @@ func Config() config {
 			},
 		},
 	}
+}
+
+func ParseConfigFromFlag(ctx *cli.Context) (*configuration.Configuration, error) {
+	fileName := ctx.String(ConfigFlagName)
+	file, err := os.ReadFile(fileName)
+	if err != nil {
+		return nil, fmt.Errorf("there was an error reading your file '%s': %v", fileName, err)
+	}
+
+	raw, err := configPackage.Parse(file)
+	if err != nil {
+		return nil, fmt.Errorf("there was an error parsing your file in to yaml: %v", err)
+	}
+
+	parsed, err := configPackage.HydrateConfiguration(raw)
+	if err != nil {
+		return nil, fmt.Errorf("there was an error hydrating your config: %v", err)
+	}
+
+	err = configPackage.ValidateConfiguration(*parsed)
+	if err != nil {
+		return nil, fmt.Errorf("your configuration is invalid, see:\n %v", err)
+	}
+
+	return parsed, nil
 }
