@@ -10,59 +10,60 @@ const (
 	Error
 )
 
-type logger struct {
+// TODO: change logger in to an interface and implement 'CollectLogger' and 'LiveLogger' types
+type Logger struct {
 	infos    []error
 	warnings []error
 	errs     []error
 }
 
-func NewLogger() logger {
-	return logger{}
+func NewLogger() Logger {
+	return Logger{}
 }
 
-func (l *logger) WrapInfo(info string) {
+func (l *Logger) WrapInfo(info string) {
 	if info == "" {
 		return
 	}
 	l.infos = append(l.infos, errors.New(info))
 }
 
-func (l *logger) Info(info error) {
+func (l *Logger) Info(info error) {
 	if info == nil {
 		return
 	}
 	l.infos = append(l.infos, info)
 }
 
-func (l *logger) WrapWarning(warning string) {
+func (l *Logger) WrapWarning(warning string) {
 	if warning == "" {
 		return
 	}
 	l.warnings = append(l.warnings, errors.New(warning))
 }
 
-func (l *logger) Warning(warning error) {
+func (l *Logger) Warning(warning error) {
 	if warning == nil {
 		return
 	}
 	l.warnings = append(l.warnings, warning)
 }
 
-func (l *logger) WrapError(err string) {
+func (l *Logger) WrapError(err string) {
 	if err == "" {
 		return
 	}
 	l.errs = append(l.errs, errors.New(err))
 }
 
-func (l *logger) Error(err error) {
+func (l *Logger) Error(err error) {
 	if err == nil {
 		return
 	}
 	l.errs = append(l.errs, err)
 }
 
-func (l *logger) Output(level string) error {
+func (l *Logger) Output(level string) error {
 	length := len(l.errs)
 	if level == "warning" || level == "info" {
 		length += len(l.warnings)
@@ -72,18 +73,12 @@ func (l *logger) Output(level string) error {
 	}
 
 	all := make([]error, length)
-	for _, err := range l.errs {
-		all = append(all, err)
-	}
+	all = append(all, l.errs...)
 	if level == "warning" || level == "info" {
-		for _, warning := range l.warnings {
-			all = append(all, warning)
-		}
+		all = append(all, l.warnings...)
 	}
 	if level == "info" {
-		for _, info := range l.infos {
-			all = append(all, info)
-		}
+		all = append(all, l.infos...)
 	}
 
 	return errors.Join(all...)
