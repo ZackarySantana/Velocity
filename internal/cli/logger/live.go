@@ -14,6 +14,13 @@ func NewLiveLogger() *Live {
 	return &Live{}
 }
 
+func (l *Live) Write(p []byte) (int, error) {
+	for _, writer := range l.info {
+		writer.Write(p)
+	}
+	return len(p), nil
+}
+
 func (l *Live) SubscribeInfo(writer io.Writer) {
 	l.info = append(l.info, writer)
 }

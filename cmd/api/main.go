@@ -45,12 +45,17 @@ func main() {
 	l := logger.NewLiveLogger()
 	l.SubscribeError(os.Stdout)
 
-	engine := gin.Default() // TODO: Write custom logger and recovery middleware to replace gin.Default() and use the live logger before
-	engine.Use(middleware.ErrorHandler(l))
+	engine := gin.New()
+	engine.Use(
+		middleware.Logger(l),
+		gin.Recovery(), // Somewhere is writing a status code 400 and then middleware.ErrorHandler is writing a status code 500
+		middleware.ErrorHandler(l),
+	)
 
 	agent := engine.Group("/agent")
 	agent.Use(middleware.AuthWithMongoDBAndUsernameAndPasswordFromJSONBody(*client, db, "users"))
 	agent.GET("/ping", func(c *gin.Context) {
+		fmt.Println("TESTING")
 		c.JSON(200, gin.H{
 			"message": "pong",
 		})

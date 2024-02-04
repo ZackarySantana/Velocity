@@ -12,6 +12,11 @@ func NewCollectLogger() Logger {
 	return &Collect{}
 }
 
+func (l *Collect) Write(p []byte) (int, error) {
+	l.infos = append(l.infos, errors.New(string(p)))
+	return len(p), nil
+}
+
 func (l *Collect) WrapInfo(info string) {
 	if info == "" {
 		return

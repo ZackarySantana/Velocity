@@ -10,6 +10,7 @@ const (
 
 // TODO: change logger in to an interface and implement 'CollectLogger' and 'LiveLogger' types
 type Logger interface {
+	Write([]byte) (int, error)
 	WrapInfo(string)
 	Info(error)
 	WrapWarning(string)

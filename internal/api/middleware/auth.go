@@ -39,8 +39,6 @@ func NewMongoDBAuthorizer(connection mongo.Client, database, collection string) 
 }
 
 func (m MongoDBUsernameAndPasswordAuthorizer) Auth(ctx context.Context, creds UsernameAndPassword) (bool, error) {
-	fmt.Println(creds)
-	fmt.Println("here")
 	test, err := m.c.Database(m.database).Collection(m.collection).Find(ctx, bson.M{"username": creds.Username})
 	if err != nil {
 		return false, fmt.Errorf("could not get entity from database: %w", err)
@@ -65,7 +63,7 @@ type UsernameAndPasswordFromJSONBodyProvider struct{}
 
 func (u UsernameAndPasswordFromJSONBodyProvider) Get(ctx *gin.Context) (UsernameAndPassword, error, error) {
 	var creds UsernameAndPassword
-	err := ctx.BindJSON(creds)
+	err := ctx.ShouldBindJSON(creds)
 	if err != nil {
 		return UsernameAndPassword{}, nil, fmt.Errorf("could not bind json: %w", err)
 	}
@@ -76,50 +74,50 @@ func (u UsernameAndPasswordFromJSONBodyProvider) Get(ctx *gin.Context) (Username
 }
 
 func Auth[T any](authorizer Authorizer[T], provider AuthProvider[T]) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		creds, invalidErr, err := provider.Get(c)
+	return func(ctx *gin.Context) {
+		creds, invalidErr, err := provider.Get(ctx)
 		if err != nil {
-			c.Error(&gin.Error{
+			ctx.Error(&gin.Error{
 				Err:  err,
 				Type: gin.ErrorTypePrivate,
 			})
-			c.Error(&gin.Error{
+			ctx.Error(&gin.Error{
 				Err:  errors.New("could not parse your credentials"),
 				Type: gin.ErrorTypePublic,
 			})
-			c.Abort()
+			ctx.Abort()
 			return
 		}
 		if invalidErr != nil {
-			c.Error(&gin.Error{
+			ctx.Error(&gin.Error{
 				Err:  errors.New("your credentials are invalid"),
 				Type: gin.ErrorTypePublic,
 			})
-			c.Abort()
+			ctx.Abort()
 			return
 		}
-		authed, err := authorizer.Auth(c, creds)
+		authed, err := authorizer.Auth(ctx, creds)
 		if err != nil {
-			c.Error(&gin.Error{
+			ctx.Error(&gin.Error{
 				Err:  err,
 				Type: gin.ErrorTypePrivate,
 			})
-			c.Error(&gin.Error{
+			ctx.Error(&gin.Error{
 				Err:  errors.New("there was an error authenticating you"),
 				Type: gin.ErrorTypePublic,
 			})
-			c.Abort()
+			ctx.Abort()
 			return
 		}
 		if !authed {
-			c.Error(&gin.Error{
+			ctx.Error(&gin.Error{
 				Err:  errors.New("you are not authorized"),
 				Type: gin.ErrorTypePublic,
 			})
-			c.Abort()
+			ctx.Abort()
 			return
 		}
-		c.Next()
+		ctx.Next()
 	}
 }
 
