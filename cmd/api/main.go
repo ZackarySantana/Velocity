@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/zackarysantana/velocity/internal/api/middleware"
+	"github.com/zackarysantana/velocity/internal/cli/logger"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -41,10 +42,14 @@ func main() {
 		log.Fatal(err)
 	}
 
-	engine := gin.Default()
+	l := logger.NewLiveLogger()
+	l.SubscribeError(os.Stdout)
+
+	engine := gin.Default() // TODO: Write custom logger and recovery middleware to replace gin.Default() and use the live logger before
+	engine.Use(middleware.ErrorHandler(l))
 
 	agent := engine.Group("/agent")
-	agent.Use(middleware.AuthWithMongoDBAndUsernameAndPasswordFromBody(*client, db, "users"))
+	agent.Use(middleware.AuthWithMongoDBAndUsernameAndPasswordFromJSONBody(*client, db, "users"))
 	agent.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "pong",

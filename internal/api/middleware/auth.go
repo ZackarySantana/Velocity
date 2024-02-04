@@ -2,8 +2,8 @@ package middleware
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
@@ -16,7 +16,7 @@ type Authorizer[T any] interface {
 }
 
 type AuthProvider[T any] interface {
-	Get(r *http.Request) (T, error, error)
+	Get(r *gin.Context) (T, error, error)
 }
 
 type UsernameAndPassword struct {
@@ -61,34 +61,61 @@ func (m MongoDBUsernameAndPasswordAuthorizer) Auth(ctx context.Context, creds Us
 	return true, nil
 }
 
-type UsernameAndPasswordFromBodyProvider struct{}
+type UsernameAndPasswordFromJSONBodyProvider struct{}
 
-func (u UsernameAndPasswordFromBodyProvider) Get(r *http.Request) (UsernameAndPassword, error, error) {
-	fmt.Println("there")
-	return UsernameAndPassword{}, nil, nil
+func (u UsernameAndPasswordFromJSONBodyProvider) Get(ctx *gin.Context) (UsernameAndPassword, error, error) {
+	var creds UsernameAndPassword
+	err := ctx.BindJSON(creds)
+	if err != nil {
+		return UsernameAndPassword{}, nil, fmt.Errorf("could not bind json: %w", err)
+	}
+	if creds.Username == "" || creds.Password == "" {
+		return UsernameAndPassword{}, fmt.Errorf("username or password is empty"), nil
+	}
+	return creds, nil, nil
 }
 
 func Auth[T any](authorizer Authorizer[T], provider AuthProvider[T]) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		creds, invalidErr, err := provider.Get(c.Request)
+		creds, invalidErr, err := provider.Get(c)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "an error occurred"})
+			c.Error(&gin.Error{
+				Err:  err,
+				Type: gin.ErrorTypePrivate,
+			})
+			c.Error(&gin.Error{
+				Err:  errors.New("could not parse your credentials"),
+				Type: gin.ErrorTypePublic,
+			})
 			c.Abort()
 			return
 		}
 		if invalidErr != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "your credentials are invalid"})
+			c.Error(&gin.Error{
+				Err:  errors.New("your credentials are invalid"),
+				Type: gin.ErrorTypePublic,
+			})
 			c.Abort()
 			return
 		}
 		authed, err := authorizer.Auth(c, creds)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "an error occurred"})
+			c.Error(&gin.Error{
+				Err:  err,
+				Type: gin.ErrorTypePrivate,
+			})
+			c.Error(&gin.Error{
+				Err:  errors.New("there was an error authenticating you"),
+				Type: gin.ErrorTypePublic,
+			})
 			c.Abort()
 			return
 		}
 		if !authed {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "you are not authorized"})
+			c.Error(&gin.Error{
+				Err:  errors.New("you are not authorized"),
+				Type: gin.ErrorTypePublic,
+			})
 			c.Abort()
 			return
 		}
@@ -96,6 +123,6 @@ func Auth[T any](authorizer Authorizer[T], provider AuthProvider[T]) gin.Handler
 	}
 }
 
-func AuthWithMongoDBAndUsernameAndPasswordFromBody(client mongo.Client, database, collection string) gin.HandlerFunc {
-	return Auth[UsernameAndPassword](NewMongoDBAuthorizer(client, database, collection), UsernameAndPasswordFromBodyProvider{})
+func AuthWithMongoDBAndUsernameAndPasswordFromJSONBody(client mongo.Client, database, collection string) gin.HandlerFunc {
+	return Auth[UsernameAndPassword](NewMongoDBAuthorizer(client, database, collection), UsernameAndPasswordFromJSONBodyProvider{})
 }

@@ -9,7 +9,7 @@ import (
 
 // TODO: Should logger be the best way to handle logs here?
 // should every route get access to this logger?
-func ErrorHandler(logger *logger.Logger) gin.HandlerFunc {
+func ErrorHandler(logger logger.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Next()
 
