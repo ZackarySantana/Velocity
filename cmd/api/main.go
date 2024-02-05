@@ -48,7 +48,7 @@ func main() {
 	engine := gin.New()
 	engine.Use(
 		middleware.Logger(l),
-		gin.Recovery(), // Somewhere is writing a status code 400 and then middleware.ErrorHandler is writing a status code 500
+		gin.Recovery(),
 		middleware.ErrorHandler(l),
 	)
 
