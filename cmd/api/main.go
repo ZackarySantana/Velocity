@@ -6,8 +6,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/gin-gonic/gin"
-	"github.com/zackarysantana/velocity/internal/api/middleware"
+	"github.com/zackarysantana/velocity/internal/api"
 	"github.com/zackarysantana/velocity/internal/cli/logger"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -45,22 +44,8 @@ func main() {
 	l := logger.NewLiveLogger()
 	l.SubscribeError(os.Stdout)
 
-	engine := gin.New()
-	engine.Use(
-		middleware.Logger(l),
-		gin.Recovery(),
-		middleware.ErrorHandler(l),
-	)
-
-	agent := engine.Group("/agent")
-	agent.Use(middleware.AuthWithMongoDBAndUsernameAndPasswordFromJSONBody(client, db, "users"))
-	agent.GET("/ping", func(c *gin.Context) {
-		fmt.Println("TESTING")
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
-
+	engine := api.CreateApi(l, client)
+	engine.AddAgentRoutes(db, "agents")
 	engine.Run(":8080")
 }
 
