@@ -17,66 +17,72 @@ func (l *Collect) Write(p []byte) (int, error) {
 	return len(p), nil
 }
 
-func (l *Collect) WrapInfo(info string) {
+func (l *Collect) Info(info []byte) {
+	l.infos = append(l.infos, errors.New(string(infoPrefix)+string(info)))
+	l.warnings = append(l.warnings, errors.New(string(infoPrefix)+string(info)))
+	l.errs = append(l.errs, errors.New(string(infoPrefix)+string(info)))
+}
+
+func (l *Collect) InfoStr(info string) {
 	if info == "" {
 		return
 	}
-	l.infos = append(l.infos, errors.New(info))
+	l.Info([]byte(info))
 }
 
-func (l *Collect) Info(info error) {
+func (l *Collect) InfoErr(info error) {
 	if info == nil {
 		return
 	}
-	l.infos = append(l.infos, info)
+	l.Info([]byte(info.Error()))
 }
 
-func (l *Collect) WrapWarning(warning string) {
+func (l *Collect) Warning(warning []byte) {
+	l.warnings = append(l.warnings, errors.New(string(warningPrefix)+string(warning)))
+	l.errs = append(l.errs, errors.New(string(warningPrefix)+string(warning)))
+}
+
+func (l *Collect) WarningStr(warning string) {
 	if warning == "" {
 		return
 	}
-	l.warnings = append(l.warnings, errors.New(warning))
+	l.Warning([]byte(warning))
 }
 
-func (l *Collect) Warning(warning error) {
+func (l *Collect) WarningErr(warning error) {
 	if warning == nil {
 		return
 	}
-	l.warnings = append(l.warnings, warning)
+	l.Warning([]byte(warning.Error()))
 }
 
-func (l *Collect) WrapError(err string) {
+func (l *Collect) Error(err []byte) {
+	l.errs = append(l.errs, errors.New(string(errorPrefix)+string(err)))
+}
+
+func (l *Collect) ErrorStr(err string) {
 	if err == "" {
 		return
 	}
-	l.errs = append(l.errs, errors.New(err))
+	l.Error([]byte(err))
 }
 
-func (l *Collect) Error(err error) {
+func (l *Collect) ErrorErr(err error) {
 	if err == nil {
 		return
 	}
-	l.errs = append(l.errs, err)
+	l.Error([]byte(err.Error()))
 }
 
-func (l *Collect) Output(level string) error {
-	length := len(l.errs)
-	if level == "warning" || level == "info" {
-		length += len(l.warnings)
+func (l *Collect) Output(level Level) error {
+	if level == Info {
+		return errors.Join(l.infos...)
 	}
-	if level == "info" {
-		length += len(l.infos)
+	if level == Warning {
+		return errors.Join(l.warnings...)
 	}
-
-	all := make([]error, length)
-	all = append(all, l.errs...)
-	if level == "warning" || level == "info" {
-		all = append(all, l.warnings...)
+	if level == Error {
+		return errors.Join(l.errs...)
 	}
-	if level == "info" {
-		all = append(all, l.infos...)
-	}
-
-	return errors.Join(all...)
-
+	return nil
 }
