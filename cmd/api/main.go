@@ -53,7 +53,7 @@ func main() {
 	)
 
 	agent := engine.Group("/agent")
-	agent.Use(middleware.AuthWithMongoDBAndUsernameAndPasswordFromJSONBody(*client, db, "users"))
+	agent.Use(middleware.AuthWithMongoDBAndUsernameAndPasswordFromJSONBody(client, db, "users"))
 	agent.GET("/ping", func(c *gin.Context) {
 		fmt.Println("TESTING")
 		c.JSON(200, gin.H{

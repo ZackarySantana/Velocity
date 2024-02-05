@@ -25,12 +25,12 @@ type UsernameAndPassword struct {
 }
 
 type MongoDBUsernameAndPasswordAuthorizer struct {
-	c          mongo.Client
+	c          *mongo.Client
 	database   string
 	collection string
 }
 
-func NewMongoDBAuthorizer(connection mongo.Client, database, collection string) MongoDBUsernameAndPasswordAuthorizer {
+func NewMongoDBAuthorizer(connection *mongo.Client, database, collection string) MongoDBUsernameAndPasswordAuthorizer {
 	return MongoDBUsernameAndPasswordAuthorizer{
 		c:          connection,
 		database:   database,
@@ -121,6 +121,6 @@ func Auth[T any](authorizer Authorizer[T], provider AuthProvider[T]) gin.Handler
 	}
 }
 
-func AuthWithMongoDBAndUsernameAndPasswordFromJSONBody(client mongo.Client, database, collection string) gin.HandlerFunc {
+func AuthWithMongoDBAndUsernameAndPasswordFromJSONBody(client *mongo.Client, database, collection string) gin.HandlerFunc {
 	return Auth[UsernameAndPassword](NewMongoDBAuthorizer(client, database, collection), UsernameAndPasswordFromJSONBodyProvider{})
 }
