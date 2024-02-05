@@ -59,7 +59,6 @@ func (a *app) exitErrHandler(c *cli.Context, err error) {
 	switch handler := err.(type) {
 	case exitHandler:
 		handler.handle(*a, err)
-		return
 	default:
 		if !a.isSilent(c) {
 			fmt.Println(err)
