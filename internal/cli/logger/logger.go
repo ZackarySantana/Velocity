@@ -15,7 +15,7 @@ var (
 	newLine       = []byte("\n")
 )
 
-// TODO: change logger in to an interface and implement 'CollectLogger' and 'LiveLogger' types
+// Logger is an interface that defines info, warning, and error logging.
 type Logger interface {
 	Write([]byte) (int, error)
 	Info([]byte)
