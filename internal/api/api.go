@@ -41,7 +41,7 @@ func (a *Api) AddUserRoutes() {
 
 func (a *Api) AddAgentRoutes() {
 	agent := a.Group("/agent")
-	agent.Use(middleware.AuthUsernameAndPasswordUserWithMongoDB(a.client))
+	agent.Use(middleware.AuthAgentWithMongoDB(a.client))
 	agent.GET("/ping", func(c *gin.Context) {
 		fmt.Println("TESTING")
 		c.JSON(200, gin.H{

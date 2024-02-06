@@ -11,6 +11,13 @@ type User struct {
 	Email string `bson:"email"`
 }
 
+type Agent struct {
+	Id primitive.ObjectID `bson:"_id,omitempty"`
+
+	AgentSecret string `bson:"agent_secret"`
+}
+
 type Database interface {
 	GetUserByUsername(username string) (User, error)
+	GetAgentBySecret(agentSecret string) (Agent, error)
 }

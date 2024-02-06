@@ -83,3 +83,7 @@ type UsernameAndPasswordCredentials struct {
 	Username string
 	Password string
 }
+
+type Secret struct {
+	Secret string
+}

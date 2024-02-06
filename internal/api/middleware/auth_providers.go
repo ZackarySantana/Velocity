@@ -71,3 +71,15 @@ func (u UsernameAndPasswordFromHeadersProvider) Get(ctx *gin.Context) (UsernameA
 		Password: password,
 	}, nil, nil
 }
+
+type SecretFromHeadersProvider struct{}
+
+func (s SecretFromHeadersProvider) Get(ctx *gin.Context) (Secret, error, error) {
+	secret := ctx.GetHeader("secret")
+	if secret == "" {
+		return Secret{}, fmt.Errorf("secret is empty"), nil
+	}
+	return Secret{
+		Secret: secret,
+	}, nil, nil
+}

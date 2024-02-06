@@ -18,3 +18,7 @@ func NewMongo(client *mongo.Client, db string) Database {
 func (m *Mongo) GetUserByUsername(username string) (User, error) {
 	panic("not implemented")
 }
+
+func (m *Mongo) GetAgentBySecret(agentSecret string) (Agent, error) {
+	panic("not implemented")
+}
