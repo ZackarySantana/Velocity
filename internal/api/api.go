@@ -6,15 +6,17 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/zackarysantana/velocity/internal/api/middleware"
 	"github.com/zackarysantana/velocity/internal/cli/logger"
-	"go.mongodb.org/mongo-driver/mongo"
+	"github.com/zackarysantana/velocity/internal/db"
 )
 
+// Api is the main API server wrapper.
 type Api struct {
 	*gin.Engine
-	client *mongo.Client
+
+	client db.Database
 }
 
-func CreateApi(logger logger.Logger, client *mongo.Client) *Api {
+func CreateApi(logger logger.Logger, client db.Database) *Api {
 	api := Api{
 		Engine: gin.New(),
 		client: client,
@@ -27,9 +29,19 @@ func CreateApi(logger logger.Logger, client *mongo.Client) *Api {
 	return &api
 }
 
-func (a *Api) AddAgentRoutes(db, collection string) {
+func (a *Api) AddUserRoutes() {
+	user := a.Group("/user")
+	user.Use(middleware.AuthUsernameAndPasswordUserWithMongoDB(a.client))
+	user.GET("/ping", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "pong",
+		})
+	})
+}
+
+func (a *Api) AddAgentRoutes() {
 	agent := a.Group("/agent")
-	agent.Use(middleware.AuthWithMongoDBAndUsernameAndPasswordFromJSONBody(a.client, db, collection))
+	agent.Use(middleware.AuthUsernameAndPasswordUserWithMongoDB(a.client))
 	agent.GET("/ping", func(c *gin.Context) {
 		fmt.Println("TESTING")
 		c.JSON(200, gin.H{

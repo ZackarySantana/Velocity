@@ -8,6 +8,7 @@ import (
 	"github.com/zackarysantana/velocity/internal/cli/logger"
 )
 
+// Logger is a middleware that logs all requests.
 func Logger(l logger.Logger) gin.HandlerFunc {
 	return gin.LoggerWithConfig(gin.LoggerConfig{
 		Output: l,

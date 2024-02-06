@@ -10,6 +10,9 @@ import (
 	"github.com/zackarysantana/velocity/internal/cli/logger"
 )
 
+// ErrorHandler catches errors caused by middleware or handlers and logs them.
+// The errors caught are from ctx.Error() calls. If the error is public, it will
+// be returned to the client. If the error is private, it will be logged.
 func ErrorHandler(logger logger.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()

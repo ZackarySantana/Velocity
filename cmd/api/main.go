@@ -8,12 +8,13 @@ import (
 
 	"github.com/zackarysantana/velocity/internal/api"
 	"github.com/zackarysantana/velocity/internal/cli/logger"
+	"github.com/zackarysantana/velocity/internal/db"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func main() {
-	db, err := getEnv("MONGODB_DATABASE")
+	mdb, err := getEnv("MONGODB_DATABASE")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -44,8 +45,9 @@ func main() {
 	l := logger.NewLiveLogger()
 	l.SubscribeError(os.Stdout)
 
-	engine := api.CreateApi(l, client)
-	engine.AddAgentRoutes(db, "agents")
+	engine := api.CreateApi(l, db.NewMongo(client, mdb))
+	engine.AddAgentRoutes()
+	engine.AddUserRoutes()
 	engine.Run(":8080")
 }
 
