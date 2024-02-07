@@ -2,24 +2,10 @@ package db
 
 import (
 	"context"
-
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"errors"
 )
 
-type User struct {
-	Id primitive.ObjectID `bson:"_id,omitempty"`
-
-	Username string `bson:"username"`
-	Password string `bson:"password"`
-
-	Email string `bson:"email"`
-}
-
-type Agent struct {
-	Id primitive.ObjectID `bson:"_id,omitempty"`
-
-	AgentSecret string `bson:"agent_secret"`
-}
+var ErrNoEntity = errors.New("no entity found")
 
 type Database interface {
 	GetUserByUsername(ctx context.Context, username string) (User, error)

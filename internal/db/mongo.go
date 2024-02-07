@@ -31,6 +31,9 @@ func (m *Mongo) agent() *mongo.Collection {
 func (m *Mongo) GetUserByUsername(ctx context.Context, username string) (User, error) {
 	var user User
 	err := m.user().FindOne(ctx, bson.M{"username": username}).Decode(&user)
+	if err == mongo.ErrNoDocuments {
+		return user, ErrNoEntity
+	}
 	return user, err
 }
 

@@ -35,15 +35,6 @@ func (m MultiCredentialProvider[T]) Get(ctx *gin.Context) (T, error, error) {
 	return creds, fmt.Errorf("no providers could parse your credentials"), nil
 }
 
-// CreateUsernameAndPasswordMultiProvider creates a MultiCredentialProvider for
-// all available UsernameAndPasswordCredentials providers.
-func CreateUsernameAndPasswordMultiProvider() CredentialProvider[UsernameAndPasswordCredentials] {
-	return NewMultiCredentialProvider[UsernameAndPasswordCredentials](
-		UsernameAndPasswordFromJSONBodyProvider{},
-		UsernameAndPasswordFromHeadersProvider{},
-	)
-}
-
 type UsernameAndPasswordFromJSONBodyProvider struct{}
 
 func (u UsernameAndPasswordFromJSONBodyProvider) Get(ctx *gin.Context) (UsernameAndPasswordCredentials, error, error) {

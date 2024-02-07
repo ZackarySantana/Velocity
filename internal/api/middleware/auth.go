@@ -68,7 +68,7 @@ func Auth[T any, E any](authorizer Authorizer[T, E], provider CredentialProvider
 		}
 		if !authed {
 			ctx.Error(&gin.Error{
-				Err:  errors.New("you are not authorized"),
+				Err:  errors.New("your credentials could not be authenticated"),
 				Type: gin.ErrorTypePublic,
 			})
 			ctx.Abort()
@@ -79,11 +79,18 @@ func Auth[T any, E any](authorizer Authorizer[T, E], provider CredentialProvider
 	}
 }
 
+func MustGetAuthArtifact[T any](ctx *gin.Context) T {
+	if val, ok := ctx.MustGet("auth_artifact").(T); ok {
+		return val
+	}
+	panic("auth artifact not found in context")
+}
+
 type UsernameAndPasswordCredentials struct {
-	Username string
-	Password string
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 type Secret struct {
-	Secret string
+	Secret string `json:"secret"`
 }
