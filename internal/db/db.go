@@ -1,6 +1,10 @@
 package db
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"context"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type User struct {
 	Id primitive.ObjectID `bson:"_id,omitempty"`
@@ -18,6 +22,6 @@ type Agent struct {
 }
 
 type Database interface {
-	GetUserByUsername(username string) (User, error)
-	GetAgentBySecret(agentSecret string) (Agent, error)
+	GetUserByUsername(ctx context.Context, username string) (User, error)
+	GetAgentBySecret(ctx context.Context, agentSecret string) (Agent, error)
 }

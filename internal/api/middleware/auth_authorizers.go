@@ -9,21 +9,21 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// MongoDBUsernameAndPasswordUserAuthorizer is an Authorizer that uses a MongoDB
-// connection to authenticate users with a username and password.
-type MongoDBUsernameAndPasswordUserAuthorizer struct {
-	c db.Database
+// DatabaseUsernameAndPasswordUserAuthorizer is an Authorizer that uses a Database
+// interface to authenticate users with a username and password.
+type DatabaseUsernameAndPasswordUserAuthorizer struct {
+	d db.Database
 }
 
-func NewMongoDBAuthorizer(connection db.Database) MongoDBUsernameAndPasswordUserAuthorizer {
-	return MongoDBUsernameAndPasswordUserAuthorizer{
-		c: connection,
+func NewDatabaseAuthorizer(connection db.Database) DatabaseUsernameAndPasswordUserAuthorizer {
+	return DatabaseUsernameAndPasswordUserAuthorizer{
+		d: connection,
 	}
 }
 
-func (m MongoDBUsernameAndPasswordUserAuthorizer) Auth(ctx context.Context, creds UsernameAndPasswordCredentials) (db.User, bool, error) {
+func (m DatabaseUsernameAndPasswordUserAuthorizer) Auth(ctx context.Context, creds UsernameAndPasswordCredentials) (db.User, bool, error) {
 	var user db.User
-	user, err := m.c.GetUserByUsername(creds.Username)
+	user, err := m.d.GetUserByUsername(ctx, creds.Username)
 	if err != nil {
 		return user, false, fmt.Errorf("could not get entity from database: %w", err)
 	}
@@ -34,25 +34,25 @@ func (m MongoDBUsernameAndPasswordUserAuthorizer) Auth(ctx context.Context, cred
 }
 
 // AuthUsernameAndPasswordUserWithMongoDB creates a middleware function that
-// authenticates requests with a username and password using a MongoDB connection.
+// authenticates requests with a username and password using a Database interface.
 // The providers is uses are all that are available for UsernameAndPasswordCredentials.
 func AuthUsernameAndPasswordUserWithMongoDB(client db.Database) gin.HandlerFunc {
-	return Auth[UsernameAndPasswordCredentials, db.User](NewMongoDBAuthorizer(client), CreateUsernameAndPasswordMultiProvider())
+	return Auth[UsernameAndPasswordCredentials, db.User](NewDatabaseAuthorizer(client), CreateUsernameAndPasswordMultiProvider())
 }
 
-type MongoDBAgentAuthorizer struct {
-	c db.Database
+type DatabaseAgentAuthorizer struct {
+	d db.Database
 }
 
-func NewMongoDBAgentAuthorizer(connection db.Database) MongoDBAgentAuthorizer {
-	return MongoDBAgentAuthorizer{
-		c: connection,
+func NewDatabaseAgentAuthorizer(connection db.Database) DatabaseAgentAuthorizer {
+	return DatabaseAgentAuthorizer{
+		d: connection,
 	}
 }
 
-func (m MongoDBAgentAuthorizer) Auth(ctx context.Context, creds Secret) (db.Agent, bool, error) {
+func (m DatabaseAgentAuthorizer) Auth(ctx context.Context, creds Secret) (db.Agent, bool, error) {
 	var agent db.Agent
-	agent, err := m.c.GetAgentBySecret(creds.Secret)
+	agent, err := m.d.GetAgentBySecret(ctx, creds.Secret)
 	if err != nil {
 		return agent, false, fmt.Errorf("could not get entity from database: %w", err)
 	}
@@ -63,5 +63,5 @@ func (m MongoDBAgentAuthorizer) Auth(ctx context.Context, creds Secret) (db.Agen
 }
 
 func AuthAgentWithMongoDB(client db.Database) gin.HandlerFunc {
-	return Auth[Secret, db.Agent](NewMongoDBAgentAuthorizer(client), SecretFromHeadersProvider{})
+	return Auth[Secret, db.Agent](NewDatabaseAgentAuthorizer(client), SecretFromHeadersProvider{})
 }
