@@ -133,7 +133,6 @@ func (a *Api) ApplyIndexes(ctx *gin.Context) {
 			Err:  err,
 			Type: gin.ErrorTypePrivate,
 		})
-		fmt.Println("Testing", err)
 	}
 
 	ctx.JSON(200, gin.H{
