@@ -16,7 +16,7 @@ func (a *Api) AddAdminRoutes() {
 	admin.Use(middleware.AuthUsernameAndPasswordUserWithMongoDB(a.db), middleware.OnlySuperUsers)
 
 	admin.POST("/user/create", a.CreateUser)
-	admin.GET("/indexes/apply", a.CreateUser)
+	admin.GET("/indexes/apply", a.ApplyIndexes)
 }
 
 type CreateUserRequest struct {
