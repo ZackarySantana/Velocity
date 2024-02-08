@@ -9,6 +9,7 @@ import (
 	"github.com/zackarysantana/velocity/internal/api"
 	"github.com/zackarysantana/velocity/internal/cli/logger"
 	"github.com/zackarysantana/velocity/internal/db"
+	"github.com/zackarysantana/velocity/internal/event"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -45,7 +46,7 @@ func main() {
 	l := logger.NewLiveLogger()
 	l.SubscribeError(os.Stdout)
 
-	engine := api.CreateApi(l, db.NewMongo(client, mdb))
+	engine := api.CreateApi(l, db.NewMongo(client, mdb), event.NewMongo(client, mdb))
 	engine.AddAgentRoutes()
 	engine.AddUserRoutes()
 	engine.AddAdminRoutes()

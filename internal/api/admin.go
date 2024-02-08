@@ -8,6 +8,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/zackarysantana/velocity/internal/api/middleware"
 	"github.com/zackarysantana/velocity/internal/db"
+	"github.com/zackarysantana/velocity/internal/event"
+	"github.com/zackarysantana/velocity/internal/event/meta"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -53,6 +55,7 @@ func (c *CreateUserRequest) Validate() error {
 	return nil
 }
 
+// POST /admin/user/create
 func (a *Api) CreateUser(ctx *gin.Context) {
 	var req CreateUserRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -104,6 +107,7 @@ func (a *Api) CreateUser(ctx *gin.Context) {
 	})
 }
 
+// GET /admin/indexes/apply
 func (a *Api) ApplyIndexes(ctx *gin.Context) {
 	err := a.db.ApplyIndexes(ctx)
 	if err != nil {
@@ -117,6 +121,19 @@ func (a *Api) ApplyIndexes(ctx *gin.Context) {
 		})
 		ctx.Abort()
 		return
+	}
+
+	user := middleware.MustGetAuthArtifact[db.User](ctx)
+	err = a.es.SendEvent(ctx, event.Event{
+		EventType: event.EventTypeIndexesApplied,
+		Metadata:  meta.CreateApplyIndexes(user),
+	})
+	if err != nil {
+		ctx.Error(&gin.Error{
+			Err:  err,
+			Type: gin.ErrorTypePrivate,
+		})
+		fmt.Println("Testing", err)
 	}
 
 	ctx.JSON(200, gin.H{

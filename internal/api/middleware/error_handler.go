@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"fmt"
-	"net/http"
 	"strings"
 	"time"
 
@@ -22,7 +21,7 @@ func ErrorHandler(logger logger.Logger) gin.HandlerFunc {
 		if len(c.Errors) > 0 {
 			errMsg := ""
 			privateErrLog := []string{}
-			code := http.StatusInternalServerError
+			code := c.Writer.Status()
 			for _, err := range c.Errors {
 				if err.Type == gin.ErrorTypePublic {
 					errMsg += err.Error()
@@ -35,11 +34,9 @@ func ErrorHandler(logger logger.Logger) gin.HandlerFunc {
 				}
 			}
 
-			if errMsg == "" {
-				errMsg = "an error occurred"
+			if errMsg != "" {
+				c.AbortWithStatusJSON(code, gin.H{"error": errMsg})
 			}
-
-			c.AbortWithStatusJSON(code, gin.H{"error": errMsg})
 
 			if len(privateErrLog) > 0 {
 				end := time.Now()
