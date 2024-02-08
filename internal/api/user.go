@@ -13,7 +13,4 @@ func (a *Api) AddUserRoutes() {
 			"message": "pong",
 		})
 	})
-
-	superUser := user.Group("", middleware.OnlySuperUsers)
-	superUser.POST("/create", a.CreateUser)
 }
