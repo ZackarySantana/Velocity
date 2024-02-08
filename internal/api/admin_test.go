@@ -14,6 +14,7 @@ import (
 	"github.com/zackarysantana/velocity/internal/api"
 	"github.com/zackarysantana/velocity/internal/cli/logger"
 	"github.com/zackarysantana/velocity/internal/db"
+	"github.com/zackarysantana/velocity/internal/event"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -151,7 +152,8 @@ func TestCreateUser(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	d, err := db.NewMockWithUsers()
 	require.NoError(t, err)
-	a := api.CreateApi(logger.NewCollectLogger(), d)
+	es := event.NewMock()
+	a := api.CreateApi(logger.NewCollectLogger(), d, es)
 	a.AddAdminRoutes()
 
 	tests := []struct {

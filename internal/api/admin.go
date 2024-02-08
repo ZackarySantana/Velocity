@@ -8,8 +8,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/zackarysantana/velocity/internal/api/middleware"
 	"github.com/zackarysantana/velocity/internal/db"
-	"github.com/zackarysantana/velocity/internal/event"
-	"github.com/zackarysantana/velocity/internal/event/meta"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -123,18 +121,7 @@ func (a *Api) ApplyIndexes(ctx *gin.Context) {
 		return
 	}
 
-	user := middleware.MustGetAuthArtifact[db.User](ctx)
-	err = a.es.SendEvent(ctx, event.Event{
-		EventType: event.EventTypeIndexesApplied,
-		Metadata:  meta.CreateApplyIndexes(user),
-	})
-	if err != nil {
-		ctx.Error(&gin.Error{
-			Err:  err,
-			Type: gin.ErrorTypePrivate,
-		})
-	}
-
+	a.SendIndexesAppliedEvent(ctx)
 	ctx.JSON(200, gin.H{
 		"message": "indexes applied",
 	})
