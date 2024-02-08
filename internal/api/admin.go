@@ -16,6 +16,7 @@ func (a *Api) AddAdminRoutes() {
 	admin.Use(middleware.AuthUsernameAndPasswordUserWithMongoDB(a.db), middleware.OnlySuperUsers)
 
 	admin.POST("/user/create", a.CreateUser)
+	admin.GET("/indexes/apply", a.CreateUser)
 }
 
 type CreateUserRequest struct {
@@ -100,5 +101,25 @@ func (a *Api) CreateUser(ctx *gin.Context) {
 	ctx.JSON(200, gin.H{
 		"user_id": user.Id.Hex(),
 		"message": "user created",
+	})
+}
+
+func (a *Api) ApplyIndexes(ctx *gin.Context) {
+	err := a.db.ApplyIndexes(ctx)
+	if err != nil {
+		ctx.Error(&gin.Error{
+			Err:  err,
+			Type: gin.ErrorTypePrivate,
+		})
+		ctx.Error(&gin.Error{
+			Err:  fmt.Errorf("error applying indexes: %v", err.Error()),
+			Type: gin.ErrorTypePublic,
+		})
+		ctx.Abort()
+		return
+	}
+
+	ctx.JSON(200, gin.H{
+		"message": "indexes applied",
 	})
 }

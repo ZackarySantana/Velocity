@@ -66,3 +66,7 @@ func (m *Mock) CreateUser(ctx context.Context, user User) (User, error) {
 func (m *Mock) GetAgentBySecret(ctx context.Context, agentSecret string) (Agent, error) {
 	return Agent{}, nil
 }
+
+func (m *Mock) ApplyIndexes(ctx context.Context) error {
+	return nil
+}
