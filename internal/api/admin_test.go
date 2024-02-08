@@ -152,7 +152,7 @@ func TestCreateUser(t *testing.T) {
 	d, err := db.NewMockWithUsers()
 	require.NoError(t, err)
 	a := api.CreateApi(logger.NewCollectLogger(), d)
-	a.AddUserRoutes()
+	a.AddAdminRoutes()
 
 	tests := []struct {
 		name       string

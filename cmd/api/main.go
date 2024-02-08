@@ -48,6 +48,7 @@ func main() {
 	engine := api.CreateApi(l, db.NewMongo(client, mdb))
 	engine.AddAgentRoutes()
 	engine.AddUserRoutes()
+	engine.AddAdminRoutes()
 	engine.Run(":8080")
 }
 
