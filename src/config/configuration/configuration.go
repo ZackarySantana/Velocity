@@ -150,8 +150,7 @@ type WorkflowGroup struct {
 	Name string
 
 	Runtimes []string
-
-	Tests []string
+	Tests    []string
 }
 
 type Workflow struct {

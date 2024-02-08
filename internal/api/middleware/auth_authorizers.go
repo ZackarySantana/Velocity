@@ -36,9 +36,6 @@ func (m DatabaseUsernameAndPasswordUserAuthorizer) Auth(ctx context.Context, cre
 	return user, true, nil
 }
 
-// curl command with username and password in body
-// curl -X GET http://localhost:8080/user/ping -d '{"username":"test","password":"password"}' -H "Content-Type: application/json"
-
 // AuthUsernameAndPasswordUserWithMongoDB creates a middleware function that
 // authenticates requests with a username and password using a Database interface.
 // The providers is uses are all that are available for UsernameAndPasswordCredentials.

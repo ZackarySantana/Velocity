@@ -11,13 +11,13 @@ import (
 type Api struct {
 	*gin.Engine
 
-	client db.Database
+	db db.Database
 }
 
-func CreateApi(logger logger.Logger, client db.Database) *Api {
+func CreateApi(logger logger.Logger, db db.Database) *Api {
 	api := Api{
 		Engine: gin.New(),
-		client: client,
+		db:     db,
 	}
 	api.Use(
 		middleware.Logger(logger),

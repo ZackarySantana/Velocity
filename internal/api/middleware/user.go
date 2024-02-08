@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"errors"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/zackarysantana/velocity/internal/db"
@@ -13,7 +14,7 @@ func OnlySuperUsers(ctx *gin.Context) {
 		ctx.Error(&gin.Error{
 			Err:  errors.New("user is not a super user"),
 			Type: gin.ErrorTypePublic,
-			Meta: 401,
+			Meta: http.StatusUnauthorized,
 		})
 		ctx.Abort()
 		return
