@@ -6,7 +6,6 @@ import (
 	"github.com/zackarysantana/velocity/internal/cli/logger"
 	"github.com/zackarysantana/velocity/internal/db"
 	"github.com/zackarysantana/velocity/internal/event"
-	"github.com/zackarysantana/velocity/internal/event/meta"
 )
 
 // Api is the main API server wrapper.
@@ -33,10 +32,7 @@ func CreateApi(logger logger.Logger, db db.Database, es event.EventSender) *Api 
 
 func (a *Api) SendIndexesAppliedEvent(ctx *gin.Context) {
 	user := middleware.MustGetAuthArtifact[db.User](ctx)
-	err := a.es.SendEvent(ctx, event.Event{
-		EventType: event.EventTypeIndexesApplied,
-		Metadata:  meta.CreateApplyIndexes(user),
-	})
+	err := a.es.SendUserCreated(ctx, user)
 	if err != nil {
 		ctx.Error(&gin.Error{
 			Err:  err,
