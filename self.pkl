@@ -11,6 +11,8 @@ tests {
             }
             request.create(new request.Request {
                 method = "get"
+                body = "testing"
+                url = "http://localhost:8080"
             })
         }
     }
