@@ -1,3 +1,7 @@
+/// Used for some type of purpose. 
+@ModuleInfo { minPklVersion = "0.0.1" } 
+module Velocity 
+
 import "primitives/command.pkl"
 import "constructs/test.pkl"
 
