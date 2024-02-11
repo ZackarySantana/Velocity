@@ -32,7 +32,7 @@ workflows {
                 }
                 tests {
                     "Golang tests"
-                    "non" // uncomment to get invalid test error
+                    // "non" // uncomment to get invalid test error
                 }
             }
         }
