@@ -1,5 +1,6 @@
 import "../primitives/command.pkl"
 
 class Test {
+    name: String
     commands: Listing<command.Command>
 }

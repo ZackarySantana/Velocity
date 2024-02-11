@@ -1,0 +1,13 @@
+class WorkflowGroup {
+    name: String
+    runtimes: Listing<String>
+    tests: Listing<String>
+}
+
+class Workflow {
+    name: String
+    groups: Listing<WorkflowGroup>
+
+    function getRuntimeNames(): List<String> = this.groups.toList().flatMap((g) -> g.runtimes.toList())
+    function getTestNames(): List<String> = this.groups.toList().flatMap((g) -> g.tests.toList())
+}

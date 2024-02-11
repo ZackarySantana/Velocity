@@ -1,21 +1,40 @@
 amends "pkl/velocity.pkl"
 import "pkl/prebuilts/git.pkl"
-import "pkl/prebuilts/request.pkl"
 
 tests {
-    ["Golang tests"] {
+    new {
+        name = "Golang tests"
         commands {
             git.clone
-            request.create(
-                new request.Request {
-                    method = "get"
-                    body = "testing"
-                    url = "http://localhost:8080"
-                },
-                new request.Response {
-                    code = 200
+            new ShellCommand {
+                command = "go test ./..."
+            }
+        }
+    }
+}
+
+runtimes {
+    new DockerRuntime {
+        name = "golang"
+        image = "golang:1.14"
+    }
+}
+
+workflows {
+    new Workflow {
+        name = "Velocity"
+        groups {
+            new WorkflowGroup {
+                name = "Golang tests"
+                runtimes {
+                    "golang"
+                    // "python" // Uncomment to get invalid runtime error
                 }
-            )
+                tests {
+                    "Golang tests"
+                    "non" // uncomment to get invalid test error
+                }
+            }
         }
     }
 }

@@ -1,0 +1,13 @@
+abstract class BaseRuntime {
+    name: String
+}
+
+class DockerRuntime extends BaseRuntime {
+    image: String
+}
+
+class MachineRuntime extends BaseRuntime {
+    machine: String
+}
+
+typealias Runtime = DockerRuntime|MachineRuntime
