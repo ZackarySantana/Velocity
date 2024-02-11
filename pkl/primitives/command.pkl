@@ -5,7 +5,7 @@ abstract class BaseCommand {
 
 class PrebuiltCommand extends BaseCommand {
     prebuilt: String
-    params: Mapping<String, String>
+    params: Mapping<String, Any>
 }
 
 class ShellCommand extends BaseCommand {
