@@ -2,22 +2,28 @@ import "../primitives/command.pkl"
 
 typealias Method = "get"|"post"|"put"|"delete"
 
-class Request {
-    /// The HTTP method to use
-    method: Method
-    /// The URL to send the request to
-    url: String
-    body: String
-    timeout: Int = 60000
-    headers: Mapping<String, String>
+class Response {
+    body: String?
+    code: Int
 }
 
-function create(request: Request) = new command.PrebuiltCommand {
+class Request {
+    method: Method
+    url: String
+
+    body: String?
+    timeout: Int?
+    headers: Mapping<String, String>?
+}
+
+// Makes a request to 
+function create(request: Request, response: Response) = new command.PrebuiltCommand {
     prebuilt = "request.\(request.method)"
     params {
         ["body"] = request.body
         ["headers"] = request.headers
         ["url"] = request.url
         ["timeout"] = request.timeout
+        ["response"] = response
     }
 }

@@ -1,11 +1,11 @@
 abstract class BaseCommand {
-    working_directory: String = ""
-    env: Mapping<String, String>
+    working_directory: String?
+    env: Mapping<String, String>?
 }
 
 class PrebuiltCommand extends BaseCommand {
     prebuilt: String
-    params: Mapping<String, Any>
+    params: Mapping<String, Any>?
 }
 
 class ShellCommand extends BaseCommand {
