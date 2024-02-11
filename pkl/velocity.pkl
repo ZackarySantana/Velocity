@@ -1,0 +1,16 @@
+import "primitives/command.pkl"
+import "constructs/test.pkl"
+
+// Command
+typealias PrebuiltCommand = command.PrebuiltCommand
+typealias ShellCommand = command.ShellCommand
+typealias OperationCommand = command.OperationCommand
+typealias Command = command.Command
+
+// Test
+typealias Test = test.Test
+
+// Etc
+
+// Sections
+tests: Mapping<String, Test>

@@ -1,0 +1,5 @@
+import "../primitives/command.pkl"
+
+class Test {
+    commands: Listing<command.Command>
+}

@@ -1,0 +1,17 @@
+amends "pkl/velocity.pkl"
+import "pkl/prebuilts/git.pkl"
+import "pkl/prebuilts/request.pkl"
+
+tests {
+    ["Golang tests"] {
+        commands {
+            git.clone
+            new ShellCommand {
+                command = "echo 'Test test'"
+            }
+            request.create(new request.Request {
+                method = "get"
+            })
+        }
+    }
+}

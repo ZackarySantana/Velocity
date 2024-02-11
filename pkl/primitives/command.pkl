@@ -1,0 +1,19 @@
+abstract class BaseCommand {
+    working_directory: String = ""
+    env: Mapping<String, String>
+}
+
+class PrebuiltCommand extends BaseCommand {
+    prebuilt: String
+    params: Mapping<String, String>
+}
+
+class ShellCommand extends BaseCommand {
+    command: String
+}
+
+class OperationCommand extends BaseCommand {
+    operation: String
+}
+
+typealias Command = PrebuiltCommand|ShellCommand|OperationCommand

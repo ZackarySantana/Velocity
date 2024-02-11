@@ -1,0 +1,14 @@
+import "../primitives/command.pkl"
+
+typealias Method = "get"|"post"|"put"|"delete"
+
+class Request {
+    method: Method
+    body: String
+    headers: Mapping<String, String>
+}
+
+function create(request: Request) = new command.PrebuiltCommand {
+    prebuilt = "request.\(request.method)"
+    // TODO: body, headers, and other parameters
+}

@@ -1,0 +1,5 @@
+import "../primitives/command.pkl"
+
+clone = new command.PrebuiltCommand {
+    prebuilt = "git.clone"
+}
