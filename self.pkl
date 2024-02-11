@@ -6,14 +6,16 @@ tests {
     ["Golang tests"] {
         commands {
             git.clone
-            new ShellCommand {
-                command = "echo 'Test test'"
-            }
-            request.create(new request.Request {
-                method = "get"
-                body = "testing"
-                url = "http://localhost:8080"
-            })
+            request.create(
+                new request.Request {
+                    method = "get"
+                    body = "testing"
+                    url = "http://localhost:8080"
+                },
+                new request.Response {
+                    code = 200
+                }
+            )
         }
     }
 }
