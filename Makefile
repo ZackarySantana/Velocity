@@ -3,6 +3,10 @@
 ENV_FILE=.env
 ENV=$(shell awk '{gsub(/#.*/, ""); printf "%s ", $$0}' $(ENV_FILE))
 
+# Experimental pkl generation
+pkl-gen:
+	pkl-gen-go self.pkl
+
 build-cli:
 	go build -o bin/velocity cmd/cli/main.go
 
