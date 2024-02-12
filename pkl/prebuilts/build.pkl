@@ -2,7 +2,7 @@ import "../primitives/command.pkl"
 import "../primitives/names.pkl"
 
 class test extends command.PrebuiltCommand {
-    function validate(n: names.Names): String? = if (n.builds.contains(this.params["build"])) null else "using invalid build name '\(this.params["build"])' in build.create"
+    function validate(n: names.Names): String? = if (n.Builds.contains(this.params["build"])) null else "using invalid build name '\(this.params["build"])' in build.create"
 }
 
 function create(buildName: String) = new test {
