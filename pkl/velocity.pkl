@@ -40,6 +40,9 @@ typealias Deployment = deployment.Deployment
 // Sections
 // Tests
 tests: Listing<Test>
+function validateTest(t: Test, n: names.Names) =
+    utils.errorIfAny("test: '\(t.name)' has command errors", t.commands.toList().map((c) -> c.validate(n)))
+function validateTests(n: names.Names) = if (tests.toList().every((t) -> validateTest(t, n))) tests else throw("invalid tests")
 
 // Runtimes
 runtimes: Listing<Runtime>
@@ -84,7 +87,7 @@ function getNames(): names.Names = new {
 output {
     value = new {
         local names = getNames()
-        ["tests"] = tests
+        ["tests"] = validateTests(names)
         ["runtimes"] = runtimes
         ["workflows"] = validateWorkflows(names)
         ["builds"] = validateBuilds(names)
