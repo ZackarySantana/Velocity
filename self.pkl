@@ -16,15 +16,15 @@ tests {
 runtimes {
     new DockerRuntime {
         name = "golang"
-        image = "golang:1.14"
+        image = "golang:1.21"
     }
 }
 
 workflows {
-    new Workflow {
+    new {
         name = "Velocity"
         groups {
-            new WorkflowGroup {
+            new {
                 name = "Golang tests"
                 runtimes {
                     "golang"
@@ -34,6 +34,24 @@ workflows {
                     "Golang tests"
                     // "non" // uncomment to get invalid test error
                 }
+            }
+        }
+    }
+}
+
+builds {
+    new {
+        name = "CLI"
+        build_runtime = "golang"
+        output = "dist/velocity"
+
+        output_runtime = "golang"
+        output_command = "velocity"
+
+        commands {
+            git.clone
+            new ShellCommand {
+                command = "make build-cli"
             }
         }
     }

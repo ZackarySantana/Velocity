@@ -3,9 +3,10 @@
 module Velocity 
 
 import "primitives/command.pkl"
+import "primitives/runtime.pkl"
 import "constructs/test.pkl"
-import "constructs/runtime.pkl"
 import "constructs/workflow.pkl"
+import "constructs/build.pkl"
 import "utils.pkl"
 
 // Command
@@ -26,6 +27,9 @@ typealias Runtime = runtime.Runtime
 typealias WorkflowGroup = workflow.WorkflowGroup
 typealias Workflow = workflow.Workflow
 
+// Build
+typealias Build = build.Build
+
 // Etc
 
 // Sections
@@ -41,12 +45,18 @@ workflows: Listing<Workflow>
 function validateWorkflow(w: Workflow) =
     utils.errorIfAny("workflow: '\(w.name)' has undefined runtimes", getUndefinedRuntimes(w.getRuntimeNames())) &&
     utils.errorIfAny("workflow: '\(w.name)' has undefined tests", getUndefinedTests(w.getTestNames()))
-function validateWorkflows(w: Listing<Workflow>) = if (w.toList().every((w) -> validateWorkflow(w))) w else throw("invalid workflows")
+function validateWorkflows() = if (workflows.toList().every((w) -> validateWorkflow(w))) workflows else throw("invalid workflows")
+
+builds: Listing<Build>
+function validateBuild(b: Build) =
+    utils.errorIfAny("build: '\(b.name)' has undefined runtimes", getUndefinedRuntimes(b.getRuntimeNames()))
+function validateBuilds() = if (builds.toList().every((b) -> validateBuild(b))) builds else throw("invalid builds")
 
 output {
     value = new {
         ["tests"] = tests
         ["runtimes"] = runtimes
-        ["workflows"] = validateWorkflows(workflows)
+        ["workflows"] = validateWorkflows()
+        ["builds"] = validateBuilds()
     }
 }

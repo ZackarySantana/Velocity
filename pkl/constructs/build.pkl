@@ -1,0 +1,14 @@
+import "../primitives/command.pkl"
+
+class Build {
+    name: String
+    build_runtime: String
+    output: String
+
+    output_runtime: String?
+    output_command: String?
+
+    commands: Listing<command.Command>
+
+    function getRuntimeNames(): List<String> = List(this.build_runtime, this.output_runtime)
+}
