@@ -1,5 +1,6 @@
 amends "pkl/velocity.pkl"
 import "pkl/prebuilts/git.pkl"
+import "pkl/prebuilts/build.pkl"
 
 tests {
     new {
@@ -22,7 +23,7 @@ runtimes {
 
 workflows {
     new {
-        name = "Velocity"
+        name = "Golang tests"
         groups {
             new {
                 name = "Golang tests"
@@ -55,4 +56,22 @@ builds {
             }
         }
     }
+}
+
+deployments {
+    new {
+        name = "CLI"
+        runtime = "golang"
+
+        workflows {
+            "Golang tests"
+            // "invalid" // uncomment to get invalid workflow error
+        }
+
+        commands {
+        //    build.create("test") 
+
+        }
+    }
+
 }

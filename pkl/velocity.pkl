@@ -4,9 +4,11 @@ module Velocity
 
 import "primitives/command.pkl"
 import "primitives/runtime.pkl"
+import "primitives/names.pkl"
 import "constructs/test.pkl"
 import "constructs/workflow.pkl"
 import "constructs/build.pkl"
+import "constructs/deployment.pkl"
 import "utils.pkl"
 
 // Command
@@ -30,33 +32,62 @@ typealias Workflow = workflow.Workflow
 // Build
 typealias Build = build.Build
 
+// Deployment
+typealias Deployment = deployment.Deployment
+
 // Etc
 
 // Sections
+// Tests
 tests: Listing<Test>
-function testsAsNames(): List<String> = tests.toList().map((t) -> t.name)
-function getUndefinedTests(t: List<String>) = utils.listDifference(t, testsAsNames())
 
+// Runtimes
 runtimes: Listing<Runtime>
-function runtimesAsNames(): List<String> = runtimes.toList().map((r) -> r.name)
-function getUndefinedRuntimes(r: List<String>) = utils.listDifference(r, runtimesAsNames())
 
+// Workflows
 workflows: Listing<Workflow>
-function validateWorkflow(w: Workflow) =
-    utils.errorIfAny("workflow: '\(w.name)' has undefined runtimes", getUndefinedRuntimes(w.getRuntimeNames())) &&
-    utils.errorIfAny("workflow: '\(w.name)' has undefined tests", getUndefinedTests(w.getTestNames()))
-function validateWorkflows() = if (workflows.toList().every((w) -> validateWorkflow(w))) workflows else throw("invalid workflows")
 
+// Workflows validation
+function validateWorkflow(w: Workflow, n: names.Names) =
+    utils.errorIfAny("workflow: '\(w.name)' has undefined runtimes", utils.listDifference(w.getRuntimeNames(), n.Runtimes)) &&
+    utils.errorIfAny("workflow: '\(w.name)' has undefined tests", utils.listDifference(w.getTestNames(), n.Tests))
+function validateWorkflows(n: names.Names) = if (workflows.toList().every((w) -> validateWorkflow(w, n))) workflows else throw("invalid workflows")
+
+// Builds
 builds: Listing<Build>
-function validateBuild(b: Build) =
-    utils.errorIfAny("build: '\(b.name)' has undefined runtimes", getUndefinedRuntimes(b.getRuntimeNames()))
-function validateBuilds() = if (builds.toList().every((b) -> validateBuild(b))) builds else throw("invalid builds")
+
+// Builds validation
+function validateBuild(b: Build, n: names.Names) =
+    utils.errorIfAny("build: '\(b.name)' has undefined runtimes", utils.listDifference(b.getRuntimeNames(), n.Runtimes)) &&
+    utils.errorIfAny("build: '\(b.name)' has command errors", b.commands.toList().map((c) -> c.validate(n)))
+function validateBuilds(n: names.Names) = if (builds.toList().every((b) -> validateBuild(b, n))) builds else throw("invalid builds")
+
+// Deployments
+deployments: Listing<Deployment>
+
+// Deployments validation
+function validateDeployment(d: Deployment, n: names.Names) =
+    utils.errorIfAny("deployment: '\(d.name)' has undefined workflows", utils.listDifference(d.getWorkflowNames(), n.Workflows)) &&
+    utils.errorIfAny("deployment: '\(d.name)' has undefined runtimes", utils.listDifference(d.getRuntimeNames(), n.Runtimes)) &&
+    utils.errorIfAny("deployment: '\(d.name)' has command errors", d.commands.toList().map((c) -> c.validate(n)))
+function validateDeployments(n: names.Names) = if (deployments.toList().every((d) -> validateDeployment(d, n))) deployments else throw("invalid deployments")
+
+// Helpers
+function getNames(): names.Names = new {
+    Tests = tests.toList().map((t) -> t.name)
+    Runtimes = runtimes.toList().map((r) -> r.name)
+    Workflows = workflows.toList().map((w) -> w.name)
+    Builds = builds.toList().map((b) -> b.name)
+    Deployments = deployments.toList().map((d) -> d.name)
+}
 
 output {
     value = new {
+        local names = getNames()
         ["tests"] = tests
         ["runtimes"] = runtimes
-        ["workflows"] = validateWorkflows()
-        ["builds"] = validateBuilds()
+        ["workflows"] = validateWorkflows(names)
+        ["builds"] = validateBuilds(names)
+        ["deployments"] = validateDeployments(names)
     }
 }

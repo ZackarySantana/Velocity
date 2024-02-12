@@ -1,9 +1,13 @@
+import "names.pkl"
+
 abstract class BaseCommand {
     working_directory: String?
     env: Mapping<String, String>?
+
+    function validate(n: names.Names): String? = null
 }
 
-class PrebuiltCommand extends BaseCommand {
+open class PrebuiltCommand extends BaseCommand {
     prebuilt: String
     params: Mapping<String, Any>?
 }

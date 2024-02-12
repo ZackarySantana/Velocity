@@ -10,5 +10,5 @@ class Build {
 
     commands: Listing<command.Command>
 
-    function getRuntimeNames(): List<String> = List(this.build_runtime, this.output_runtime)
+    function getRuntimeNames(): List<String> = List(this.build_runtime, this.output_runtime ?? null).filterNonNull()
 }

@@ -2,4 +2,4 @@
 function listDifference(A: List<Any>, B: List<Any>): List<Any> = A.filter((s) -> !B.contains(s))
 
 // errorIfAny throws an error if the list is not empty, including the given message.
-function errorIfAny(msg: String, l: List<Any>): Boolean = if (l.length > 0) throw("\(msg): \(l.join(", "))") else true
+function errorIfAny(msg: String, l: List<Any>): Boolean = if (l.filterNonNull().length > 0) throw("\(msg): \(l.filterNonNull().join(", "))") else true

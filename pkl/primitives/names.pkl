@@ -1,0 +1,7 @@
+class Names {
+    Tests: List<String>
+    Runtimes: List<String>
+    Workflows: List<String>
+    Builds: List<String>
+    Deployments: List<String>
+}

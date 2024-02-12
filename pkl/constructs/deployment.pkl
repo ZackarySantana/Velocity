@@ -1,0 +1,13 @@
+import "../primitives/command.pkl"
+
+class Deployment {
+    name: String
+    runtime: String
+
+    workflows: Listing<String>?
+
+    commands: Listing<command.Command>
+
+    function getWorkflowNames(): List<String> = workflows?.toList() ?? List()
+    function getRuntimeNames(): List<String> = List(runtime)
+}
