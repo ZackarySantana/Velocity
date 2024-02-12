@@ -40,6 +40,8 @@ typealias Deployment = deployment.Deployment
 // Sections
 // Tests
 tests: Listing<Test>
+
+// Tests validation
 function validateTest(t: Test, n: names.Names) =
     utils.errorIfAny("test: '\(t.name)' has command errors", t.commands.toList().map((c) -> c.validate(n)))
 function validateTests(n: names.Names) = if (tests.toList().every((t) -> validateTest(t, n))) tests else throw("invalid tests")
