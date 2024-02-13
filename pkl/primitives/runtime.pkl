@@ -1,19 +1,17 @@
-@go.Package { name = "github.com/zackarysantana/velocity/internal/pkl/velocity/constructs/runtime" }
-module runtime_construct
+@go.Package { name = "github.com/zackarysantana/velocity/internal/pkl/velocity/primitives/runtime" }
+module runtime_primitive
 
 import "package://pkg.pkl-lang.org/pkl-go/pkl.golang@0.5.3#/go.pkl" 
 
-abstract class BaseRuntime {
+abstract class Runtime {
     name: String
     env: Mapping<String, String>?
 }
 
-class DockerRuntime extends BaseRuntime {
+class DockerRuntime extends Runtime {
     image: String
 }
 
-class MachineRuntime extends BaseRuntime {
+class MachineRuntime extends Runtime {
     machine: String
 }
-
-typealias Runtime = DockerRuntime|MachineRuntime
