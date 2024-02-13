@@ -1,5 +1,5 @@
 @ModuleInfo { minPklVersion = "0.0.1" } 
-@go.Package { name = "github.com/zackarysantana/velocity/gen/pkl/velocity" }
+@go.Package { name = "github.com/zackarysantana/velocity/gen/pkl/velocity_pkl" }
 module velocity 
 
 import "package://pkg.pkl-lang.org/pkl-go/pkl.golang@0.5.3#/go.pkl" 
