@@ -1,3 +1,8 @@
+@go.Package { name = "github.com/zackarysantana/velocity/internal/pkl/velocity/constructs/runtime" }
+module runtime_construct
+
+import "package://pkg.pkl-lang.org/pkl-go/pkl.golang@0.5.3#/go.pkl" 
+
 abstract class BaseRuntime {
     name: String
     env: Mapping<String, String>?

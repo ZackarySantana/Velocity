@@ -1,6 +1,8 @@
-/// Used for some type of purpose. 
 @ModuleInfo { minPklVersion = "0.0.1" } 
-module Velocity 
+@go.Package { name = "github.com/zackarysantana/velocity/internal/pkl/velocity" }
+module velocity 
+
+import "package://pkg.pkl-lang.org/pkl-go/pkl.golang@0.5.3#/go.pkl" 
 
 import "primitives/command.pkl"
 import "primitives/runtime.pkl"
@@ -39,39 +41,39 @@ typealias Deployment = deployment.Deployment
 
 // Sections
 // Tests
-tests: Listing<Test>
+tests: Listing<test.Test>
 
 // Tests validation
-function validateTest(t: Test, n: names.Names) =
+function validateTest(t: test.Test, n: names.Names) =
     utils.errorIfAny("test: '\(t.name)' has command errors", t.commands.toList().map((c) -> c.validate(n)))
 function validateTests(n: names.Names) = if (tests.toList().every((t) -> validateTest(t, n))) tests else throw("invalid tests")
 
 // Runtimes
-runtimes: Listing<Runtime>
+runtimes: Listing<runtime.Runtime>
 
 // Workflows
-workflows: Listing<Workflow>
+workflows: Listing<workflow.Workflow>
 
 // Workflows validation
-function validateWorkflow(w: Workflow, n: names.Names) =
+function validateWorkflow(w: workflow.Workflow, n: names.Names) =
     utils.errorIfAny("workflow: '\(w.name)' has undefined runtimes", utils.listDifference(w.getRuntimeNames(), n.Runtimes)) &&
     utils.errorIfAny("workflow: '\(w.name)' has undefined tests", utils.listDifference(w.getTestNames(), n.Tests))
 function validateWorkflows(n: names.Names) = if (workflows.toList().every((w) -> validateWorkflow(w, n))) workflows else throw("invalid workflows")
 
 // Builds
-builds: Listing<Build>
+builds: Listing<build.Build>
 
 // Builds validation
-function validateBuild(b: Build, n: names.Names) =
+function validateBuild(b: build.Build, n: names.Names) =
     utils.errorIfAny("build: '\(b.name)' has undefined runtimes", utils.listDifference(b.getRuntimeNames(), n.Runtimes)) &&
     utils.errorIfAny("build: '\(b.name)' has command errors", b.commands.toList().map((c) -> c.validate(n)))
 function validateBuilds(n: names.Names) = if (builds.toList().every((b) -> validateBuild(b, n))) builds else throw("invalid builds")
 
 // Deployments
-deployments: Listing<Deployment>
+deployments: Listing<deployment.Deployment>
 
 // Deployments validation
-function validateDeployment(d: Deployment, n: names.Names) =
+function validateDeployment(d: deployment.Deployment, n: names.Names) =
     utils.errorIfAny("deployment: '\(d.name)' has undefined workflows", utils.listDifference(d.getWorkflowNames(), n.Workflows)) &&
     utils.errorIfAny("deployment: '\(d.name)' has undefined runtimes", utils.listDifference(d.getRuntimeNames(), n.Runtimes)) &&
     utils.errorIfAny("deployment: '\(d.name)' has command errors", d.commands.toList().map((c) -> c.validate(n)))
