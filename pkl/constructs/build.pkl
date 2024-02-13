@@ -1,4 +1,4 @@
-@go.Package { name = "github.com/zackarysantana/velocity/gen/pkl/constructs/build_pkl" }
+@go.Package { name = "github.com/zackarysantana/velocity/gen/pkl/constructs/build" }
 module build_construct
 
 import "package://pkg.pkl-lang.org/pkl-go/pkl.golang@0.5.3#/go.pkl" 
