@@ -1,0 +1,44 @@
+amends "pkl:test"
+
+import "pkl:test"
+
+import "../velocity.pkl"
+import "../prebuilts/build.pkl"
+
+// Command validation
+local cmd1 = (velocity) {
+    tests {
+        new {
+            name = "No build named test"
+            commands {
+                build.create("test")
+            }
+        }
+    }
+}
+
+local cmd2 = (velocity) {
+    tests {
+        new {
+            name = "Valid build named test"
+            commands {
+                build.create("test")
+            }
+        }
+    }
+    builds {
+        new {
+            name = "test"
+        }
+    }
+}
+
+
+facts {
+    ["invalid"] {
+        test.catchOrNull(() -> cmd1.validateTests(cmd1.getNames())).contains("test: 'No build named test' has command errors")
+    }
+    ["valid"] {
+        test.catchOrNull(() -> cmd2.validateTests(cmd2.getNames())) == null
+    }
+}
