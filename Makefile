@@ -6,6 +6,13 @@ ENV=$(shell awk '{gsub(/#.*/, ""); printf "%s ", $$0}' $(ENV_FILE))
 pkl-gen:
 	rm -rf gen/pkl
 	pkl-gen-go pkl/velocity.pkl
+	make pkl-gen-prebuilts
+
+pkl-gen-prebuilts:
+	@for file in pkl/prebuilts/*.pkl; do \
+		echo "Processing $$file..."; \
+		pkl-gen-go "$$file"; \
+	done
 
 pkl-test:
 	pkl test pkl/tests/**
