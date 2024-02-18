@@ -35,8 +35,8 @@ build-ui:
 	go build -o bin/ui cmd/ui/main.go
 
 clean:
-	rm -r bin
+	rm -rf bin
 	make clean-pkl
 
 clean-pkl:
-	rm -r gen/pkl
+	rm -rf gen/pkl
