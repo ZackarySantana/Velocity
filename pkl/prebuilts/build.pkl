@@ -6,11 +6,11 @@ import "package://pkg.pkl-lang.org/pkl-go/pkl.golang@0.5.3#/go.pkl"
 import "../primitives/command.pkl"
 import "../primitives/names.pkl"
 
-class test extends command.PrebuiltCommand {
+class _request extends command.PrebuiltCommand {
     function validate(n: names.Names): String? = if (n.Builds.contains(this.params["build"])) null else "using invalid build name '\(this.params["build"])' in build.create"
 }
 
-function create(buildName: String) = new test {
+function create(buildName: String) = new _request {
     prebuilt = "build.create"
     params {
         ["build"] = buildName
