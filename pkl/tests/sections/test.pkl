@@ -2,9 +2,9 @@ amends "pkl:test"
 
 import "pkl:test"
 
-import "../tests.pkl"
-import "../velocity.pkl"
-import "../primitives/command.pkl"
+import "../../tests.pkl"
+import "../../velocity.pkl"
+import "../../primitives/command.pkl"
 
 // Command validation
 local cmd1 = (velocity) {

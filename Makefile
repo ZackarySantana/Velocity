@@ -11,7 +11,7 @@ pkl-gen:
 	done
 
 pkl-test:
-	pkl test pkl/tests/**
+	pkl test pkl/tests/sections/**
 
 build-cli:
 	go build -o bin/velocity cmd/cli/main.go

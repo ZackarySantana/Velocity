@@ -2,8 +2,8 @@ amends "pkl:test"
 
 import "pkl:test"
 
-import "../tests.pkl"
-import "../velocity.pkl"
+import "../../tests.pkl"
+import "../../velocity.pkl"
 
 // Test validation
 local test1 = (velocity) {
