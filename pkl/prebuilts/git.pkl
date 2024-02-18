@@ -5,6 +5,6 @@ import "package://pkg.pkl-lang.org/pkl-go/pkl.golang@0.5.3#/go.pkl"
 
 import "../primitives/command.pkl"
 
-clone = new command.PrebuiltCommand {
+function clone() = new command.PrebuiltCommand {
     prebuilt = "git.clone"
 }

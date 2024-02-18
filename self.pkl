@@ -6,7 +6,7 @@ tests {
     new {
         name = "Golang tests"
         commands {
-            git.clone
+            git.clone()
             new ShellCommand {
                 command = "go test ./..."
             }
@@ -48,7 +48,7 @@ builds {
         output_command = "velocity"
 
         commands {
-            git.clone
+            git.clone()
             new ShellCommand {
                 command = "make build-cli"
             }
