@@ -1,0 +1,24 @@
+module prebuilt_build
+
+amends "pkl:test"
+
+import "pkl:test"
+
+import "../../prebuilts/build.pkl"
+import "../../primitives/names.pkl"
+
+local namesWithBuild = new names.Names {
+    Builds = List("build")
+}
+
+local namesWithNothing = new names.Names {}
+
+facts {
+    ["invalid build"] {
+        build.create("build").validate.apply(namesWithNothing).contains("using invalid build name")
+    }
+    ["valid build"] {
+        build.create("build").validate.apply(namesWithBuild) == null
+    }
+}
+
