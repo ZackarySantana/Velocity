@@ -45,7 +45,7 @@ tests: Listing<test.Test>
 
 // Tests validation
 function validateTest(t: test.Test, n: names.Names) =
-    utils.errorIfAny("test: '\(t.name)' has command errors", t.commands.toList().map((c) -> c.validate(n)))
+    utils.errorIfAny("test: '\(t.name)' has command errors", t.commands.toList().map((c) -> c.validate.apply(n)))
 function validateTests(n: names.Names) =
     if (tests.toList().every((t) -> validateTest(t, n))) tests else throw("invalid tests")
 
@@ -70,7 +70,7 @@ builds: Listing<build.Build>
 // Builds validation
 function validateBuild(b: build.Build, n: names.Names) =
     utils.errorIfAny("build: '\(b.name)' has undefined runtimes", utils.listDifference(b.getRuntimeNames(), n.Runtimes)) &&
-    utils.errorIfAny("build: '\(b.name)' has command errors", b.commands.toList().map((c) -> c.validate(n)))
+    utils.errorIfAny("build: '\(b.name)' has command errors", b.commands.toList().map((c) -> c.validate.apply(n)))
 function validateBuilds(n: names.Names) =
     if (builds.toList().every((b) -> validateBuild(b, n))) builds else throw("invalid builds")
 
@@ -81,7 +81,7 @@ deployments: Listing<deployment.Deployment>
 function validateDeployment(d: deployment.Deployment, n: names.Names) =
     utils.errorIfAny("deployment: '\(d.name)' has undefined workflows", utils.listDifference(d.getWorkflowNames(), n.Workflows)) &&
     utils.errorIfAny("deployment: '\(d.name)' has undefined runtimes", utils.listDifference(d.getRuntimeNames(), n.Runtimes)) &&
-    utils.errorIfAny("deployment: '\(d.name)' has command errors", d.commands.toList().map((c) -> c.validate(n)))
+    utils.errorIfAny("deployment: '\(d.name)' has command errors", d.commands.toList().map((c) -> c.validate.apply(n)))
 function validateDeployments(n: names.Names) =
     if (deployments.toList().every((d) -> validateDeployment(d, n))) deployments else throw("invalid deployments")
 

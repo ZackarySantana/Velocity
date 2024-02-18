@@ -9,7 +9,7 @@ abstract class Command {
     working_directory: String?
     env: Mapping<String, String>?
 
-    function validate(n: names.Names): String? = null
+    hidden validate = (n: names.Names) -> null
 }
 
 open class PrebuiltCommand extends Command {
