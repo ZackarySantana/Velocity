@@ -4,13 +4,9 @@ ENV_FILE=.env
 ENV=$(shell awk '{gsub(/#.*/, ""); printf "%s ", $$0}' $(ENV_FILE))
 
 pkl-gen:
-	rm -rf gen/pkl
+	make clean-pkl
 	pkl-gen-go pkl/velocity.pkl
-	make pkl-gen-prebuilts
-
-pkl-gen-prebuilts:
 	@for file in pkl/prebuilts/*.pkl; do \
-		echo "Processing $$file..."; \
 		pkl-gen-go "$$file"; \
 	done
 
@@ -40,3 +36,7 @@ build-ui:
 
 clean:
 	rm -r bin
+	make clean-pkl
+
+clean-pkl:
+	rm -r gen/pkl
