@@ -10,11 +10,11 @@ type OperationCommand interface {
 var _ OperationCommand = (*OperationCommandImpl)(nil)
 
 type OperationCommandImpl struct {
-	Operation string `pkl:"operation"`
+	Operation string `pkl:"operation" bson:"operation,omitempty" json:"operation,omitempty" yaml:"operation,omitempty"`
 
-	WorkingDirectory *string `pkl:"working_directory"`
+	WorkingDirectory *string `pkl:"working_directory" bson:"working_directory,omitempty" json:"working_directory,omitempty" yaml:"working_directory,omitempty"`
 
-	Env *map[string]string `pkl:"env"`
+	Env *map[string]string `pkl:"env" bson:"env,omitempty" json:"env,omitempty" yaml:"env,omitempty"`
 }
 
 func (rcv *OperationCommandImpl) GetOperation() string {

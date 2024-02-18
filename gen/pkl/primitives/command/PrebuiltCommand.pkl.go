@@ -12,13 +12,13 @@ type PrebuiltCommand interface {
 var _ PrebuiltCommand = (*PrebuiltCommandImpl)(nil)
 
 type PrebuiltCommandImpl struct {
-	Prebuilt string `pkl:"prebuilt"`
+	Prebuilt string `pkl:"prebuilt" bson:"prebuilt,omitempty" json:"prebuilt,omitempty" yaml:"prebuilt,omitempty"`
 
-	Params *map[string]any `pkl:"params"`
+	Params *map[string]any `pkl:"params" bson:"params,omitempty" json:"params,omitempty" yaml:"params,omitempty"`
 
-	WorkingDirectory *string `pkl:"working_directory"`
+	WorkingDirectory *string `pkl:"working_directory" bson:"working_directory,omitempty" json:"working_directory,omitempty" yaml:"working_directory,omitempty"`
 
-	Env *map[string]string `pkl:"env"`
+	Env *map[string]string `pkl:"env" bson:"env,omitempty" json:"env,omitempty" yaml:"env,omitempty"`
 }
 
 func (rcv *PrebuiltCommandImpl) GetPrebuilt() string {

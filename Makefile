@@ -5,7 +5,7 @@ ENV=$(shell awk '{gsub(/#.*/, ""); printf "%s ", $$0}' $(ENV_FILE))
 
 pkl-gen:
 	make clean-pkl
-	pkl-gen-go pkl/velocity.pkl
+	pkl-gen-go --generator-settings=pkl/generator-settings.pkl pkl/velocity.pkl
 	@for file in pkl/prebuilts/*.pkl; do \
 		pkl-gen-go "$$file"; \
 	done

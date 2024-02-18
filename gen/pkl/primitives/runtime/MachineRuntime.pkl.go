@@ -10,11 +10,11 @@ type MachineRuntime interface {
 var _ MachineRuntime = (*MachineRuntimeImpl)(nil)
 
 type MachineRuntimeImpl struct {
-	Machine string `pkl:"machine"`
+	Machine string `pkl:"machine" bson:"machine,omitempty" json:"machine,omitempty" yaml:"machine,omitempty"`
 
-	Name string `pkl:"name"`
+	Name string `pkl:"name" bson:"name,omitempty" json:"name,omitempty" yaml:"name,omitempty"`
 
-	Env *map[string]string `pkl:"env"`
+	Env *map[string]string `pkl:"env" bson:"env,omitempty" json:"env,omitempty" yaml:"env,omitempty"`
 }
 
 func (rcv *MachineRuntimeImpl) GetMachine() string {

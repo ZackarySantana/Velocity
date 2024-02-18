@@ -13,17 +13,17 @@ import (
 )
 
 type Velocity struct {
-	Tests []*test.Test `pkl:"tests"`
+	Tests []*test.Test `pkl:"tests" bson:"tests,omitempty" json:"tests,omitempty" yaml:"tests,omitempty"`
 
-	Runtimes []runtime.Runtime `pkl:"runtimes"`
+	Runtimes []runtime.Runtime `pkl:"runtimes" bson:"runtimes,omitempty" json:"runtimes,omitempty" yaml:"runtimes,omitempty"`
 
-	Workflows []*workflow.Workflow `pkl:"workflows"`
+	Workflows []*workflow.Workflow `pkl:"workflows" bson:"workflows,omitempty" json:"workflows,omitempty" yaml:"workflows,omitempty"`
 
-	Builds []*build.Build `pkl:"builds"`
+	Builds []*build.Build `pkl:"builds" bson:"builds,omitempty" json:"builds,omitempty" yaml:"builds,omitempty"`
 
-	Deployments []*deployment.Deployment `pkl:"deployments"`
+	Deployments []*deployment.Deployment `pkl:"deployments" bson:"deployments,omitempty" json:"deployments,omitempty" yaml:"deployments,omitempty"`
 
-	Output any `pkl:"output"`
+	Output any `pkl:"output" bson:"output,omitempty" json:"output,omitempty" yaml:"output,omitempty"`
 }
 
 // LoadFromPath loads the pkl module at the given path and evaluates it into a Velocity

@@ -10,11 +10,11 @@ type DockerRuntime interface {
 var _ DockerRuntime = (*DockerRuntimeImpl)(nil)
 
 type DockerRuntimeImpl struct {
-	Image string `pkl:"image"`
+	Image string `pkl:"image" bson:"image,omitempty" json:"image,omitempty" yaml:"image,omitempty"`
 
-	Name string `pkl:"name"`
+	Name string `pkl:"name" bson:"name,omitempty" json:"name,omitempty" yaml:"name,omitempty"`
 
-	Env *map[string]string `pkl:"env"`
+	Env *map[string]string `pkl:"env" bson:"env,omitempty" json:"env,omitempty" yaml:"env,omitempty"`
 }
 
 func (rcv *DockerRuntimeImpl) GetImage() string {

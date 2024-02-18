@@ -10,11 +10,11 @@ type ShellCommand interface {
 var _ ShellCommand = (*ShellCommandImpl)(nil)
 
 type ShellCommandImpl struct {
-	Command string `pkl:"command"`
+	Command string `pkl:"command" bson:"command,omitempty" json:"command,omitempty" yaml:"command,omitempty"`
 
-	WorkingDirectory *string `pkl:"working_directory"`
+	WorkingDirectory *string `pkl:"working_directory" bson:"working_directory,omitempty" json:"working_directory,omitempty" yaml:"working_directory,omitempty"`
 
-	Env *map[string]string `pkl:"env"`
+	Env *map[string]string `pkl:"env" bson:"env,omitempty" json:"env,omitempty" yaml:"env,omitempty"`
 }
 
 func (rcv *ShellCommandImpl) GetCommand() string {
