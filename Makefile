@@ -4,6 +4,7 @@ ENV_FILE=.env
 ENV=$(shell awk '{gsub(/#.*/, ""); printf "%s ", $$0}' $(ENV_FILE))
 
 pkl-gen:
+	rm -rf gen/pkl
 	pkl-gen-go pkl/velocity.pkl
 
 pkl-test:
