@@ -2,16 +2,17 @@ amends "pkl:test"
 
 import "pkl:test"
 
+import "tests.pkl"
 import "../velocity.pkl"
-import "../prebuilts/build.pkl"
+import "../primitives/command.pkl"
 
 // Command validation
 local cmd1 = (velocity) {
     tests {
         new {
-            name = "No build named test"
+            name = "Invalid command"
             commands {
-                build.create("test")
+                new tests.InvalidCommand {}
             }
         }
     }
@@ -20,9 +21,11 @@ local cmd1 = (velocity) {
 local cmd2 = (velocity) {
     tests {
         new {
-            name = "Valid build named test"
+            name = "Valid command"
             commands {
-                build.create("test")
+                new tests.RequireBuildCommand {
+                    name = "test"
+                }
             }
         }
     }
@@ -36,7 +39,7 @@ local cmd2 = (velocity) {
 
 facts {
     ["invalid command"] {
-        test.catchOrNull(() -> cmd1.validateTests(cmd1.getNames())).contains("test: 'No build named test' has command errors")
+        test.catchOrNull(() -> cmd1.validateTests(cmd1.getNames())).contains("test: 'Invalid command' has command errors")
     }
     ["valid command"] {
         test.catchOrNull(() -> cmd2.validateTests(cmd2.getNames())) == null
