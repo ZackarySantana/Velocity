@@ -2,7 +2,7 @@ amends "pkl:test"
 
 import "pkl:test"
 
-import "tests.pkl"
+import "../tests.pkl"
 import "../velocity.pkl"
 import "../primitives/command.pkl"
 

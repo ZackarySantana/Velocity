@@ -1,6 +1,6 @@
-import "../primitives/command.pkl"
-import "../primitives/runtime.pkl"
-import "../primitives/names.pkl"
+import "primitives/command.pkl"
+import "primitives/runtime.pkl"
+import "primitives/names.pkl"
 
 class InvalidCommand extends command.Command {
     function validate(n: names.Names): String? = "invalid"
