@@ -1,0 +1,97 @@
+amends "pkl:test"
+
+import "pkl:test"
+
+import "../velocity.pkl"
+import "../prebuilts/build.pkl"
+
+// Test validation
+local test1 = (velocity) {
+    workflows {
+        new {
+            name = "No test named poll"
+            groups {
+                new {
+                    name = "g1"
+                    tests {
+                        "poll"
+                    }
+                }
+            }
+        }
+    }
+}
+
+local test2 = (velocity) {
+    workflows {
+        new {
+            name = "Valid test named poll"
+            groups {
+                new {
+                    name = "g1"
+                    tests {
+                        "poll"
+                    }
+                }
+            }
+        }
+    }
+    tests {
+        new {
+            name = "poll"
+        }
+    }
+}
+
+// Runtime validation
+local runtime1 = (velocity) {
+    workflows {
+        new {
+            name = "No runtime named poll"
+            groups {
+                new {
+                    name = "g1"
+                    runtimes {
+                        "poll"
+                    }
+                }
+            }
+        }
+    }
+}
+
+local runtime2 = (velocity) {
+    workflows {
+        new {
+            name = "Valid runtime named poll"
+            groups {
+                new {
+                    name = "g1"
+                    runtimes {
+                        "poll"
+                    }
+                }
+            }
+        }
+    }
+    runtimes {
+        new {
+            name = "poll"
+        }
+    }
+}
+
+facts {
+    ["invalid test"] {
+        test.catchOrNull(() -> test1.validateWorkflows(test1.getNames())).contains("workflow 'No test named poll' has group: 'g1' with undefined tests: poll")
+    }
+    ["invalid runtime"] {
+        test.catchOrNull(() -> test1.validateWorkflows(test1.getNames())).contains("workflow 'No test named poll' has group: 'g1' with undefined tests: poll")
+    }
+    ["valid test"] {
+        test.catchOrNull(() -> test2.validateTests(test2.getNames())) == null
+    }
+    ["valid runtime"] {
+        test.catchOrNull(() -> test2.validateTests(test2.getNames())) == null
+    }
+}
