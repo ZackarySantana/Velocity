@@ -1,3 +1,5 @@
+module section_deployment
+
 amends "pkl:test"
 
 import "pkl:test"

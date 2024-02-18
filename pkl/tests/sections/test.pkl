@@ -1,3 +1,5 @@
+module section_test
+
 amends "pkl:test"
 
 import "pkl:test"

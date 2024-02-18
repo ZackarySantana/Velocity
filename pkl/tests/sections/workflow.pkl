@@ -1,3 +1,5 @@
+module section_workflow
+
 amends "pkl:test"
 
 import "pkl:test"
