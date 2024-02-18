@@ -57,10 +57,10 @@ workflows: Listing<workflow.Workflow>
 
 // Workflows validation
 function validateWorkflowGroup(w: workflow.WorkflowGroup, origin: String, n: names.Names) =
-    utils.errorIfAny("workflow '\(origin)' has group: '\(w.name)' with undefined tests", utils.listDifference(w.tests.toList(), n.Tests)) &&
-    utils.errorIfAny("workflow '\(origin)' has group: '\(w.name)' with undefined runtimes", utils.listDifference(w.runtimes.toList(), n.Runtimes))
+    utils.errorIfAny("workflow: '\(origin)' has group: '\(w.name)' with undefined tests", utils.listDifference(w.tests.toList(), n.Tests)) &&
+    utils.errorIfAny("workflow: '\(origin)' has group: '\(w.name)' with undefined runtimes", utils.listDifference(w.runtimes.toList(), n.Runtimes))
 function validateWorkflow(w: workflow.Workflow, n: names.Names) =
-    if (w.groups.toList().every((g) -> validateWorkflowGroup(g, w.name, n))) w else throw("invalid workflow")
+    if (w.groups.toList().every((g) -> validateWorkflowGroup(g, w.name, n))) true else throw("invalid workflow")
 function validateWorkflows(n: names.Names) =
     if (workflows.toList().every((w) -> validateWorkflow(w, n))) workflows else throw("invalid workflows")
 
