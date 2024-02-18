@@ -1,3 +1,5 @@
+import "constructs/workflow.pkl"
+
 import "primitives/command.pkl"
 import "primitives/runtime.pkl"
 import "primitives/names.pkl"
@@ -16,5 +18,9 @@ class RequireBuildCommand extends command.Command {
 }
 
 class ValidRuntime extends runtime.Runtime {
+    name = "valid"
+}
+
+function createValidWorkflow() = new workflow.Workflow {
     name = "valid"
 }
