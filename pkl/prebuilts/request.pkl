@@ -22,7 +22,6 @@ class Request {
     headers: Mapping<String, String>?
 }
 
-// Makes a request to 
 function create(request: Request, response: Response) = new command.PrebuiltCommand {
     prebuilt = "request.\(request.method)"
     params {
