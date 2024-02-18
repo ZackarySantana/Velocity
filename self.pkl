@@ -7,7 +7,6 @@ tests {
         name = "Golang tests"
         commands {
             git.clone
-            // build.create("Test") // uncomment to get invalid build error
             new ShellCommand {
                 command = "go test ./..."
             }
@@ -30,11 +29,9 @@ workflows {
                 name = "Golang tests"
                 runtimes {
                     "golang"
-                    // "python" // Uncomment to get invalid runtime error
                 }
                 tests {
                     "Golang tests"
-                    // "non" // uncomment to get invalid test error
                 }
             }
         }
@@ -66,13 +63,10 @@ deployments {
 
         workflows {
             "Golang tests"
-            // "invalid" // uncomment to get invalid workflow error
         }
 
         commands {
             build.create("CLI") 
-            // build.create("tests")  // uncomment to get invalid build error
-
         }
     }
 }
