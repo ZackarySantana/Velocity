@@ -35,10 +35,10 @@ local cmd2 = (velocity) {
 
 
 facts {
-    ["invalid"] {
+    ["invalid command"] {
         test.catchOrNull(() -> cmd1.validateTests(cmd1.getNames())).contains("test: 'No build named test' has command errors")
     }
-    ["valid"] {
+    ["valid command"] {
         test.catchOrNull(() -> cmd2.validateTests(cmd2.getNames())) == null
     }
 }
