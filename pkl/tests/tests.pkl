@@ -1,0 +1,20 @@
+import "../primitives/command.pkl"
+import "../primitives/runtime.pkl"
+import "../primitives/names.pkl"
+
+class InvalidCommand extends command.Command {
+    function validate(n: names.Names): String? = "invalid"
+}
+
+class ValidCommand extends command.Command {
+    function validate(n: names.Names): String? = null
+}
+
+class RequireBuildCommand extends command.Command {
+    name: String?
+    function validate(n: names.Names): String? = if (n.Builds.contains(name)) null else "invalid"
+}
+
+class ValidRuntime extends runtime.Runtime {
+    name = "valid"
+}
