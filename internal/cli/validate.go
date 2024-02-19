@@ -12,7 +12,6 @@ func CreateValidate(app *app) *cli.Command {
 		Usage:   "validate a configuration file",
 		Flags: []cli.Flag{
 			flags.Config().Flag(),
-			flags.ExitCodeOnly().Flag(),
 		},
 		Action: func(ctx *cli.Context) error {
 			if _, err := flags.ParseConfigFromFlag(ctx); err != nil {

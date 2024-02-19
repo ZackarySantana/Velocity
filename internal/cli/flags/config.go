@@ -1,12 +1,9 @@
 package flags
 
 import (
-	"fmt"
-	"os"
-
 	"github.com/urfave/cli/v2"
-	configPackage "github.com/zackarysantana/velocity/src/config"
-	"github.com/zackarysantana/velocity/src/config/configuration"
+	"github.com/zackarysantana/velocity/gen/pkl/velocity"
+	config_ "github.com/zackarysantana/velocity/src/config"
 )
 
 const ConfigFlagName = "config"
@@ -22,33 +19,12 @@ func Config() config {
 				Name:    ConfigFlagName,
 				Aliases: []string{"c"},
 				Usage:   "location of your configuration file",
-				Value:   "velocity.yml",
+				Value:   "velocity.pkl",
 			},
 		},
 	}
 }
 
-func ParseConfigFromFlag(ctx *cli.Context) (*configuration.Configuration, error) {
-	fileName := ctx.String(ConfigFlagName)
-	file, err := os.ReadFile(fileName)
-	if err != nil {
-		return nil, fmt.Errorf("there was an error reading your file '%s': %v", fileName, err)
-	}
-
-	raw, err := configPackage.Parse(file)
-	if err != nil {
-		return nil, fmt.Errorf("there was an error parsing your file in to yaml: %v", err)
-	}
-
-	parsed, err := configPackage.HydrateConfiguration(raw)
-	if err != nil {
-		return nil, fmt.Errorf("there was an error hydrating your config: %v", err)
-	}
-
-	err = configPackage.ValidateConfiguration(*parsed)
-	if err != nil {
-		return nil, fmt.Errorf("your configuration is invalid, see:\n %v", err)
-	}
-
-	return parsed, nil
+func ParseConfigFromFlag(ctx *cli.Context) (*velocity.Velocity, error) {
+	return config_.Load(ctx.Context, ctx.String(ConfigFlagName))
 }
