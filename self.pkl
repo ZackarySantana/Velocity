@@ -65,21 +65,32 @@ workflows {
     }
 }
 
-builds {
-    new {
-        name = "CLI"
-        build_runtime = "golang"
-        output = "dist/velocity"
+local function createGolangBuild(n: String, o: String) = new Build {
+    name = n
+    build_runtime = "golang"
+    output = o
 
-        output_runtime = "golang"
-        output_command = "velocity"
+    output_runtime = "golang"
+    output_command = o
 
-        commands {
-            git.clone()
-            new ShellCommand {
-                command = "make build-cli"
-            }
+    commands {
+        git.clone()
+        new ShellCommand {
+            command = "make build-\(name)"
         }
+    }
+}
+
+local buildInfo = List(
+    List("cli", "dist/velocity"),
+    List("api", "dist/api"),
+    List("agent", "dist/agent"),
+    List("ui", "dist/ui")
+)
+
+builds {
+    for (b in buildInfo) {
+        createGolangBuild(b[0], b[1])
     }
 }
 
@@ -93,7 +104,7 @@ deployments {
         }
 
         commands {
-            build.create("CLI") 
+            build.create("cli") 
         }
     }
 }
