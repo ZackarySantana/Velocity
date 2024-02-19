@@ -94,6 +94,11 @@ function getNames(): names.Names = new {
     Deployments = deployments.toList().map((d) -> d.name)
 }
 
+// External helpers
+function shell(cmd: String): ShellCommand = new ShellCommand {
+    command = cmd
+}
+
 output {
     value = new {
         local names = getNames()

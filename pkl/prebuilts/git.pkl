@@ -8,3 +8,14 @@ import "../primitives/command.pkl"
 function clone() = new command.PrebuiltCommand {
     prebuilt = "git.clone"
 }
+
+class CloneExactArgs {
+    directory: String?
+}
+
+function cloneExact(args: CloneExactArgs) = new command.PrebuiltCommand {
+    prebuilt = "git.clone"
+    params {
+        ["directory"] = args.directory
+    }
+}
