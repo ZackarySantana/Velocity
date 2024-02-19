@@ -1,19 +1,26 @@
 amends "pkl/velocity.pkl"
+
+import "pkl/velocity.pkl"
 import "pkl/prebuilts/git.pkl"
 import "pkl/prebuilts/build.pkl"
 
-local install_pkl = new ShellCommand {
-    command = "curl -L -o pkl https://github.com/apple/pkl/releases/download/0.25.2/pkl-alpine-linux-amd64 && chmod +x ./pkl"
-}
+local golangApps = List(
+    List("cli", "dist/velocity"),
+    List("api", "dist/api"),
+    List("agent", "dist/agent"),
+    List("ui", "dist/ui")
+)
+
+local install_pkl = velocity.shell(
+    "curl -L -o pkl https://github.com/apple/pkl/releases/download/0.25.2/pkl-alpine-linux-amd64 && chmod +x ./pkl"
+)
 
 tests {
     new {
         name = "Golang tests"
         commands {
             git.clone()
-            new ShellCommand {
-                command = "go test ./..."
-            }
+            velocity.shell("go test ./...")
         }
     }
     new {
@@ -21,9 +28,29 @@ tests {
         commands {
             git.clone()
             install_pkl
-            new ShellCommand {
-                command = "make PKL_BINARY=./pkl pkl-test"
-            }
+            velocity.shell("make PKL_BINARY=./pkl pkl-test")
+        }
+    }
+    new {
+        name = "Docs can build"
+        commands {
+            git.cloneExact(new git.CloneExactArgs {
+                directory = "docs"
+            })
+            velocity.shell("cd docs")
+            velocity.shell("npm install")
+            velocity.shell("npm build")
+        }
+    }
+    new {
+        name = "Doc tests"
+        commands {
+            git.cloneExact(new git.CloneExactArgs {
+                directory = "docs"
+            })
+            velocity.shell("cd docs")
+            velocity.shell("npm install")
+            // TODO: Add tests for docs
         }
     }
 }
@@ -36,6 +63,15 @@ runtimes {
     new DockerRuntime {
         name = "curl"
         image = "curlimages/curl:8.6.0"
+    }
+    new DockerRuntime {
+        name = "node"
+        image = "node:21"
+    }
+    // Minimal runtime for static http server
+    new DockerRuntime {
+        name = "busybox"
+        image = "busybox:1.35"
     }
 }
 
@@ -63,6 +99,22 @@ workflows {
             }
         }
     }
+    new {
+        name = "Docs"
+        groups {
+            new {
+                name = "Build"
+                runtimes {
+                    "node"
+                }
+                tests {
+                    "Docs can build"
+                    "Doc tests"
+                }
+            }
+        }
+    
+    }
 }
 
 local function createGolangBuild(n: String, o: String) = new Build {
@@ -75,29 +127,53 @@ local function createGolangBuild(n: String, o: String) = new Build {
 
     commands {
         git.clone()
-        new ShellCommand {
-            command = "make build-\(name)"
+        velocity.shell("make build-\(name)")
+    }
+}
+
+builds {
+    for (g in golangApps) {
+        createGolangBuild(g[0], g[1])
+    }
+    new {
+        name = "Docs"
+        build_runtime = "node"
+        output = "docs/build"
+
+        output_runtime = "busybox"
+        output_command = "busybox httpd -f -v"
+
+        commands {
+            git.cloneExact(new git.CloneExactArgs {
+                directory = "docs"
+            })
+            velocity.shell("cd docs")
+            velocity.shell("npm install")
+            velocity.shell("npm build")
         }
     }
 }
 
-local buildInfo = List(
-    List("cli", "dist/velocity"),
-    List("api", "dist/api"),
-    List("agent", "dist/agent"),
-    List("ui", "dist/ui")
-)
+local function createGolangDeployment(n: String) = new Deployment {
+    name = n
+    runtime = "golang" // TODO: replace with an image that can just post the binary
 
-builds {
-    for (b in buildInfo) {
-        createGolangBuild(b[0], b[1])
+    workflows {
+        "Main app"
+    }
+
+    commands {
+        build.create(n)
     }
 }
 
 deployments {
+    for (g in golangApps) {
+        createGolangDeployment(g[0])
+    }
     new {
-        name = "CLI"
-        runtime = "golang"
+        name = "Docs"
+        runtime = "golang" // TODO: Same as the above TODO
 
         workflows {
             "Main app"
