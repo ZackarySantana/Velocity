@@ -1,42 +1,36 @@
 .SILENT:
 
 ENV_FILE=.env
-ENV=$(shell awk '{gsub(/#.*/, ""); printf "%s ", $$0}' $(ENV_FILE))
+-include $(ENV_FILE)
+export $(shell sed 's/#.*//' $(ENV_FILE) | xargs)
 
-pkl-gen:
-	make clean-pkl
+# Binaries
+GO=go
+PKL=pkl
+
+build-cli:
+	$(GO) build -o bin/velocity cmd/cli/main.go
+
+build-%:
+	$(GO) build -o bin/$* cmd/$*/main.go
+
+run-%:
+	$(GO) run cmd/$*/main.go
+
+pkl-gen: clean-pkl
 	pkl-gen-go --generator-settings=pkl/generator-settings.pkl pkl/velocity.pkl
-	@for file in pkl/prebuilts/*.pkl; do \
+	for file in pkl/prebuilts/*.pkl; do \
 		pkl-gen-go "$$file"; \
 	done
 
 pkl-test:
-	pkl test pkl/tests/sections/** pkl/tests/prebuilts/**
+	$(PKL) test pkl/tests/sections/** pkl/tests/prebuilts/**
 
-build-cli:
-	go build -o bin/velocity cmd/cli/main.go
+pkl-eval:
+	$(PKL) eval self.pkl
 
-agent:
-	$(ENV) go run cmd/agent/main.go
-
-build-agent:
-	go build -o bin/agent cmd/agent/main.go
-
-api:
-	$(ENV) go run cmd/api/main.go
-
-build-api:
-	go build -o bin/api cmd/api/main.go
-
-ui:
-	$(ENV) go run cmd/ui/main.go
-
-build-ui:
-	go build -o bin/ui cmd/ui/main.go
-
-clean:
+clean: clean-pkl
 	rm -rf bin
-	make clean-pkl
 
 clean-pkl:
 	rm -rf gen/pkl
