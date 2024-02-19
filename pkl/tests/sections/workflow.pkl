@@ -1,0 +1,97 @@
+module section_workflow
+
+amends "pkl:test"
+
+import "pkl:test"
+
+import "../../tests.pkl"
+import "../../velocity.pkl"
+
+// Test validation
+local test1 = (velocity) {
+    workflows {
+        new {
+            name = "Invalid test"
+            groups {
+                new {
+                    name = "g1"
+                    tests {
+                        "poll"
+                    }
+                }
+            }
+        }
+    }
+}
+
+local test2 = (velocity) {
+    workflows {
+        new {
+            name = "Valid test"
+            groups {
+                new {
+                    name = "g1"
+                    tests {
+                        "poll"
+                    }
+                }
+            }
+        }
+    }
+    tests {
+        new {
+            name = "poll"
+        }
+    }
+}
+
+// Runtime validation
+local runtime1 = (velocity) {
+    workflows {
+        new {
+            name = "Invalid runtime"
+            groups {
+                new {
+                    name = "g1"
+                    runtimes {
+                        "valid"
+                    }
+                }
+            }
+        }
+    }
+}
+
+local runtime2 = (velocity) {
+    workflows {
+        new {
+            name = "Valid runtime"
+            groups {
+                new {
+                    name = "g1"
+                    runtimes {
+                        "valid"
+                    }
+                }
+            }
+        }
+    }
+    runtimes {
+        new tests.ValidRuntime {}
+    }
+}
+
+facts {
+    ["invalid test"] {
+        test.catchOrNull(() -> test1.validateWorkflows(test1.getNames())).contains("workflow: 'Invalid test' has group: 'g1' with undefined tests")
+    }
+    ["invalid runtime"] {
+        test.catchOrNull(() -> runtime1.validateWorkflows(runtime1.getNames())).contains("workflow: 'Invalid runtime' has group: 'g1' with undefined runtimes")
+    }
+    ["valid test"] {
+        test.catchOrNull(() -> test2.validateWorkflows(test2.getNames())) == null
+    }
+    ["valid runtime"] {
+        test.catchOrNull(() -> runtime2.validateWorkflows(runtime2.getNames())) == null
+    }
+}

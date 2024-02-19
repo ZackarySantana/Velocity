@@ -1,0 +1,106 @@
+@ModuleInfo { minPklVersion = "0.0.1" } 
+@go.Package { name = "github.com/zackarysantana/velocity/gen/pkl/velocity" }
+module velocity 
+
+import "package://pkg.pkl-lang.org/pkl-go/pkl.golang@0.5.3#/go.pkl" 
+
+import "primitives/command.pkl"
+import "primitives/runtime.pkl"
+import "primitives/names.pkl"
+import "constructs/test.pkl"
+import "constructs/workflow.pkl"
+import "constructs/build.pkl"
+import "constructs/deployment.pkl"
+import "utils.pkl"
+
+// Command
+typealias PrebuiltCommand = command.PrebuiltCommand
+typealias ShellCommand = command.ShellCommand
+typealias OperationCommand = command.OperationCommand
+typealias Command = command.Command
+
+// Test
+typealias Test = test.Test
+
+// Runtime
+typealias DockerRuntime = runtime.DockerRuntime
+typealias MachineRuntime = runtime.MachineRuntime
+typealias Runtime = runtime.Runtime
+
+// Workflow
+typealias WorkflowGroup = workflow.WorkflowGroup
+typealias Workflow = workflow.Workflow
+
+// Build
+typealias Build = build.Build
+
+// Deployment
+typealias Deployment = deployment.Deployment
+
+// Etc
+
+// Sections
+// Tests
+tests: Listing<test.Test>
+
+// Tests validation
+function validateTest(t: test.Test, n: names.Names) =
+    utils.errorIfAny("test: '\(t.name)' has command errors", t.commands.toList().map((c) -> c.validate.apply(n)))
+function validateTests(n: names.Names) =
+    if (tests.toList().every((t) -> validateTest(t, n))) tests else throw("invalid tests")
+
+// Runtimes
+runtimes: Listing<runtime.Runtime>
+
+// Workflows
+workflows: Listing<workflow.Workflow>
+
+// Workflows validation
+function validateWorkflowGroup(w: workflow.WorkflowGroup, origin: String, n: names.Names) =
+    utils.errorIfAny("workflow: '\(origin)' has group: '\(w.name)' with undefined tests", utils.listDifference(w.tests.toList(), n.Tests)) &&
+    utils.errorIfAny("workflow: '\(origin)' has group: '\(w.name)' with undefined runtimes", utils.listDifference(w.runtimes.toList(), n.Runtimes))
+function validateWorkflow(w: workflow.Workflow, n: names.Names) =
+    if (w.groups.toList().every((g) -> validateWorkflowGroup(g, w.name, n))) true else throw("invalid workflow")
+function validateWorkflows(n: names.Names) =
+    if (workflows.toList().every((w) -> validateWorkflow(w, n))) workflows else throw("invalid workflows")
+
+// Builds
+builds: Listing<build.Build>
+
+// Builds validation
+function validateBuild(b: build.Build, n: names.Names) =
+    utils.errorIfAny("build: '\(b.name)' has undefined runtimes", utils.listDifference(b.getRuntimeNames(), n.Runtimes)) &&
+    utils.errorIfAny("build: '\(b.name)' has command errors", b.commands.toList().map((c) -> c.validate.apply(n)))
+function validateBuilds(n: names.Names) =
+    if (builds.toList().every((b) -> validateBuild(b, n))) builds else throw("invalid builds")
+
+// Deployments
+deployments: Listing<deployment.Deployment>
+
+// Deployments validation
+function validateDeployment(d: deployment.Deployment, n: names.Names) =
+    utils.errorIfAny("deployment: '\(d.name)' has undefined workflows", utils.listDifference(d.getWorkflowNames(), n.Workflows)) &&
+    utils.errorIfAny("deployment: '\(d.name)' has undefined runtimes", utils.listDifference(d.getRuntimeNames(), n.Runtimes)) &&
+    utils.errorIfAny("deployment: '\(d.name)' has command errors", d.commands.toList().map((c) -> c.validate.apply(n)))
+function validateDeployments(n: names.Names) =
+    if (deployments.toList().every((d) -> validateDeployment(d, n))) deployments else throw("invalid deployments")
+
+// Helpers
+function getNames(): names.Names = new {
+    Tests = tests.toList().map((t) -> t.name)
+    Runtimes = runtimes.toList().map((r) -> r.name)
+    Workflows = workflows.toList().map((w) -> w.name)
+    Builds = builds.toList().map((b) -> b.name)
+    Deployments = deployments.toList().map((d) -> d.name)
+}
+
+output {
+    value = new {
+        local names = getNames()
+        ["tests"] = validateTests(names)
+        ["runtimes"] = runtimes
+        ["workflows"] = validateWorkflows(names)
+        ["builds"] = validateBuilds(names)
+        ["deployments"] = validateDeployments(names)
+    }
+}

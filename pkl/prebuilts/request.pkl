@@ -1,0 +1,34 @@
+
+@go.Package { name = "github.com/zackarysantana/velocity/gen/pkl/prebuilts/request" }
+module request_prebuilt
+
+import "package://pkg.pkl-lang.org/pkl-go/pkl.golang@0.5.3#/go.pkl" 
+
+import "../primitives/command.pkl"
+
+typealias Method = "get"|"post"|"put"|"delete"
+
+class Response {
+    body: String?
+    code: Int
+}
+
+class Request {
+    method: Method
+    url: String
+
+    body: String?
+    timeout: Int?
+    headers: Mapping<String, String>?
+}
+
+function create(request: Request, response: Response) = new command.PrebuiltCommand {
+    prebuilt = "request.\(request.method)"
+    params {
+        ["body"] = request.body
+        ["headers"] = request.headers
+        ["url"] = request.url
+        ["timeout"] = request.timeout
+        ["response"] = response
+    }
+}

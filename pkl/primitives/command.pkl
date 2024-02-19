@@ -1,0 +1,26 @@
+@go.Package { name = "github.com/zackarysantana/velocity/gen/pkl/primitives/command" }
+module command_primitive
+
+import "package://pkg.pkl-lang.org/pkl-go/pkl.golang@0.5.3#/go.pkl" 
+
+import "names.pkl"
+
+abstract class Command {
+    working_directory: String?
+    env: Mapping<String, String>?
+
+    hidden validate = (n: names.Names) -> null
+}
+
+open class PrebuiltCommand extends Command {
+    prebuilt: String
+    params: Mapping<String, Any>?
+}
+
+class ShellCommand extends Command {
+    command: String
+}
+
+class OperationCommand extends Command {
+    operation: String
+}

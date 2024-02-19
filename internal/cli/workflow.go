@@ -19,7 +19,7 @@ func CreateWorkflowList(app *app) *cli.Command {
 				return err
 			}
 
-			for _, w := range config.WorkflowSection {
+			for _, w := range config.Workflows {
 				app.logf(ctx, "Workflow: %s", w.Name)
 				for _, g := range w.Groups {
 					app.logf(ctx, "    Group: %s", g.Name)

@@ -1,0 +1,110 @@
+amends "pkl/velocity.pkl"
+import "pkl/prebuilts/git.pkl"
+import "pkl/prebuilts/build.pkl"
+
+local install_pkl = new ShellCommand {
+    command = "curl -L -o pkl https://github.com/apple/pkl/releases/download/0.25.2/pkl-alpine-linux-amd64 && chmod +x ./pkl"
+}
+
+tests {
+    new {
+        name = "Golang tests"
+        commands {
+            git.clone()
+            new ShellCommand {
+                command = "go test ./..."
+            }
+        }
+    }
+    new {
+        name = "Pkl"
+        commands {
+            git.clone()
+            install_pkl
+            new ShellCommand {
+                command = "make PKL_BINARY=./pkl pkl-test"
+            }
+        }
+    }
+}
+
+runtimes {
+    new DockerRuntime {
+        name = "golang"
+        image = "golang:1.21"
+    }
+    new DockerRuntime {
+        name = "curl"
+        image = "curlimages/curl:8.6.0"
+    }
+}
+
+workflows {
+    new {
+        name = "Main app"
+        groups {
+            new {
+                name = "Golang tests"
+                runtimes {
+                    "golang"
+                }
+                tests {
+                    "Golang tests"
+                }
+            }
+            new {
+                name = "Pkl"
+                runtimes {
+                    "curl"
+                }
+                tests {
+                    "Pkl"
+                }
+            }
+        }
+    }
+}
+
+local function createGolangBuild(n: String, o: String) = new Build {
+    name = n
+    build_runtime = "golang"
+    output = o
+
+    output_runtime = "golang"
+    output_command = o
+
+    commands {
+        git.clone()
+        new ShellCommand {
+            command = "make build-\(name)"
+        }
+    }
+}
+
+local buildInfo = List(
+    List("cli", "dist/velocity"),
+    List("api", "dist/api"),
+    List("agent", "dist/agent"),
+    List("ui", "dist/ui")
+)
+
+builds {
+    for (b in buildInfo) {
+        createGolangBuild(b[0], b[1])
+    }
+}
+
+deployments {
+    new {
+        name = "CLI"
+        runtime = "golang"
+
+        workflows {
+            "Main app"
+        }
+
+        commands {
+            build.create("cli") 
+        }
+    }
+}

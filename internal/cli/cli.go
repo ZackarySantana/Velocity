@@ -98,6 +98,8 @@ func (a *app) isSilent(c *cli.Context) bool {
 	return a.silent
 }
 
+// logf is a wrapper around fmt.Printf that checks if the
+// silent flag is set before logging.
 func (a *app) logf(c *cli.Context, msg string, v ...any) {
 	if a.isSilent(c) {
 		return

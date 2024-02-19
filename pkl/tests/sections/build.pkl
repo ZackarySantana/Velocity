@@ -1,0 +1,89 @@
+module section_build
+
+amends "pkl:test"
+
+import "pkl:test"
+
+import "../../tests.pkl"
+import "../../velocity.pkl"
+
+// Command validation
+local cmd1 = (velocity) {
+    builds {
+        new {
+            name = "Invalid command"
+            build_runtime = "valid"
+            output = ""
+            commands {
+                new tests.InvalidCommand {}
+            }
+        }
+    }
+
+    runtimes {
+        new tests.ValidRuntime {}
+    }
+}
+
+local cmd2 = (velocity) {
+    builds {
+        new {
+            name = "Valid command"
+            build_runtime = "valid"
+            output = ""
+            commands {
+                new tests.ValidCommand {}
+            }
+        }
+    }
+
+    runtimes {
+        new tests.ValidRuntime {}
+    }
+}
+
+// Runtime validation
+local runtime1 = (velocity) {
+    builds {
+        new {
+            name = "Invalid runtime"
+            build_runtime = "valid"
+            output = ""
+            commands {
+                new tests.ValidCommand {}
+            }
+        }
+    }
+}
+
+local runtime2 = (velocity) {
+    builds {
+        new {
+            name = "Invalid command"
+            build_runtime = "valid"
+            output = ""
+            commands {
+                new tests.ValidCommand {}
+            }
+        }
+    }
+
+    runtimes {
+        new tests.ValidRuntime {}
+    }
+}
+
+facts {
+    ["invalid test"] {
+        test.catchOrNull(() -> cmd1.validateBuilds(cmd1.getNames())).contains("build: 'Invalid command' has command errors")
+    }
+    ["invalid runtime"] {
+        test.catchOrNull(() -> runtime1.validateBuilds(runtime1.getNames())).contains("build: 'Invalid runtime' has undefined runtimes")
+    }
+    ["valid test"] {
+        test.catchOrNull(() -> cmd2.validateBuilds(cmd2.getNames())) == null
+    }
+    ["valid runtime"] {
+        test.catchOrNull(() -> runtime2.validateBuilds(runtime2.getNames())) == null
+    }
+}

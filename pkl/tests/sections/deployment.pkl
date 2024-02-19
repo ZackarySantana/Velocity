@@ -1,0 +1,123 @@
+module section_deployment
+
+amends "pkl:test"
+
+import "pkl:test"
+
+import "../../tests.pkl"
+import "../../velocity.pkl"
+
+// Runtime validation
+local runtime1 = (velocity) {
+    deployments {
+        new {
+            name = "Invalid runtime"
+            runtime = "valid"
+        }
+    }
+}
+
+local runtime2 = (velocity) {
+    deployments {
+        new {
+            name = "Valid runtime"
+            runtime = "valid"
+        }
+    }
+    runtimes {
+        new tests.ValidRuntime {}
+    }
+}
+
+// Workflow validation
+local workflow1 = (velocity) {
+    deployments {
+        new {
+            name = "Invalid workflow"
+            runtime = "valid"
+            workflows {
+                "valid"
+            }
+        }
+    }
+    runtimes {
+        new tests.ValidRuntime {}
+    }
+}
+
+local workflow2 = (velocity) {
+    deployments {
+        new {
+            name = "Valid workflow"
+            runtime = "valid"
+            workflows {
+                "valid"
+            }
+        }
+    }
+    runtimes {
+        new tests.ValidRuntime {}
+    }
+    workflows {
+        tests.createValidWorkflow()
+    }
+}
+
+// Command validation
+local cmd1 = (velocity) {
+    deployments {
+        new {
+            name = "Invalid command"
+            runtime = "valid"
+            commands {
+                new tests.InvalidCommand {}
+            }
+        }
+    }
+    runtimes {
+        new tests.ValidRuntime {}
+    }
+}
+
+local cmd2 = (velocity) {
+    deployments {
+        new {
+            name = "Valid command"
+            runtime = "valid"
+            commands {
+                new tests.RequireBuildCommand {
+                    name = "test"
+                }
+            }
+        }
+    }
+    runtimes {
+        new tests.ValidRuntime {}
+    }
+    builds {
+        new {
+            name = "test"
+        }
+    }
+}
+
+facts {
+    ["invalid runtime"] {
+        test.catchOrNull(() -> runtime1.validateDeployments(runtime1.getNames())).contains("deployment: 'Invalid runtime' has undefined runtimes")
+    }
+    ["invalid workflow"] {
+        test.catchOrNull(() -> workflow1.validateDeployments(workflow1.getNames())).contains("deployment: 'Invalid workflow' has undefined workflows")
+    }
+    ["invalid command"] {
+        test.catchOrNull(() -> cmd1.validateDeployments(cmd1.getNames())).contains("deployment: 'Invalid command' has command errors")
+    }
+    ["valid runtime"] {
+        test.catchOrNull(() -> runtime2.validateDeployments(runtime2.getNames())) == null
+    }
+    ["valid workflow"] {
+        test.catchOrNull(() -> workflow2.validateDeployments(workflow2.getNames())) == null
+    }
+    ["valid command"] {
+        test.catchOrNull(() -> cmd2.validateDeployments(cmd2.getNames())) == null
+    }
+}

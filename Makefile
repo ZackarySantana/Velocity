@@ -1,28 +1,36 @@
 .SILENT:
 
 ENV_FILE=.env
-ENV=$(shell awk '{gsub(/#.*/, ""); printf "%s ", $$0}' $(ENV_FILE))
+-include $(ENV_FILE)
+export $(shell sed 's/#.*//' $(ENV_FILE) | xargs)
+
+# Binaries
+GO=go
+PKL=pkl
 
 build-cli:
-	go build -o bin/velocity cmd/cli/main.go
+	$(GO) build -o bin/velocity cmd/cli/main.go
 
-agent:
-	$(ENV) go run cmd/agent/main.go
+build-%:
+	$(GO) build -o bin/$* cmd/$*/main.go
 
-build-agent:
-	go build -o bin/agent cmd/agent/main.go
+run-%:
+	$(GO) run cmd/$*/main.go
 
-api:
-	$(ENV) go run cmd/api/main.go
+pkl-gen: clean-pkl
+	pkl-gen-go --generator-settings=pkl/generator-settings.pkl pkl/velocity.pkl
+	for file in pkl/prebuilts/*.pkl; do \
+		pkl-gen-go "$$file"; \
+	done
 
-build-api:
-	go build -o bin/api cmd/api/main.go
+pkl-test:
+	$(PKL) test pkl/tests/sections/** pkl/tests/prebuilts/**
 
-ui:
-	$(ENV) go run cmd/ui/main.go
+pkl-eval:
+	$(PKL) eval self.pkl
 
-build-ui:
-	go build -o bin/ui cmd/ui/main.go
+clean: clean-pkl
+	rm -rf bin
 
-clean:
-	rm -r bin
+clean-pkl:
+	rm -rf gen/pkl

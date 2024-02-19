@@ -1,0 +1,12 @@
+@go.Package { name = "github.com/zackarysantana/velocity/gen/pkl/primitives/names" }
+module names_primitive
+
+import "package://pkg.pkl-lang.org/pkl-go/pkl.golang@0.5.3#/go.pkl" 
+
+class Names {
+    Tests: List<String>
+    Runtimes: List<String>
+    Workflows: List<String>
+    Builds: List<String>
+    Deployments: List<String>
+}
