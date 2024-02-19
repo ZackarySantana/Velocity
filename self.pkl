@@ -2,6 +2,10 @@ amends "pkl/velocity.pkl"
 import "pkl/prebuilts/git.pkl"
 import "pkl/prebuilts/build.pkl"
 
+local install_pkl = new ShellCommand {
+    command = "curl -L -o pkl https://github.com/apple/pkl/releases/download/0.25.2/pkl-alpine-linux-amd64 && chmod +x ./pkl"
+}
+
 tests {
     new {
         name = "Golang tests"
@@ -12,6 +16,16 @@ tests {
             }
         }
     }
+    new {
+        name = "Pkl"
+        commands {
+            git.clone()
+            install_pkl
+            new ShellCommand {
+                command = "make PKL_BINARY=./pkl pkl-test"
+            }
+        }
+    }
 }
 
 runtimes {
@@ -19,11 +33,15 @@ runtimes {
         name = "golang"
         image = "golang:1.21"
     }
+    new DockerRuntime {
+        name = "curl"
+        image = "curlimages/curl:8.6.0"
+    }
 }
 
 workflows {
     new {
-        name = "Golang tests"
+        name = "Main app"
         groups {
             new {
                 name = "Golang tests"
@@ -32,6 +50,15 @@ workflows {
                 }
                 tests {
                     "Golang tests"
+                }
+            }
+            new {
+                name = "Pkl"
+                runtimes {
+                    "curl"
+                }
+                tests {
+                    "Pkl"
                 }
             }
         }
@@ -62,7 +89,7 @@ deployments {
         runtime = "golang"
 
         workflows {
-            "Golang tests"
+            "Main app"
         }
 
         commands {
