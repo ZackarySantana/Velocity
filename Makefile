@@ -9,7 +9,7 @@ test:
 	)
 
 build-cli:
-	go build -o $(GOPATH)/bin/velocity cmd/cli/main.go
+	go build -o ./bin/velocity cmd/cli/main.go
 
 agent:
 	$(ENV) go run cmd/agent/main.go
@@ -27,4 +27,4 @@ packages:
 	echo $(PACKAGES)
 
 clean:
-	rm $(GOPATH)/bin/velocity
+	rm ./bin/velocity
