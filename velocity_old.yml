@@ -1,0 +1,98 @@
+config:
+    project: velocity
+    registry: docker.io/library
+    server: http://localhost:8080
+    ui: http://localhost:8080
+
+tests:
+    velocity:
+        language: golang
+        framework: std
+
+    test-golang-std:
+        directory: testdata/golang/std
+        language: golang
+        framework: std
+
+    test-javascript-jest:
+        directory: testdata/javascript/jest
+        language: javascript
+        framework: jest
+
+    test-python-pytest:
+        directory: testdata/python/pytest
+        language: python
+        framework: pytest
+
+images:
+    ubuntu:
+        image: ubuntu:mantic
+    alpine:
+        image: alpine:latest
+    golang:
+        image: golang:latest
+    golang-1-18:
+        image: golang:1.18
+    golang-1-16:
+        image: golang:1.16
+    javascript:
+        image: node:latest
+    python:
+        image: python:latest
+
+builds:
+    local:
+        input:
+            image: golang
+            directory: .
+            run: make build-cli
+            path: $GOPATH/bin/velocity
+        output:
+            path: $GOPATH/bin/velocity
+    deploy:
+        input:
+            image: golang
+            directory: .
+            run: make build-cli
+            path: $GOPATH/bin/velocity
+        output:
+            url: $DEPLOY_URL
+            method: POST
+            headers:
+                Authoriization: Bearer $DEPLOY_API_KEY
+
+workflows:
+    all-tests:
+        tests:
+            golang:
+                - test-golang-std
+            javascript:
+                - test-javascript-jest
+            python:
+                - test-python-pytest
+
+    velocity:
+        tests:
+            golang:
+                - velocity
+            golang-1-18:
+                - velocity
+
+    golang:
+        tests:
+            golang:
+                - test-golang-std
+            golang-1-18:
+                - test-golang-std
+            golang-1-16:
+                - test-golang-std
+
+    javascript:
+        tests:
+            javascript:
+                - test-javascript-jest
+
+    python:
+        tests:
+            python:
+                - test-python-pytest

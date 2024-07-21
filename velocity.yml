@@ -1,0 +1,36 @@
+tests:
+    - name: Std golang tests
+      language: golang
+    - name: Custom golang tests
+      commands:
+          - shell: make test
+    - name: Testdata Golang
+      directory: testdata/golang/std
+      language: golang
+
+images:
+    - name: golang
+      image: golang:latest
+
+jobs:
+    - name: Golang tests
+      tests:
+          - Std golang tests
+          - Custom golang tests
+      images:
+          - golang
+    - name: Testdata
+      tests:
+          - Testdata Golang
+      images:
+          - golang
+
+routines:
+    # Pull requests and base commits
+    - name: All tests
+      jobs:
+          - Golang tests
+          - Testdata
+    - name: Self tests
+      jobs:
+          - Golang tests
