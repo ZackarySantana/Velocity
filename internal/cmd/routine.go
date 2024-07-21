@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 
+	"github.com/samber/oops"
 	"github.com/urfave/cli/v3"
 	"github.com/zackarysantana/velocity/src/config"
 )
@@ -23,10 +24,9 @@ var (
 				return err
 			}
 
-			Logger(cmd).Debug("Adding routine")
 			Logger(cmd).Info("Tests", "tests", c.Tests)
 
-			return nil
+			return oops.Code("Testing").Errorf("Not implemented")
 		},
 	}
 )
