@@ -35,19 +35,23 @@ func (h *PlainHandler) Enabled(ctx context.Context, level slog.Level) bool {
 func (h *PlainHandler) Handle(ctx context.Context, r slog.Record) error {
 	buf := make([]byte, 0, 1024)
 
+	buf = append(buf, r.Message...)
+	r.Attrs(func(a slog.Attr) bool {
+		buf = append(buf, ": "+a.Value.String()...)
+		return true
+	})
+	buf = append(buf, '\n')
+
 	var err error
 	switch r.Level {
-	case slog.LevelInfo:
-		buf = append(buf, r.Message...)
 	case slog.LevelDebug:
-		buf = append(buf, color.CyanString(r.Message)...)
+		buf = []byte(color.CyanString(string(buf)))
 	case slog.LevelWarn:
-		buf = append(buf, color.YellowString(r.Message)...)
+		buf = []byte(color.YellowString(string(buf)))
 	case slog.LevelError:
-		buf = append(buf, color.RedString(r.Message)...)
+		buf = []byte(color.RedString(string(buf)))
 	}
 
-	buf = append(buf, '\n')
 	_, err = h.out.Write(buf)
 	return err
 }
