@@ -2,19 +2,6 @@ package config
 
 import "gopkg.in/yaml.v3"
 
-type Command struct {
-	Shell string `yaml:"shell"`
-}
-type Test struct {
-	Name string `yaml:"name"`
-
-	Language string `yaml:"language"`
-	Library  string `yaml:"library"`
-
-	Commands []Command
-
-	Directory string `yaml:"directory"`
-}
 type TestSection []Test
 
 type Image struct {
