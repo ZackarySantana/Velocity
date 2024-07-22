@@ -70,7 +70,7 @@ func CreateCommand() *cli.Command {
 		},
 		ExitErrHandler: func(ctx context.Context, cmd *cli.Command, err error) {
 			Logger(cmd).Error(
-				err.Error(),
+				"Exiting with error",
 				slog.Any("error", err), // unwraps and flattens error context
 			)
 		},
