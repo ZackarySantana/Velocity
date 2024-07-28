@@ -14,10 +14,10 @@ type Config struct {
 
 func (c *Config) Validate() error {
 	catcher := catcher.New()
-	catcher.Catch(c.Tests.Validate())
-	catcher.Catch(c.Images.Validate())
-	catcher.Catch(c.Jobs.Validate())
-	catcher.Catch(c.Routines.Validate())
+	catcher.Catch(validate(&c.Tests, c))
+	catcher.Catch(validate(&c.Images, c))
+	catcher.Catch(validate(&c.Jobs, c))
+	catcher.Catch(validate(&c.Routines, c))
 	return catcher.Resolve()
 }
 

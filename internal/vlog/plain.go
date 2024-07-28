@@ -44,9 +44,12 @@ func (h *PlainHandler) Handle(ctx context.Context, r slog.Record) error {
 			buf = append(buf, fmt.Sprintf(" %s='%s'", a.Key, a.Value.String())...)
 			return true
 		})
-	default:
+	case slog.LevelError:
 		r.Attrs(func(a slog.Attr) bool {
-			buf = append(buf, ": "+a.Value.String()...)
+			if a.Key == "error" {
+				buf = append(buf, ": "+a.Value.String()...)
+				return false
+			}
 			return true
 		})
 	}

@@ -7,15 +7,30 @@ import (
 
 type RoutineSection []Routine
 
-func (r *RoutineSection) Validate() error {
+func (r *RoutineSection) validateSyntax() error {
 	if r == nil {
 		return nil
 	}
 	catcher := catcher.New()
 	for _, routine := range *r {
-		catcher.Catch(validate(&routine))
+		catcher.Catch(routine.Error().Wrap(routine.validateSyntax()))
 	}
 	return catcher.Resolve()
+}
+
+func (r *RoutineSection) validateIntegrity(c *Config) error {
+	if r == nil {
+		return nil
+	}
+	catcher := catcher.New()
+	for _, routine := range *r {
+		catcher.Catch(routine.Error().Wrap(routine.validateIntegrity(c)))
+	}
+	return catcher.Resolve()
+}
+
+func (r *RoutineSection) Error() oops.OopsErrorBuilder {
+	return oops.Code("routine_section")
 }
 
 type Routine struct {
@@ -24,15 +39,33 @@ type Routine struct {
 }
 
 func (r *Routine) validateSyntax() error {
+	catcher := catcher.New()
 	if r.Name == "" {
-		return oops.Errorf("name is required")
+		catcher.Error("name is required")
 	}
 	if len(r.Jobs) == 0 {
-		return oops.Errorf("jobs are required")
+		catcher.Error("jobs are required")
 	}
-	return nil
+	return catcher.Resolve()
 }
 
 func (r *Routine) validateIntegrity(config *Config) error {
-	return nil
+	catcher := catcher.New()
+	for _, jobName := range r.Jobs {
+		found := false
+		for _, job := range config.Jobs {
+			if job.Name == jobName {
+				found = true
+				break
+			}
+		}
+		if !found {
+			catcher.Error("job not found")
+		}
+	}
+	return catcher.Resolve()
+}
+
+func (r *Routine) Error() oops.OopsErrorBuilder {
+	return oops.With("routine_name", r.Name)
 }

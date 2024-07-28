@@ -8,15 +8,30 @@ import (
 
 type TestSection []Test
 
-func (t *TestSection) Validate() error {
+func (t *TestSection) validateSyntax() error {
 	if t == nil {
 		return nil
 	}
 	catcher := catcher.New()
 	for _, test := range *t {
-		catcher.Catch(validate(&test))
+		catcher.Catch(test.Error().Wrap(test.validateSyntax()))
 	}
 	return catcher.Resolve()
+}
+
+func (t *TestSection) validateIntegrity(c *Config) error {
+	if t == nil {
+		return nil
+	}
+	catcher := catcher.New()
+	for _, test := range *t {
+		catcher.Catch(test.Error().Wrap(test.validateIntegrity(c)))
+	}
+	return catcher.Resolve()
+}
+
+func (t *TestSection) Error() oops.OopsErrorBuilder {
+	return oops.Code("test_section")
 }
 
 type Command struct {
@@ -27,20 +42,25 @@ type Command struct {
 }
 
 func (c *Command) validateSyntax() error {
+	catcher := catcher.New()
 	if c.Shell == "" && c.Prebuilt == "" {
-		return oops.Errorf("must specify a shell or prebuilt command")
+		catcher.Error("must specify a shell or prebuilt command")
 	}
 	if c.Shell != "" && c.Prebuilt != "" {
-		return oops.Errorf("cannot specify both a shell and prebuilt command")
+		catcher.Error("cannot specify both a shell and prebuilt command")
 	}
 	if c.Shell != "" && len(c.Params) > 0 {
-		return oops.Errorf("cannot specify params with a shell command")
+		catcher.Error("cannot specify params with a shell command")
 	}
-	return nil
+	return catcher.Resolve()
 }
 
 func (c *Command) validateIntegrity(config *Config) error {
 	return nil
+}
+
+func (c *Command) Error() oops.OopsErrorBuilder {
+	return oops.With("shell", c.Shell).With("prebuilt", c.Prebuilt)
 }
 
 func (c *Command) ToEntity() test.Command {
@@ -63,28 +83,31 @@ type Test struct {
 }
 
 func (t *Test) validateSyntax() error {
+	catcher := catcher.New()
 	if t.Name == "" {
-		return oops.Errorf("name is required")
+		catcher.Error("name is required")
 	}
 	if t.Language == "" && len(t.Commands) == 0 {
-		return oops.Errorf("language or commands are required")
+		catcher.Error("language or commands are required")
 	}
 	if t.Language != "" && len(t.Commands) > 0 {
-		return oops.Errorf("cannot specify both a language and commands")
+		catcher.Error("cannot specify both a language and commands")
 	}
 	if t.Library != "" && len(t.Commands) > 0 {
-		return oops.Errorf("cannot specify a library with commands")
+		catcher.Error("cannot specify a library with commands")
 	}
 	for _, cmd := range t.Commands {
-		if err := cmd.validateSyntax(); err != nil {
-			return oops.Wrapf(err, "command validation failed")
-		}
+		catcher.Catch(cmd.Error().Wrap(cmd.validateSyntax()))
 	}
-	return nil
+	return catcher.Resolve()
 }
 
 func (t *Test) validateIntegrity(config *Config) error {
 	return nil
+}
+
+func (t *Test) Error() oops.OopsErrorBuilder {
+	return oops.With("test_name", t.Name).With("language", t.Language).With("library", t.Library)
 }
 
 func (t *Test) ToEntity() *test.Test {

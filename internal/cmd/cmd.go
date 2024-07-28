@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 
 	"github.com/samber/oops"
@@ -30,6 +31,7 @@ func CreateCommand() *cli.Command {
 		},
 		ExitErrHandler: func(ctx context.Context, cmd *cli.Command, err error) {
 			oops, _ := oops.AsOops(err)
+			fmt.Println(oops)
 			Logger(cmd).Error(
 				"Exiting with error",
 				slog.Any("error", oops.LogValuer()),

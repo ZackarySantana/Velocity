@@ -27,11 +27,11 @@ func (c *Catcher) Wrap(err error, msg string, a ...any) {
 	c.Catch(errors.Join(err, fmt.Errorf(msg, a...)))
 }
 
-func (c *Catcher) Error(msg string) {
+func (c *Catcher) Error(msg string, a ...any) {
 	if msg == "" {
 		return
 	}
-	c.Catch(errors.New(msg))
+	c.Catch(fmt.Errorf(msg, a...))
 }
 
 func (c *Catcher) Resolve() error {

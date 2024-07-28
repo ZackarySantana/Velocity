@@ -7,15 +7,30 @@ import (
 
 type ImageSection []Image
 
-func (i *ImageSection) Validate() error {
+func (i *ImageSection) validateSyntax() error {
 	if i == nil {
 		return nil
 	}
 	catcher := catcher.New()
 	for _, image := range *i {
-		catcher.Catch(validate(&image))
+		catcher.Catch(image.Error().Wrap(image.validateSyntax()))
 	}
 	return catcher.Resolve()
+}
+
+func (i *ImageSection) validateIntegrity(c *Config) error {
+	if i == nil {
+		return nil
+	}
+	catcher := catcher.New()
+	for _, image := range *i {
+		catcher.Catch(image.Error().Wrap(image.validateIntegrity(c)))
+	}
+	return catcher.Resolve()
+}
+
+func (i *ImageSection) Error() oops.OopsErrorBuilder {
+	return oops.Code("image_section")
 }
 
 type Image struct {
@@ -24,15 +39,20 @@ type Image struct {
 }
 
 func (i *Image) validateSyntax() error {
+	catcher := catcher.New()
 	if i.Name == "" {
-		return oops.Errorf("name is required")
+		catcher.Error("name is required")
 	}
 	if i.Image == "" {
-		return oops.Errorf("image is required")
+		catcher.Error("image is required")
 	}
-	return nil
+	return catcher.Resolve()
 }
 
 func (i *Image) validateIntegrity(config *Config) error {
 	return nil
+}
+
+func (i *Image) Error() oops.OopsErrorBuilder {
+	return oops.With("image_name", i.Name)
 }
