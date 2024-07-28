@@ -24,6 +24,10 @@ var (
 				return err
 			}
 
+			if err := c.Validate(); err != nil {
+				return oops.Wrap(err)
+			}
+
 			Logger(cmd).Info("Tests", "tests", c.Tests)
 
 			return oops.Code("Testing").Errorf("Not implemented")

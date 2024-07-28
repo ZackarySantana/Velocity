@@ -2,8 +2,22 @@ package config
 
 import (
 	"github.com/samber/oops"
+	"github.com/zackarysantana/velocity/src/catcher"
 	"github.com/zackarysantana/velocity/src/entities/test"
 )
+
+type TestSection []Test
+
+func (t *TestSection) Validate() error {
+	if t == nil {
+		return nil
+	}
+	catcher := catcher.New()
+	for _, test := range *t {
+		catcher.Catch(test.Validate())
+	}
+	return catcher.Resolve()
+}
 
 type Command struct {
 	Shell string `yaml:"shell"`
