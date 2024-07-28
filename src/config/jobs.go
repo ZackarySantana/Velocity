@@ -13,7 +13,7 @@ func (j *JobSection) Validate() error {
 	}
 	catcher := catcher.New()
 	for _, job := range *j {
-		catcher.Catch(job.Validate())
+		catcher.Catch(validate(&job))
 	}
 	return catcher.Resolve()
 }
@@ -24,8 +24,7 @@ type Job struct {
 	Images []string `yaml:"images"`
 }
 
-func (j *Job) Validate() error {
-	oops := oops.With("job", *j)
+func (j *Job) validateSyntax() error {
 	if j.Name == "" {
 		return oops.Errorf("name is required")
 	}
@@ -35,5 +34,9 @@ func (j *Job) Validate() error {
 	if len(j.Images) == 0 {
 		return oops.Errorf("images are required")
 	}
+	return nil
+}
+
+func (j *Job) validateIntegrity(config *Config) error {
 	return nil
 }

@@ -14,7 +14,7 @@ func (t *TestSection) Validate() error {
 	}
 	catcher := catcher.New()
 	for _, test := range *t {
-		catcher.Catch(test.Validate())
+		catcher.Catch(validate(&test))
 	}
 	return catcher.Resolve()
 }
@@ -26,8 +26,7 @@ type Command struct {
 	Params   map[string]interface{} `yaml:"params"`
 }
 
-func (c *Command) Validate() error {
-	oops := oops.With("command", *c)
+func (c *Command) validateSyntax() error {
 	if c.Shell == "" && c.Prebuilt == "" {
 		return oops.Errorf("must specify a shell or prebuilt command")
 	}
@@ -37,6 +36,10 @@ func (c *Command) Validate() error {
 	if c.Shell != "" && len(c.Params) > 0 {
 		return oops.Errorf("cannot specify params with a shell command")
 	}
+	return nil
+}
+
+func (c *Command) validateIntegrity(config *Config) error {
 	return nil
 }
 
@@ -59,8 +62,7 @@ type Test struct {
 	Directory string `yaml:"directory"`
 }
 
-func (t *Test) Validate() error {
-	oops := oops.With("test", *t)
+func (t *Test) validateSyntax() error {
 	if t.Name == "" {
 		return oops.Errorf("name is required")
 	}
@@ -74,10 +76,14 @@ func (t *Test) Validate() error {
 		return oops.Errorf("cannot specify a library with commands")
 	}
 	for _, cmd := range t.Commands {
-		if err := cmd.Validate(); err != nil {
+		if err := cmd.validateSyntax(); err != nil {
 			return oops.Wrapf(err, "command validation failed")
 		}
 	}
+	return nil
+}
+
+func (t *Test) validateIntegrity(config *Config) error {
 	return nil
 }
 

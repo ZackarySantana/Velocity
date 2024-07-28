@@ -13,7 +13,7 @@ func (i *ImageSection) Validate() error {
 	}
 	catcher := catcher.New()
 	for _, image := range *i {
-		catcher.Catch(image.Validate())
+		catcher.Catch(validate(&image))
 	}
 	return catcher.Resolve()
 }
@@ -23,13 +23,16 @@ type Image struct {
 	Image string `yaml:"image"`
 }
 
-func (i *Image) Validate() error {
-	oops := oops.With("image", *i)
+func (i *Image) validateSyntax() error {
 	if i.Name == "" {
 		return oops.Errorf("name is required")
 	}
 	if i.Image == "" {
 		return oops.Errorf("image is required")
 	}
+	return nil
+}
+
+func (i *Image) validateIntegrity(config *Config) error {
 	return nil
 }

@@ -13,7 +13,7 @@ func (r *RoutineSection) Validate() error {
 	}
 	catcher := catcher.New()
 	for _, routine := range *r {
-		catcher.Catch(routine.Validate())
+		catcher.Catch(validate(&routine))
 	}
 	return catcher.Resolve()
 }
@@ -23,13 +23,16 @@ type Routine struct {
 	Jobs []string `yaml:"jobs"`
 }
 
-func (r *Routine) Validate() error {
-	oops := oops.With("routine", *r)
+func (r *Routine) validateSyntax() error {
 	if r.Name == "" {
 		return oops.Errorf("name is required")
 	}
 	if len(r.Jobs) == 0 {
 		return oops.Errorf("jobs are required")
 	}
+	return nil
+}
+
+func (r *Routine) validateIntegrity(config *Config) error {
 	return nil
 }
