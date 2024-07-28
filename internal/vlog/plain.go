@@ -2,6 +2,7 @@ package vlog
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"log/slog"
 
@@ -36,13 +37,20 @@ func (h *PlainHandler) Handle(ctx context.Context, r slog.Record) error {
 	buf := make([]byte, 0, 1024)
 
 	buf = append(buf, r.Message...)
-	r.Attrs(func(a slog.Attr) bool {
-		buf = append(buf, ": "+a.Value.String()...)
-		return true
-	})
-	buf = append(buf, '\n')
 
-	var err error
+	switch r.Level {
+	case slog.LevelDebug:
+		r.Attrs(func(a slog.Attr) bool {
+			buf = append(buf, fmt.Sprintf(" %s='%s'", a.Key, a.Value.String())...)
+			return true
+		})
+	default:
+		r.Attrs(func(a slog.Attr) bool {
+			buf = append(buf, ": "+a.Value.String()...)
+			return true
+		})
+	}
+
 	switch r.Level {
 	case slog.LevelDebug:
 		buf = []byte(color.CyanString(string(buf)))
@@ -52,7 +60,8 @@ func (h *PlainHandler) Handle(ctx context.Context, r slog.Record) error {
 		buf = []byte(color.RedString(string(buf)))
 	}
 
-	_, err = h.out.Write(buf)
+	buf = append(buf, '\n')
+	_, err := h.out.Write(buf)
 	return err
 }
 
