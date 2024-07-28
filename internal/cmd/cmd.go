@@ -35,7 +35,3 @@ func CreateCommand() *cli.Command {
 		},
 	}
 }
-
-func Logger(cmd *cli.Command) *slog.Logger {
-	return cmd.Root().Metadata["logger"].(*slog.Logger)
-}

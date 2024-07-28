@@ -100,3 +100,7 @@ func setLogger(_ context.Context, cmd *cli.Command) error {
 	logger.Debug("Starting logger", "cmd", os.Args, "version", cmd.Version, "ip", stats.GetIP())
 	return nil
 }
+
+func Logger(cmd *cli.Command) *slog.Logger {
+	return cmd.Root().Metadata["logger"].(*slog.Logger)
+}
