@@ -4,6 +4,7 @@ import (
 	"context"
 	"log/slog"
 
+	"github.com/samber/oops"
 	"github.com/urfave/cli/v3"
 )
 
@@ -28,9 +29,10 @@ func CreateCommand() *cli.Command {
 			routine,
 		},
 		ExitErrHandler: func(ctx context.Context, cmd *cli.Command, err error) {
+			oops, _ := oops.AsOops(err)
 			Logger(cmd).Error(
 				"Exiting with error",
-				slog.Any("error", err), // unwraps and flattens error context
+				slog.Any("error", oops.LogValuer()),
 			)
 		},
 	}
