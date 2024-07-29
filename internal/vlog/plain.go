@@ -39,11 +39,19 @@ func (h *PlainHandler) Handle(ctx context.Context, r slog.Record) error {
 	buf = append(buf, r.Message...)
 
 	switch r.Level {
+	case slog.LevelInfo:
+		r.Attrs(func(a slog.Attr) bool {
+			buf = append(buf, ": "+a.Value.String()...)
+			return true
+		})
 	case slog.LevelDebug:
 		r.Attrs(func(a slog.Attr) bool {
 			buf = append(buf, fmt.Sprintf(" %s='%s'", a.Key, a.Value.String())...)
 			return true
 		})
+		buf = []byte(color.CyanString(string(buf)))
+	case slog.LevelWarn:
+		buf = []byte(color.YellowString(string(buf)))
 	case slog.LevelError:
 		r.Attrs(func(a slog.Attr) bool {
 			if a.Key == "error" {
@@ -52,14 +60,6 @@ func (h *PlainHandler) Handle(ctx context.Context, r slog.Record) error {
 			}
 			return true
 		})
-	}
-
-	switch r.Level {
-	case slog.LevelDebug:
-		buf = []byte(color.CyanString(string(buf)))
-	case slog.LevelWarn:
-		buf = []byte(color.YellowString(string(buf)))
-	case slog.LevelError:
 		buf = []byte(color.RedString(string(buf)))
 	}
 
