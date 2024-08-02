@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/samber/oops"
 	"github.com/zackarysantana/velocity/src/catcher"
 	"gopkg.in/yaml.v3"
 )
@@ -13,6 +14,9 @@ type Config struct {
 }
 
 func (c *Config) Validate() error {
+	if c == nil {
+		return oops.Errorf("config is nil")
+	}
 	catcher := catcher.New()
 	catcher.Catch(validate(&c.Tests, c))
 	catcher.Catch(validate(&c.Images, c))
@@ -21,11 +25,11 @@ func (c *Config) Validate() error {
 	return catcher.Resolve()
 }
 
-func Read(bytes []byte) (Config, error) {
+func Parse(bytes []byte) (*Config, error) {
 	var config Config
 	err := yaml.Unmarshal(bytes, &config)
 	if err != nil {
-		return Config{}, err
+		return &config, err
 	}
-	return config, nil
+	return &config, nil
 }

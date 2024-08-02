@@ -8,7 +8,7 @@ type Validator interface {
 	validateSyntax() error
 	validateIntegrity(*Config) error
 
-	Error() oops.OopsErrorBuilder
+	error() oops.OopsErrorBuilder
 }
 
 func validate(v Validator, c *Config) error {
@@ -23,14 +23,14 @@ func validate(v Validator, c *Config) error {
 
 func validateSyntax(v Validator) error {
 	if err := v.validateSyntax(); err != nil {
-		return v.Error().Wrapf(err, "validating syntax")
+		return v.error().Wrapf(err, "validating syntax")
 	}
 	return nil
 }
 
 func validateIntegrity(v Validator, c *Config) error {
 	if err := v.validateIntegrity(c); err != nil {
-		return v.Error().Wrapf(err, "validating integrity")
+		return v.error().Wrapf(err, "validating integrity")
 	}
 	return nil
 }

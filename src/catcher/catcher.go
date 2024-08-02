@@ -34,6 +34,13 @@ func (c *Catcher) Error(msg string, a ...any) {
 	c.Catch(fmt.Errorf(msg, a...))
 }
 
+func (c *Catcher) ErrorWhen(cond bool, msg string, a ...any) {
+	if !cond {
+		return
+	}
+	c.Error(msg, a...)
+}
+
 func (c *Catcher) Resolve() error {
 	if len(c.errs) == 0 {
 		return nil

@@ -1,7 +1,7 @@
 package test
 
 type Test struct {
-	Id int
+	Id string
 
 	Name string
 

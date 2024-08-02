@@ -14,7 +14,7 @@ func (t *TestSection) validateSyntax() error {
 	}
 	catcher := catcher.New()
 	for _, test := range *t {
-		catcher.Catch(test.Error().Wrap(test.validateSyntax()))
+		catcher.Catch(test.error().Wrap(test.validateSyntax()))
 	}
 	return catcher.Resolve()
 }
@@ -25,13 +25,13 @@ func (t *TestSection) validateIntegrity(c *Config) error {
 	}
 	catcher := catcher.New()
 	for _, test := range *t {
-		catcher.Catch(test.Error().Wrap(test.validateIntegrity(c)))
+		catcher.Catch(test.error().Wrap(test.validateIntegrity(c)))
 	}
 	return catcher.Resolve()
 }
 
-func (t *TestSection) Error() oops.OopsErrorBuilder {
-	return oops.Code("test_section")
+func (t *TestSection) error() oops.OopsErrorBuilder {
+	return oops.In("test_section")
 }
 
 type Command struct {
@@ -43,15 +43,9 @@ type Command struct {
 
 func (c *Command) validateSyntax() error {
 	catcher := catcher.New()
-	if c.Shell == "" && c.Prebuilt == "" {
-		catcher.Error("must specify a shell or prebuilt command")
-	}
-	if c.Shell != "" && c.Prebuilt != "" {
-		catcher.Error("cannot specify both a shell and prebuilt command")
-	}
-	if c.Shell != "" && len(c.Params) > 0 {
-		catcher.Error("cannot specify params with a shell command")
-	}
+	catcher.ErrorWhen(c.Shell == "" && c.Prebuilt == "", "must specify a shell or prebuilt command")
+	catcher.ErrorWhen(c.Shell != "" && c.Prebuilt != "", "cannot specify both a shell and prebuilt command")
+	catcher.ErrorWhen(c.Shell == "" && len(c.Params) > 0, "cannot specify params without a shell command")
 	return catcher.Resolve()
 }
 
@@ -59,7 +53,7 @@ func (c *Command) validateIntegrity(config *Config) error {
 	return nil
 }
 
-func (c *Command) Error() oops.OopsErrorBuilder {
+func (c *Command) error() oops.OopsErrorBuilder {
 	return oops.With("shell", c.Shell).With("prebuilt", c.Prebuilt)
 }
 
@@ -84,20 +78,12 @@ type Test struct {
 
 func (t *Test) validateSyntax() error {
 	catcher := catcher.New()
-	if t.Name == "" {
-		catcher.Error("name is required")
-	}
-	if t.Language == "" && len(t.Commands) == 0 {
-		catcher.Error("language or commands are required")
-	}
-	if t.Language != "" && len(t.Commands) > 0 {
-		catcher.Error("cannot specify both a language and commands")
-	}
-	if t.Library != "" && len(t.Commands) > 0 {
-		catcher.Error("cannot specify a library with commands")
-	}
+	catcher.ErrorWhen(t.Name == "", "name is required")
+	catcher.ErrorWhen(t.Language == "" && len(t.Commands) == 0, "language or commands are required")
+	catcher.ErrorWhen(t.Language != "" && len(t.Commands) > 0, "cannot specify both a language and commands")
+	catcher.ErrorWhen(t.Library != "" && len(t.Commands) > 0, "cannot specify a library with commands")
 	for _, cmd := range t.Commands {
-		catcher.Catch(cmd.Error().Wrap(cmd.validateSyntax()))
+		catcher.Catch(cmd.error().Wrap(cmd.validateSyntax()))
 	}
 	return catcher.Resolve()
 }
@@ -106,7 +92,7 @@ func (t *Test) validateIntegrity(config *Config) error {
 	return nil
 }
 
-func (t *Test) Error() oops.OopsErrorBuilder {
+func (t *Test) error() oops.OopsErrorBuilder {
 	return oops.With("test_name", t.Name).With("language", t.Language).With("library", t.Library)
 }
 

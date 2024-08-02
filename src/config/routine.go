@@ -3,6 +3,8 @@ package config
 import (
 	"github.com/samber/oops"
 	"github.com/zackarysantana/velocity/src/catcher"
+	"github.com/zackarysantana/velocity/src/entities"
+	"github.com/zackarysantana/velocity/src/entities/routine"
 )
 
 type RoutineSection []Routine
@@ -13,7 +15,7 @@ func (r *RoutineSection) validateSyntax() error {
 	}
 	catcher := catcher.New()
 	for _, routine := range *r {
-		catcher.Catch(routine.Error().Wrap(routine.validateSyntax()))
+		catcher.Catch(routine.error().Wrap(routine.validateSyntax()))
 	}
 	return catcher.Resolve()
 }
@@ -24,13 +26,13 @@ func (r *RoutineSection) validateIntegrity(c *Config) error {
 	}
 	catcher := catcher.New()
 	for _, routine := range *r {
-		catcher.Catch(routine.Error().Wrap(routine.validateIntegrity(c)))
+		catcher.Catch(routine.error().Wrap(routine.validateIntegrity(c)))
 	}
 	return catcher.Resolve()
 }
 
-func (r *RoutineSection) Error() oops.OopsErrorBuilder {
-	return oops.Code("routine_section")
+func (r *RoutineSection) error() oops.OopsErrorBuilder {
+	return oops.In("routine_section")
 }
 
 type Routine struct {
@@ -59,13 +61,27 @@ func (r *Routine) validateIntegrity(config *Config) error {
 				break
 			}
 		}
-		if !found {
-			catcher.Error("job not found")
-		}
+		catcher.ErrorWhen(!found, "job %s not found", jobName)
 	}
 	return catcher.Resolve()
 }
 
-func (r *Routine) Error() oops.OopsErrorBuilder {
+func (r *Routine) error() oops.OopsErrorBuilder {
 	return oops.With("routine_name", r.Name)
+}
+
+func (r *Routine) ToEntity(ec *entities.ConfigEntity) routine.Routine {
+	jobs := make([]string, len(r.Jobs))
+	for i, jobName := range r.Jobs {
+		for _, job := range ec.Jobs {
+			if job.Name == jobName {
+				jobs[i] = job.Id
+				break
+			}
+		}
+	}
+	return routine.Routine{
+		Name: r.Name,
+		Jobs: jobs,
+	}
 }

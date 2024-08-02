@@ -3,6 +3,8 @@ package config
 import (
 	"github.com/samber/oops"
 	"github.com/zackarysantana/velocity/src/catcher"
+	"github.com/zackarysantana/velocity/src/entities"
+	"github.com/zackarysantana/velocity/src/entities/job"
 )
 
 type JobSection []Job
@@ -13,7 +15,7 @@ func (j *JobSection) validateSyntax() error {
 	}
 	catcher := catcher.New()
 	for _, job := range *j {
-		catcher.Catch(job.Error().Wrap(job.validateSyntax()))
+		catcher.Catch(job.error().Wrap(job.validateSyntax()))
 	}
 	return catcher.Resolve()
 }
@@ -24,13 +26,13 @@ func (j *JobSection) validateIntegrity(c *Config) error {
 	}
 	catcher := catcher.New()
 	for _, job := range *j {
-		catcher.Catch(job.Error().Wrap(job.validateIntegrity(c)))
+		catcher.Catch(job.error().Wrap(job.validateIntegrity(c)))
 	}
 	return catcher.Resolve()
 }
 
-func (j *JobSection) Error() oops.OopsErrorBuilder {
-	return oops.Code("job_section")
+func (j *JobSection) error() oops.OopsErrorBuilder {
+	return oops.In("job_section")
 }
 
 type Job struct {
@@ -41,15 +43,9 @@ type Job struct {
 
 func (j *Job) validateSyntax() error {
 	catcher := catcher.New()
-	if j.Name == "" {
-		catcher.Error("name is required")
-	}
-	if len(j.Tests) == 0 {
-		catcher.Error("tests are required")
-	}
-	if len(j.Images) == 0 {
-		catcher.Error("images are required")
-	}
+	catcher.ErrorWhen(j.Name == "", "name is required")
+	catcher.ErrorWhen(len(j.Tests) == 0, "tests are required")
+	catcher.ErrorWhen(len(j.Images) == 0, "images are required")
 	return catcher.Resolve()
 }
 
@@ -63,9 +59,7 @@ func (j *Job) validateIntegrity(config *Config) error {
 				break
 			}
 		}
-		if !found {
-			catcher.Error("test %s not found", testName)
-		}
+		catcher.ErrorWhen(!found, "test %s not found", testName)
 	}
 	for _, imageName := range j.Images {
 		found := false
@@ -75,13 +69,37 @@ func (j *Job) validateIntegrity(config *Config) error {
 				break
 			}
 		}
-		if !found {
-			catcher.Error("image %s not found", imageName)
-		}
+		catcher.ErrorWhen(!found, "image %s not found", imageName)
 	}
 	return catcher.Resolve()
 }
 
-func (j *Job) Error() oops.OopsErrorBuilder {
+func (j *Job) error() oops.OopsErrorBuilder {
 	return oops.With("job_name", j.Name)
+}
+
+func (j *Job) ToEntity(ec *entities.ConfigEntity) job.Job {
+	tests := make([]string, len(j.Tests))
+	for i, testName := range j.Tests {
+		for _, test := range ec.Tests {
+			if test.Name == testName {
+				tests[i] = test.Id
+				break
+			}
+		}
+	}
+	images := make([]string, len(j.Images))
+	for i, imageName := range j.Images {
+		for _, image := range ec.Images {
+			if image.Name == imageName {
+				images[i] = image.Id
+				break
+			}
+		}
+	}
+	return job.Job{
+		Name:   j.Name,
+		Tests:  tests,
+		Images: images,
+	}
 }

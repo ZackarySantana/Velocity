@@ -2,33 +2,31 @@ package cmd
 
 import (
 	"context"
-	"os"
 
 	"github.com/samber/oops"
 	"github.com/urfave/cli/v3"
-	"github.com/zackarysantana/velocity/src/config"
+	"github.com/zackarysantana/velocity/internal/cmd/flags"
 )
 
 var (
 	routine = &cli.Command{
 		Name:  "routine",
-		Usage: "add a task to the list",
+		Usage: "routine related commands",
+		Commands: []*cli.Command{
+			routineRun,
+		},
+	}
+	routineRun = &cli.Command{
+		Name:  "run",
+		Usage: "runs a routine locally",
+		Flags: []cli.Flag{
+			flags.ConfigFlag,
+		},
+		Before: befores(flags.SetConfig),
 		Action: func(ctx context.Context, cmd *cli.Command) error {
-			file, err := os.ReadFile("velocity.yml")
-			if err != nil {
-				return err
-			}
+			c := flags.Config(cmd)
 
-			c, err := config.Read(file)
-			if err != nil {
-				return err
-			}
-
-			if err := c.Validate(); err != nil {
-				return oops.Wrap(err)
-			}
-
-			Logger(cmd).Info("Tests", "tests", c.Tests)
+			flags.Logger(cmd).Info("Tests", "tests", c.Tests)
 
 			return oops.Code("Testing").Errorf("Not implemented")
 		},

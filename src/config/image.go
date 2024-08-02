@@ -3,6 +3,7 @@ package config
 import (
 	"github.com/samber/oops"
 	"github.com/zackarysantana/velocity/src/catcher"
+	"github.com/zackarysantana/velocity/src/entities/image"
 )
 
 type ImageSection []Image
@@ -13,7 +14,7 @@ func (i *ImageSection) validateSyntax() error {
 	}
 	catcher := catcher.New()
 	for _, image := range *i {
-		catcher.Catch(image.Error().Wrap(image.validateSyntax()))
+		catcher.Catch(image.error().Wrap(image.validateSyntax()))
 	}
 	return catcher.Resolve()
 }
@@ -24,13 +25,13 @@ func (i *ImageSection) validateIntegrity(c *Config) error {
 	}
 	catcher := catcher.New()
 	for _, image := range *i {
-		catcher.Catch(image.Error().Wrap(image.validateIntegrity(c)))
+		catcher.Catch(image.error().Wrap(image.validateIntegrity(c)))
 	}
 	return catcher.Resolve()
 }
 
-func (i *ImageSection) Error() oops.OopsErrorBuilder {
-	return oops.Code("image_section")
+func (i *ImageSection) error() oops.OopsErrorBuilder {
+	return oops.In("image_section")
 }
 
 type Image struct {
@@ -40,12 +41,8 @@ type Image struct {
 
 func (i *Image) validateSyntax() error {
 	catcher := catcher.New()
-	if i.Name == "" {
-		catcher.Error("name is required")
-	}
-	if i.Image == "" {
-		catcher.Error("image is required")
-	}
+	catcher.ErrorWhen(i.Name == "", "name is required")
+	catcher.ErrorWhen(i.Image == "", "image is required")
 	return catcher.Resolve()
 }
 
@@ -53,6 +50,13 @@ func (i *Image) validateIntegrity(config *Config) error {
 	return nil
 }
 
-func (i *Image) Error() oops.OopsErrorBuilder {
+func (i *Image) error() oops.OopsErrorBuilder {
 	return oops.With("image_name", i.Name)
+}
+
+func (i *Image) ToEntity() image.Image {
+	return image.Image{
+		Name:  i.Name,
+		Image: i.Image,
+	}
 }

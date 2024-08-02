@@ -1,4 +1,4 @@
-package cmd
+package flags
 
 import (
 	"context"
@@ -52,7 +52,7 @@ var (
 		Debug: "debug",
 		Quiet: "quiet",
 	}
-	loggerModeFlag = &cli.StringFlag{
+	LoggerModeFlag = &cli.StringFlag{
 		Name:  "mode",
 		Usage: fmt.Sprintf("set the mode to `%s`", strings.Join(getAllLoggerModes(), "|")),
 		Validator: func(s string) error {
@@ -65,13 +65,13 @@ var (
 			return nil
 		},
 	}
-	verboseFlag = &cli.BoolFlag{
+	VerboseFlag = &cli.BoolFlag{
 		Name:  "verbose",
 		Usage: "enable verbose output",
 	}
 )
 
-func setLogger(_ context.Context, cmd *cli.Command) error {
+func SetLogger(_ context.Context, cmd *cli.Command) error {
 	level := slog.LevelInfo
 	switch cmd.String("mode") {
 	case "":
