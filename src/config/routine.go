@@ -3,6 +3,7 @@ package config
 import (
 	"github.com/samber/oops"
 	"github.com/zackarysantana/velocity/src/catcher"
+	"github.com/zackarysantana/velocity/src/config/id"
 	"github.com/zackarysantana/velocity/src/entities"
 	"github.com/zackarysantana/velocity/src/entities/routine"
 )
@@ -33,6 +34,14 @@ func (r *RoutineSection) validateIntegrity(c *Config) error {
 
 func (r *RoutineSection) error() oops.OopsErrorBuilder {
 	return oops.In("routine_section")
+}
+
+func (r *RoutineSection) ToEntities(ic id.Creator, ec *entities.ConfigEntity) []*routine.Routine {
+	routines := make([]*routine.Routine, 0)
+	for _, rt := range *r {
+		routines = append(routines, rt.ToEntity(ic, ec))
+	}
+	return routines
 }
 
 type Routine struct {
@@ -70,7 +79,7 @@ func (r *Routine) error() oops.OopsErrorBuilder {
 	return oops.With("routine_name", r.Name)
 }
 
-func (r *Routine) ToEntity(ec *entities.ConfigEntity) routine.Routine {
+func (r *Routine) ToEntity(ic id.Creator, ec *entities.ConfigEntity) *routine.Routine {
 	jobs := make([]string, len(r.Jobs))
 	for i, jobName := range r.Jobs {
 		for _, job := range ec.Jobs {
@@ -80,7 +89,8 @@ func (r *Routine) ToEntity(ec *entities.ConfigEntity) routine.Routine {
 			}
 		}
 	}
-	return routine.Routine{
+	return &routine.Routine{
+		Id:   ic(),
 		Name: r.Name,
 		Jobs: jobs,
 	}

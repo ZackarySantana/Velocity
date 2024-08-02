@@ -1,4 +1,4 @@
-package domain
+package mongo
 
 import (
 	"context"
@@ -13,20 +13,41 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func NewRepository(db *mongo.Client) (*service.Repository, error) {
+const (
+	dbName = "velocity-beta"
+
+	routineCollection = "routines"
+	jobCollection     = "jobs"
+	imageCollection   = "images"
+	testCollection    = "tests"
+)
+
+func NewMongoRepository(db *mongo.Client) *service.Repository {
 	return &service.Repository{
-		Routine:    createTypeRepository[routine.Routine](db, "velocity", "routines"),
-		PutRoutine: createPutType[routine.Routine](db, "velocity", "routines"),
+		Routine:     createTypeRepository[routine.Routine](db, dbName, routineCollection),
+		PutRoutines: createPutType[routine.Routine](db, dbName, routineCollection),
 
-		Job:    createTypeRepository[job.Job](db, "velocity", "jobs"),
-		PutJob: createPutType[job.Job](db, "velocity", "jobs"),
+		Job:     createTypeRepository[job.Job](db, dbName, jobCollection),
+		PutJobs: createPutType[job.Job](db, dbName, jobCollection),
 
-		Image:    createTypeRepository[image.Image](db, "velocity", "images"),
-		PutImage: createPutType[image.Image](db, "velocity", "images"),
+		Image:     createTypeRepository[image.Image](db, dbName, imageCollection),
+		PutImages: createPutType[image.Image](db, dbName, imageCollection),
 
-		Test:    createTypeRepository[test.Test](db, "velocity", "tests"),
-		PutTest: createPutType[test.Test](db, "velocity", "tests"),
-	}, nil
+		Test:     createTypeRepository[test.Test](db, dbName, testCollection),
+		PutTests: createPutType[test.Test](db, dbName, testCollection),
+
+		WithTransaction: func(ctx context.Context, fn func(context.Context) error) error {
+			session, err := db.StartSession()
+			if err != nil {
+				return err
+			}
+			defer session.EndSession(ctx)
+			_, err = session.WithTransaction(ctx, func(sessCtx mongo.SessionContext) (interface{}, error) {
+				return nil, fn(sessCtx)
+			})
+			return err
+		},
+	}
 }
 
 func createTypeRepository[T any](db *mongo.Client, database, collection string) dataloader.Interface[string, *T] {
@@ -53,9 +74,13 @@ func createTypeRepository[T any](db *mongo.Client, database, collection string) 
 	)
 }
 
-func createPutType[T any](db *mongo.Client, database, collection string) func(context.Context, *T) error {
-	return func(ctx context.Context, t *T) error {
-		_, err := db.Database(database).Collection(collection).InsertOne(ctx, t)
+func createPutType[T any](db *mongo.Client, database, collection string) func(context.Context, []*T) error {
+	return func(ctx context.Context, t []*T) error {
+		items := make([]interface{}, len(t))
+		for i, v := range t {
+			items[i] = v
+		}
+		_, err := db.Database(database).Collection(collection).InsertMany(ctx, items)
 		return err
 	}
 }

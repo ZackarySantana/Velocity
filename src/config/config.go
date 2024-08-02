@@ -3,6 +3,8 @@ package config
 import (
 	"github.com/samber/oops"
 	"github.com/zackarysantana/velocity/src/catcher"
+	"github.com/zackarysantana/velocity/src/config/id"
+	"github.com/zackarysantana/velocity/src/entities"
 	"gopkg.in/yaml.v3"
 )
 
@@ -23,6 +25,16 @@ func (c *Config) Validate() error {
 	catcher.Catch(validate(&c.Jobs, c))
 	catcher.Catch(validate(&c.Routines, c))
 	return catcher.Resolve()
+}
+
+func (c *Config) ToEntity(ic id.Creator) *entities.ConfigEntity {
+	ec := &entities.ConfigEntity{
+		Images: c.Images.ToEntities(ic),
+		Tests:  c.Tests.ToEntities(ic),
+	}
+	ec.Jobs = c.Jobs.ToEntities(ic, ec)
+	ec.Routines = c.Routines.ToEntities(ic, ec)
+	return ec
 }
 
 func Parse(bytes []byte) (*Config, error) {

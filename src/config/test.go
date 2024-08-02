@@ -3,6 +3,7 @@ package config
 import (
 	"github.com/samber/oops"
 	"github.com/zackarysantana/velocity/src/catcher"
+	"github.com/zackarysantana/velocity/src/config/id"
 	"github.com/zackarysantana/velocity/src/entities/test"
 )
 
@@ -32,6 +33,14 @@ func (t *TestSection) validateIntegrity(c *Config) error {
 
 func (t *TestSection) error() oops.OopsErrorBuilder {
 	return oops.In("test_section")
+}
+
+func (t *TestSection) ToEntities(ic id.Creator) []*test.Test {
+	tests := make([]*test.Test, 0)
+	for _, tst := range *t {
+		tests = append(tests, tst.ToEntity(ic))
+	}
+	return tests
 }
 
 type Command struct {
@@ -96,12 +105,13 @@ func (t *Test) error() oops.OopsErrorBuilder {
 	return oops.With("test_name", t.Name).With("language", t.Language).With("library", t.Library)
 }
 
-func (t *Test) ToEntity() *test.Test {
+func (t *Test) ToEntity(ic id.Creator) *test.Test {
 	cmds := make([]test.Command, len(t.Commands))
 	for i, cmd := range t.Commands {
 		cmds[i] = cmd.ToEntity()
 	}
 	return &test.Test{
+		Id:        ic(),
 		Name:      t.Name,
 		Language:  t.Language,
 		Library:   t.Library,

@@ -3,6 +3,7 @@ package config
 import (
 	"github.com/samber/oops"
 	"github.com/zackarysantana/velocity/src/catcher"
+	"github.com/zackarysantana/velocity/src/config/id"
 	"github.com/zackarysantana/velocity/src/entities"
 	"github.com/zackarysantana/velocity/src/entities/job"
 )
@@ -33,6 +34,14 @@ func (j *JobSection) validateIntegrity(c *Config) error {
 
 func (j *JobSection) error() oops.OopsErrorBuilder {
 	return oops.In("job_section")
+}
+
+func (j *JobSection) ToEntities(ic id.Creator, ec *entities.ConfigEntity) []*job.Job {
+	jobs := make([]*job.Job, 0)
+	for _, jb := range *j {
+		jobs = append(jobs, jb.ToEntity(ic, ec))
+	}
+	return jobs
 }
 
 type Job struct {
@@ -78,7 +87,7 @@ func (j *Job) error() oops.OopsErrorBuilder {
 	return oops.With("job_name", j.Name)
 }
 
-func (j *Job) ToEntity(ec *entities.ConfigEntity) job.Job {
+func (j *Job) ToEntity(ic id.Creator, ec *entities.ConfigEntity) *job.Job {
 	tests := make([]string, len(j.Tests))
 	for i, testName := range j.Tests {
 		for _, test := range ec.Tests {
@@ -97,7 +106,8 @@ func (j *Job) ToEntity(ec *entities.ConfigEntity) job.Job {
 			}
 		}
 	}
-	return job.Job{
+	return &job.Job{
+		Id:     ic(),
 		Name:   j.Name,
 		Tests:  tests,
 		Images: images,
