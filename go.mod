@@ -4,6 +4,7 @@ go 1.23rc2
 
 require (
 	github.com/fatih/color v1.17.0
+	github.com/joho/godotenv v1.5.1
 	github.com/samber/oops v1.12.1
 	github.com/samber/slog-multi v1.2.0
 	github.com/sysulq/dataloader-go v0.2.0

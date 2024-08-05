@@ -1,7 +1,7 @@
 package routine
 
 type Routine struct {
-	Id string
+	Id string `bson:"_id"`
 
 	Name string
 

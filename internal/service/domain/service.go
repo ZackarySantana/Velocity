@@ -18,17 +18,17 @@ func NewService(db *service.Repository) service.Service {
 
 func (s *Service) StartRoutine(ctx context.Context, ec *entities.ConfigEntity, name string) error {
 	return s.db.WithTransaction(ctx, func(ctx context.Context) error {
-		err := s.db.PutTests(ctx, ec.Tests)
+		err := s.db.Test.Put(ctx, ec.Tests)
 		if err != nil {
 			return err
 		}
 
-		err = s.db.PutImages(ctx, ec.Images)
+		err = s.db.Image.Put(ctx, ec.Images)
 		if err != nil {
 			return err
 		}
 
-		err = s.db.PutJobs(ctx, ec.Jobs)
+		err = s.db.Job.Put(ctx, ec.Jobs)
 		if err != nil {
 			return err
 		}
@@ -37,7 +37,7 @@ func (s *Service) StartRoutine(ctx context.Context, ec *entities.ConfigEntity, n
 			if r.Name != name {
 				continue
 			}
-			err := s.db.PutRoutines(ctx, []*routine.Routine{r})
+			err := s.db.Routine.Put(ctx, []*routine.Routine{r})
 			if err != nil {
 				return err
 			}

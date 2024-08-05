@@ -1,7 +1,7 @@
 package test
 
 type Test struct {
-	Id string
+	Id string `bson:"_id"`
 
 	Name string
 

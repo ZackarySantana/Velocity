@@ -11,22 +11,30 @@ import (
 )
 
 type Repository struct {
-	Routine     RoutineRepository
-	PutRoutines func(context.Context, []*routine.Routine) error
-
+	Routine RoutineRepository
 	Job     JobRepository
-	PutJobs func(context.Context, []*job.Job) error
-
-	Image     ImageRepository
-	PutImages func(context.Context, []*image.Image) error
-
-	Test     TestRepository
-	PutTests func(context.Context, []*test.Test) error
+	Image   ImageRepository
+	Test    TestRepository
 
 	WithTransaction func(context.Context, func(context.Context) error) error
 }
 
-type RoutineRepository dataloader.Interface[string, *routine.Routine]
-type JobRepository dataloader.Interface[string, *job.Job]
-type ImageRepository dataloader.Interface[string, *image.Image]
-type TestRepository dataloader.Interface[string, *test.Test]
+type RoutineRepository struct {
+	dataloader.Interface[string, *routine.Routine]
+	Put func(context.Context, []*routine.Routine) error
+}
+
+type JobRepository struct {
+	dataloader.Interface[string, *job.Job]
+	Put func(context.Context, []*job.Job) error
+}
+
+type ImageRepository struct {
+	dataloader.Interface[string, *image.Image]
+	Put func(context.Context, []*image.Image) error
+}
+
+type TestRepository struct {
+	dataloader.Interface[string, *test.Test]
+	Put func(context.Context, []*test.Test) error
+}

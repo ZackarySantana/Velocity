@@ -24,18 +24,22 @@ const (
 
 func NewMongoRepository(db *mongo.Client) *service.Repository {
 	return &service.Repository{
-		Routine:     createTypeRepository[routine.Routine](db, dbName, routineCollection),
-		PutRoutines: createPutType[routine.Routine](db, dbName, routineCollection),
-
-		Job:     createTypeRepository[job.Job](db, dbName, jobCollection),
-		PutJobs: createPutType[job.Job](db, dbName, jobCollection),
-
-		Image:     createTypeRepository[image.Image](db, dbName, imageCollection),
-		PutImages: createPutType[image.Image](db, dbName, imageCollection),
-
-		Test:     createTypeRepository[test.Test](db, dbName, testCollection),
-		PutTests: createPutType[test.Test](db, dbName, testCollection),
-
+		Routine: service.RoutineRepository{
+			Interface: createTypeRepository[routine.Routine](db, dbName, routineCollection),
+			Put:       createPutType[routine.Routine](db, dbName, routineCollection),
+		},
+		Job: service.JobRepository{
+			Interface: createTypeRepository[job.Job](db, dbName, jobCollection),
+			Put:       createPutType[job.Job](db, dbName, jobCollection),
+		},
+		Image: service.ImageRepository{
+			Interface: createTypeRepository[image.Image](db, dbName, imageCollection),
+			Put:       createPutType[image.Image](db, dbName, imageCollection),
+		},
+		Test: service.TestRepository{
+			Interface: createTypeRepository[test.Test](db, dbName, testCollection),
+			Put:       createPutType[test.Test](db, dbName, testCollection),
+		},
 		WithTransaction: func(ctx context.Context, fn func(context.Context) error) error {
 			session, err := db.StartSession()
 			if err != nil {

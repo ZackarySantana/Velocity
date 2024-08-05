@@ -25,13 +25,15 @@ func CreateCommand() *cli.Command {
 			routine,
 		},
 		ExitErrHandler: func(ctx context.Context, cmd *cli.Command, err error) {
-			oops, ok := oops.AsOops(err)
-			if ok {
-				flags.Logger(cmd).Error(
-					"Exiting with error",
-					slog.Any("error", oops.LogValuer()),
-				)
-				return
+			if cmd.Bool("verbose") {
+				oops, ok := oops.AsOops(err)
+				if ok {
+					flags.Logger(cmd).Error(
+						"Exiting with error",
+						slog.Any("error", oops.LogValuer()),
+					)
+					return
+				}
 			}
 			flags.Logger(cmd).Error("Exiting with error", "error", err)
 		},

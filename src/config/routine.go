@@ -44,6 +44,15 @@ func (r *RoutineSection) ToEntities(ic id.Creator, ec *entities.ConfigEntity) []
 	return routines
 }
 
+func (r *RoutineSection) GetRoutine(name string) *Routine {
+	for _, routine := range *r {
+		if routine.Name == name {
+			return &routine
+		}
+	}
+	return nil
+}
+
 type Routine struct {
 	Name string   `yaml:"name"`
 	Jobs []string `yaml:"jobs"`

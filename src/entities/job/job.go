@@ -1,7 +1,7 @@
 package job
 
 type Job struct {
-	Id string
+	Id string `bson:"_id"`
 
 	Name string
 
