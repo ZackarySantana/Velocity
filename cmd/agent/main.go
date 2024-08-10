@@ -26,8 +26,7 @@ func main() {
 	velocity := velocity.NewAgent(os.Getenv("VELOCITY_URL"))
 
 	// If this is in dev mode, we wait a little because
-	// connecting to the velocity server immediately after
-	// sometimes causes a connection error.
+	// both services usually get restarted at the same time.
 	if os.Getenv("DEV_MODE") == "true" {
 		time.Sleep(2 * time.Second)
 	}

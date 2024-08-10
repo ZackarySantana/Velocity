@@ -3,16 +3,17 @@ package kafka
 import (
 	"context"
 	"crypto/tls"
+	"os"
 
 	"github.com/segmentio/kafka-go"
-	"github.com/segmentio/kafka-go/sasl"
 	"github.com/segmentio/kafka-go/sasl/scram"
 	"github.com/zackarysantana/velocity/internal/service"
 	"github.com/zackarysantana/velocity/src/catcher"
 )
 
 type KafkaQueue struct {
-	mechanism sasl.Mechanism
+	transport kafka.RoundTripper
+	dialer    *kafka.Dialer
 	broker    string
 	groupId   string
 
@@ -26,24 +27,36 @@ func NewKafkaQueue(username, password, broker, groupId string) (service.ProcessQ
 		groupId: groupId,
 		r:       map[string]*kafka.Reader{},
 	}
-	var err error
-	k.mechanism, err = scram.Mechanism(scram.SHA256, username, password)
-	if err != nil {
-		return nil, err
+	// If this isn't dev mode, we need to set up the SASL mechanism.
+	// If it is, we can just use the default transport and dialer.
+	if os.Getenv("DEV_MODE") != "true" {
+		mechanism, err := scram.Mechanism(scram.SHA256, username, password)
+		if err != nil {
+			return nil, err
+		}
+		k.transport = &kafka.Transport{
+			SASL: mechanism,
+			TLS:  &tls.Config{},
+		}
+		k.dialer = &kafka.Dialer{
+			SASLMechanism: mechanism,
+			TLS:           &tls.Config{},
+		}
 	}
 	k.w = &kafka.Writer{
-		Addr: kafka.TCP(broker),
-		Transport: &kafka.Transport{
-			SASL: k.mechanism,
-			TLS:  &tls.Config{},
-		},
+		Addr:      kafka.TCP(broker),
+		Transport: k.transport,
 	}
 
 	return k, nil
 }
 
-func (k *KafkaQueue) Write(ctx context.Context, topic string, message []byte) error {
-	return k.w.WriteMessages(ctx, kafka.Message{Value: message, Topic: topic})
+func (k *KafkaQueue) Write(ctx context.Context, topic string, messages ...[]byte) error {
+	kafkaMessages := make([]kafka.Message, len(messages))
+	for i, message := range messages {
+		kafkaMessages[i] = kafka.Message{Value: message, Topic: topic}
+	}
+	return k.w.WriteMessages(ctx, kafkaMessages...)
 }
 
 func (k *KafkaQueue) Consume(ctx context.Context, topic string, f func([]byte) error) error {
@@ -78,10 +91,7 @@ func (k *KafkaQueue) getReader(topic string) (*kafka.Reader, error) {
 			Brokers: []string{k.broker},
 			Topic:   topic,
 			GroupID: k.groupId,
-			Dialer: &kafka.Dialer{
-				SASLMechanism: k.mechanism,
-				TLS:           &tls.Config{},
-			},
+			Dialer:  k.dialer,
 		})
 	}
 	return k.r[topic], nil

@@ -10,10 +10,11 @@ import (
 
 type Service struct {
 	db *service.Repository
+	pq service.ProcessQueue
 }
 
-func NewService(db *service.Repository) service.Service {
-	return &Service{db: db}
+func NewService(db *service.Repository, pq service.ProcessQueue) service.Service {
+	return &Service{db: db, pq: pq}
 }
 
 func (s *Service) StartRoutine(ctx context.Context, ec *entities.ConfigEntity, name string) error {
@@ -44,6 +45,11 @@ func (s *Service) StartRoutine(ctx context.Context, ec *entities.ConfigEntity, n
 			break
 		}
 
-		return nil
+		testIds := make([][]byte, len(ec.Tests))
+		for i, t := range ec.Tests {
+			testIds[i] = []byte(t.Id)
+		}
+
+		return s.pq.Write(ctx, "tests", testIds...)
 	})
 }
