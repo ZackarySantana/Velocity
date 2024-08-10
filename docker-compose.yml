@@ -58,7 +58,7 @@ services:
             retries: 30
         restart: on-failure
 
-    app:
+    api:
         build:
             context: .
             dockerfile: Dockerfile.api.dev
@@ -93,7 +93,7 @@ services:
             context: .
             dockerfile: Dockerfile.cli.dev
         depends_on:
-            - app
+            - api
         volumes:
             - .:/app
         networks:
