@@ -26,8 +26,8 @@ func (a *agent) Start(ctx context.Context) error {
 	fmt.Println(*resp)
 
 	err = a.processQueue.Consume(ctx, "tests", func(data []byte) error {
-		// id := string(data)
-
+		id := string(data)
+		fmt.Println(id)
 		return nil
 	})
 	if err != nil {

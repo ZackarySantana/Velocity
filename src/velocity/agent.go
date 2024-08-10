@@ -1,6 +1,8 @@
 package velocity
 
-import "net/http"
+import (
+	"net/http"
+)
 
 type AgentClient struct {
 	*baseClient

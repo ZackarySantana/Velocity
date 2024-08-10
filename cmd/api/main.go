@@ -34,6 +34,6 @@ func main() {
 
 	dbName := os.Getenv("MONGODB_DATABASE")
 	mux := api.New(domain.NewService(mongodomain.NewMongoRepository(client, dbName)), mongodomain.NewMongoIdCreator())
-	slog.Info("Starting server", "addr", "0.0.0.0:8080")
-	http.ListenAndServe("0.0.0.0:8080", mux)
+	slog.Info("Starting server", "addr", ":8080")
+	http.ListenAndServe(":8080", mux)
 }
