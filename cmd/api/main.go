@@ -23,11 +23,16 @@ func main() {
 
 	uri := fmt.Sprintf(os.Getenv("MONGODB_URI"), os.Getenv("MONGODB_USERNAME"), os.Getenv("MONGODB_PASSWORD"))
 	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(uri))
+
 	if err != nil {
 		log.Fatal("Error connecting to MongoDB", err)
 	}
-	dbName := os.Getenv("MONGODB_DATABASE")
+	err = client.Ping(context.Background(), nil)
+	if err != nil {
+		log.Fatal("Error pinging MongoDB", err)
+	}
 
+	dbName := os.Getenv("MONGODB_DATABASE")
 	mux := api.New(domain.NewService(mongodomain.NewMongoRepository(client, dbName)), mongodomain.NewMongoIdCreator())
 	slog.Info("Starting server", "addr", "0.0.0.0:8080")
 	http.ListenAndServe("0.0.0.0:8080", mux)
