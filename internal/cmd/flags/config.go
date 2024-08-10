@@ -12,14 +12,15 @@ import (
 var (
 	ConfigFlag = &cli.StringFlag{
 		Name:  "config",
-		Usage: "set the config file location",
+		Usage: "set the config file path",
 		Value: "velocity.yml",
 	}
 )
 
 func SetConfig(_ context.Context, cmd *cli.Command) error {
-	file, err := os.ReadFile(cmd.String("config"))
-	oops := oops.In("config_flag").With("config_name", cmd.String("config"))
+	filepath := cmd.String(ConfigFlag.Name)
+	file, err := os.ReadFile(filepath)
+	oops := oops.In("config_flag").With("config_name", filepath)
 	if err != nil {
 		return oops.Wrap(err)
 	}
@@ -33,12 +34,12 @@ func SetConfig(_ context.Context, cmd *cli.Command) error {
 		return oops.Wrap(err)
 	}
 
-	cmd.Metadata["config"] = c
+	cmd.Metadata[ConfigFlag.Name] = c
 
-	Logger(cmd).Debug("Using config", "location", cmd.String("config"))
+	Logger(cmd).Debug("Using config", "filepath", filepath)
 	return nil
 }
 
 func Config(cmd *cli.Command) *config.Config {
-	return cmd.Metadata["config"].(*config.Config)
+	return cmd.Metadata[ConfigFlag.Name].(*config.Config)
 }

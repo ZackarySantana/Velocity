@@ -2,8 +2,8 @@ package config
 
 import (
 	"github.com/samber/oops"
+	"github.com/zackarysantana/velocity/internal/service"
 	"github.com/zackarysantana/velocity/src/catcher"
-	"github.com/zackarysantana/velocity/src/config/id"
 	"github.com/zackarysantana/velocity/src/entities/test"
 )
 
@@ -35,7 +35,7 @@ func (t *TestSection) error() oops.OopsErrorBuilder {
 	return oops.In("test_section")
 }
 
-func (t *TestSection) ToEntities(ic id.Creator) []*test.Test {
+func (t *TestSection) ToEntities(ic service.IdCreator) []*test.Test {
 	tests := make([]*test.Test, 0)
 	for _, tst := range *t {
 		tests = append(tests, tst.ToEntity(ic))
@@ -105,7 +105,7 @@ func (t *Test) error() oops.OopsErrorBuilder {
 	return oops.With("test_name", t.Name).With("language", t.Language).With("library", t.Library)
 }
 
-func (t *Test) ToEntity(ic id.Creator) *test.Test {
+func (t *Test) ToEntity(ic service.IdCreator) *test.Test {
 	cmds := make([]test.Command, len(t.Commands))
 	for i, cmd := range t.Commands {
 		cmds[i] = cmd.ToEntity()

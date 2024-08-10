@@ -73,7 +73,7 @@ var (
 
 func SetLogger(_ context.Context, cmd *cli.Command) error {
 	level := slog.LevelInfo
-	switch cmd.String("mode") {
+	switch cmd.String(LoggerModeFlag.Name) {
 	case "":
 		level = slog.LevelInfo
 	case "debug":
@@ -86,7 +86,7 @@ func SetLogger(_ context.Context, cmd *cli.Command) error {
 		return oops.In("flags").Errorf("mode must be one of: %s", strings.Join(getAllLoggerModes(), ", "))
 	}
 	var stdLogger slog.Handler
-	if cmd.Bool("verbose") {
+	if cmd.Bool(VerboseFlag.Name) {
 		stdLogger = slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: level})
 	} else {
 		stdLogger = vlog.NewPlainHandler(os.Stdout, &vlog.Options{Level: level})
@@ -95,12 +95,12 @@ func SetLogger(_ context.Context, cmd *cli.Command) error {
 	logger := slog.New(slogmulti.Fanout(
 		stdLogger,
 	))
-	cmd.Metadata["logger"] = logger
+	cmd.Metadata[LoggerModeFlag.Name] = logger
 
 	logger.Debug("Starting logger", "cmd", os.Args, "version", cmd.Version, "ip", stats.GetIP())
 	return nil
 }
 
 func Logger(cmd *cli.Command) *slog.Logger {
-	return cmd.Root().Metadata["logger"].(*slog.Logger)
+	return cmd.Root().Metadata[LoggerModeFlag.Name].(*slog.Logger)
 }

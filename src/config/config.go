@@ -2,8 +2,8 @@ package config
 
 import (
 	"github.com/samber/oops"
+	"github.com/zackarysantana/velocity/internal/service"
 	"github.com/zackarysantana/velocity/src/catcher"
-	"github.com/zackarysantana/velocity/src/config/id"
 	"github.com/zackarysantana/velocity/src/entities"
 	"gopkg.in/yaml.v3"
 )
@@ -27,7 +27,7 @@ func (c *Config) Validate() error {
 	return catcher.Resolve()
 }
 
-func (c *Config) ToEntity(ic id.Creator) *entities.ConfigEntity {
+func (c *Config) ToEntity(ic service.IdCreator) *entities.ConfigEntity {
 	ec := &entities.ConfigEntity{
 		Images: c.Images.ToEntities(ic),
 		Tests:  c.Tests.ToEntities(ic),

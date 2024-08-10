@@ -7,7 +7,6 @@ import (
 	"github.com/samber/oops"
 	"github.com/urfave/cli/v3"
 	"github.com/zackarysantana/velocity/internal/cmd/flags"
-	"github.com/zackarysantana/velocity/src/velocity"
 )
 
 var (
@@ -23,13 +22,13 @@ var (
 		Usage: "runs a routine locally",
 		Flags: []cli.Flag{
 			flags.ConfigFlag,
-			flags.ServerFlag,
+			flags.APIFlag,
 		},
-		Before: befores(flags.SetConfig, flags.SetServer),
+		Before: befores(flags.SetConfig, flags.SetAPI),
 		Action: func(ctx context.Context, cmd *cli.Command) error {
 			c := flags.Config(cmd)
 			routine := strings.Join(cmd.Args().Slice(), " ")
-			_, data, err := velocity.New(flags.Server(cmd)).StartRoutine(c, routine)
+			_, data, err := flags.API(cmd).StartRoutine(c, routine)
 			if err != nil {
 				return oops.Code("request").Wrap(err)
 			}

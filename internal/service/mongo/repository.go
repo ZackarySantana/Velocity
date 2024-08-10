@@ -14,15 +14,13 @@ import (
 )
 
 const (
-	dbName = "velocity-beta"
-
 	routineCollection = "routines"
 	jobCollection     = "jobs"
 	imageCollection   = "images"
 	testCollection    = "tests"
 )
 
-func NewMongoRepository(db *mongo.Client) *service.Repository {
+func NewMongoRepository(db *mongo.Client, dbName string) *service.Repository {
 	return &service.Repository{
 		Routine: service.RoutineRepository{
 			Interface: createTypeRepository[routine.Routine](db, dbName, routineCollection),
