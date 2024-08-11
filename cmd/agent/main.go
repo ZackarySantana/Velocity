@@ -38,7 +38,7 @@ func main() {
 	}
 
 	logger.Debug("Starting agent")
-	agent := agent.New(pq, velocity)
+	agent := agent.New(pq, velocity, logger)
 	err = agent.Start(context.Background())
 	if err != nil {
 		panic(err)
