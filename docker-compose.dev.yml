@@ -112,7 +112,7 @@ services:
             KAFKA_USERNAME: admin
             KAFKA_PASSWORD: password
             KAFKA_BROKER: kafka:9092
-            VELOCITY_URL: http://api:8080/
+            VELOCITY_URL: http://api:8080
             DEV_MODE: true
         networks:
             - internal

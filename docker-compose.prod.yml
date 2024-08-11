@@ -39,7 +39,7 @@ services:
         volumes:
             - .:/app
         environment:
-            VELOCITY_URL: http://api:8080/
+            VELOCITY_URL: http://api:8080
             DEV_MODE: true
         networks:
             - internal
