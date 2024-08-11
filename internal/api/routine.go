@@ -10,7 +10,7 @@ import (
 
 func (a *api) routineStart() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		body := velocity.StartRoutineRequst{}
+		body := velocity.APIStartRoutineRequest{}
 		err := json.NewDecoder(r.Body).Decode(&body)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -30,7 +30,7 @@ func (a *api) routineStart() http.Handler {
 			return
 		}
 		w.WriteHeader(http.StatusOK)
-		resp := velocity.StartRoutineResponse{Id: ec.Routines[0].Id}
+		resp := velocity.APIStartRoutineResponse{Id: ec.Routines[0].Id}
 		err = json.NewEncoder(w).Encode(resp)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)

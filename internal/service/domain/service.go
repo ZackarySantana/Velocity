@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/zackarysantana/velocity/internal/service"
 	"github.com/zackarysantana/velocity/src/entities"
@@ -9,27 +10,28 @@ import (
 )
 
 type Service struct {
-	db *service.Repository
-	pq service.ProcessQueue
+	repository *service.Repository
+	pq         service.ProcessQueue
+	logger     *slog.Logger
 }
 
-func NewService(db *service.Repository, pq service.ProcessQueue) service.Service {
-	return &Service{db: db, pq: pq}
+func NewService(repository *service.Repository, pq service.ProcessQueue, logger *slog.Logger) service.Service {
+	return &Service{repository: repository, pq: pq, logger: logger}
 }
 
 func (s *Service) StartRoutine(ctx context.Context, ec *entities.ConfigEntity, name string) error {
-	return s.db.WithTransaction(ctx, func(ctx context.Context) error {
-		err := s.db.Test.Put(ctx, ec.Tests)
+	return s.repository.WithTransaction(ctx, func(ctx context.Context) error {
+		err := s.repository.Test.Put(ctx, ec.Tests)
 		if err != nil {
 			return err
 		}
 
-		err = s.db.Image.Put(ctx, ec.Images)
+		err = s.repository.Image.Put(ctx, ec.Images)
 		if err != nil {
 			return err
 		}
 
-		err = s.db.Job.Put(ctx, ec.Jobs)
+		err = s.repository.Job.Put(ctx, ec.Jobs)
 		if err != nil {
 			return err
 		}
@@ -38,7 +40,7 @@ func (s *Service) StartRoutine(ctx context.Context, ec *entities.ConfigEntity, n
 			if r.Name != name {
 				continue
 			}
-			err := s.db.Routine.Put(ctx, []*routine.Routine{r})
+			err := s.repository.Routine.Put(ctx, []*routine.Routine{r})
 			if err != nil {
 				return err
 			}

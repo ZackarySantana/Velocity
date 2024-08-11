@@ -19,22 +19,22 @@ func (c *APIClient) Health() (*http.Response, error) {
 	return c.do("GET", "/health", nil)
 }
 
-type StartRoutineRequst struct {
+type APIStartRoutineRequest struct {
 	Config  config.Config
 	Routine string
 }
 
-type StartRoutineResponse struct {
+type APIStartRoutineResponse struct {
 	Id string `json:"id"`
 }
 
 // StartRoutine
-func (c *APIClient) StartRoutine(config *config.Config, routine string) (*http.Response, *StartRoutineResponse, error) {
-	resp, err := c.do("POST", "/routine/start", StartRoutineRequst{Config: *config, Routine: routine})
+func (c *APIClient) StartRoutine(config *config.Config, routine string) (*http.Response, *APIStartRoutineResponse, error) {
+	resp, err := c.do("POST", "/routine/start", APIStartRoutineRequest{Config: *config, Routine: routine})
 	if err != nil {
 		return resp, nil, err
 	}
-	decodedResp := StartRoutineResponse{}
+	decodedResp := APIStartRoutineResponse{}
 	defer resp.Body.Close()
 	return resp, &decodedResp, json.NewDecoder(resp.Body).Decode(&decodedResp)
 }

@@ -2,48 +2,84 @@ package api
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
+	"time"
 
 	"github.com/zackarysantana/velocity/internal/service"
+	"github.com/zackarysantana/velocity/src/writer"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
 )
 
 var tracer = otel.Tracer("api")
 
-var (
-	middlewares    = []func(http.Handler) http.Handler{}
-	apiMiddlewares = []func(http.Handler) http.Handler{
-		func(h http.Handler) http.Handler {
-			return otelhttp.NewHandler(h, "api")
-		},
-		func(h http.Handler) http.Handler {
-			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				fmt.Println("api middleware")
-				h.ServeHTTP(w, r)
-			})
-		},
-	}
-	agentMiddlewares = []func(http.Handler) http.Handler{
-		func(h http.Handler) http.Handler {
-			return otelhttp.NewHandler(h, "agent-api")
-		},
-		func(h http.Handler) http.Handler {
-			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				fmt.Println("agent middleware")
-				h.ServeHTTP(w, r)
-			})
-		},
-	}
-)
+var ()
 
 type api struct {
-	service   service.Service
-	idCreator service.IdCreator
+	repository *service.Repository
+	service    service.Service
+	idCreator  service.IdCreator
+	logger     *slog.Logger
 }
 
-func New(service service.Service, idCreator service.IdCreator) http.Handler {
-	a := &api{service: service, idCreator: idCreator}
+func New(repository *service.Repository, service service.Service, idCreator service.IdCreator, logger *slog.Logger) http.Handler {
+	a := &api{service: service, idCreator: idCreator, repository: repository, logger: logger}
+
+	middlewares := []func(http.Handler) http.Handler{
+		func(next http.Handler) http.Handler {
+			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				// Start time
+				start := time.Now()
+
+				// Capture the response status code
+				rw := &writer.Response{ResponseWriter: w}
+
+				// Call the next handler
+				next.ServeHTTP(w, r)
+
+				method := r.Method
+				if method == "" {
+					method = "GET"
+				}
+
+				// Log the details
+				a.logger.Info(
+					r.URL.Path,
+					"address",
+					r.RemoteAddr,
+					"status",
+					fmt.Sprintf("%d", rw.StatusCode()),
+					"method",
+					method,
+					"duration",
+					time.Since(start).String(),
+				)
+			})
+		},
+	}
+	apiMiddlewares := []func(http.Handler) http.Handler{
+		func(next http.Handler) http.Handler {
+			return otelhttp.NewHandler(next, "api")
+		},
+		func(next http.Handler) http.Handler {
+			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				fmt.Println("api middleware")
+				next.ServeHTTP(w, r)
+			})
+		},
+	}
+	agentMiddlewares := []func(http.Handler) http.Handler{
+		func(next http.Handler) http.Handler {
+			return otelhttp.NewHandler(next, "agent-api")
+		},
+		func(next http.Handler) http.Handler {
+			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				fmt.Println("agent middleware")
+				next.ServeHTTP(w, r)
+			})
+		},
+	}
 
 	rootMux := http.NewServeMux()
 
@@ -54,6 +90,7 @@ func New(service service.Service, idCreator service.IdCreator) http.Handler {
 
 	agentMux := http.NewServeMux()
 	agentMux.Handle("GET /health", a.health())
+	agentMux.Handle("GET /test/{id}", a.agentGetTask())
 	rootMux.Handle("/agent/", http.StripPrefix("/agent", applyMiddleware(agentMux, agentMiddlewares...)))
 
 	return applyMiddleware(rootMux, middlewares...)
