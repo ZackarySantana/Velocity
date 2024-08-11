@@ -47,7 +47,7 @@ func NewKafkaQueue(config *KafkaQueueConfig) (service.ProcessQueue, error) {
 	}
 	// If this isn't dev mode, we need to set up the SASL mechanism.
 	// If it is, we can just use the default transport and dialer.
-	if os.Getenv("DEV_MODE") != "true" {
+	if os.Getenv("DEV_SERVICES") != "true" {
 		mechanism, err := scram.Mechanism(scram.SHA256, config.Username, config.Password)
 		if err != nil {
 			return nil, err

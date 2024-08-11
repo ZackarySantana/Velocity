@@ -14,7 +14,9 @@ func (w *Response) StatusCode() int {
 }
 
 func (w *Response) Write(data []byte) (int, error) {
-	w.statusCode = http.StatusOK
+	if w.statusCode == 0 {
+		w.statusCode = http.StatusOK
+	}
 	return w.ResponseWriter.Write(data)
 }
 
