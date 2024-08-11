@@ -28,15 +28,18 @@ func (a *agent) Start(ctx context.Context) error {
 	}
 	a.logger.Debug("Pinged server")
 
-	err = a.processQueue.Consume(ctx, "tests", func(data []byte) (bool, error) {
-		id := string(data)
+	err = a.processQueue.Consume(ctx, "tests", func(idMsg []byte) (bool, error) {
+		id := string(idMsg)
 		a.logger.Debug("Received test", "id", id)
-		a.logger.Debug("Attempting to get test...")
-		_, res, err := a.client.GetTest(id)
+		resp, data, err := a.client.GetTest(id)
 		if err != nil {
+			if resp.StatusCode == 404 {
+				a.logger.Debug("Test not found. Skipping", "id", id)
+				return true, nil
+			}
 			return false, err
 		}
-		a.logger.Debug("Got test", "test", res)
+		a.logger.Debug("Got test", "test", data)
 		return true, nil
 	})
 	if err != nil {
