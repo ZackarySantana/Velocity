@@ -1,0 +1,52 @@
+services:
+    api:
+        build:
+            context: .
+            dockerfile: Dockerfile.api.dev
+        volumes:
+            - .:/app
+        environment:
+            DEV_MODE: true
+        ports:
+            - "8080:8080"
+        networks:
+            - internal
+            - external
+        healthcheck:
+            test: curl --fail http://localhost:8080/health || exit 1
+            interval: 10s
+            start_period: 30s
+        restart: on-failure
+
+    cli:
+        build:
+            context: .
+            dockerfile: Dockerfile.cli.dev
+        depends_on:
+            - api
+        volumes:
+            - .:/app
+        environment:
+            DEV_MODE: true
+        restart: on-failure
+
+    agent:
+        build:
+            context: .
+            dockerfile: Dockerfile.agent.dev
+        depends_on:
+            - api
+        volumes:
+            - .:/app
+        environment:
+            VELOCITY_URL: http://api:8080/
+            DEV_MODE: true
+        networks:
+            - internal
+        restart: on-failure
+
+networks:
+    internal:
+        driver: bridge
+    external:
+        driver: bridge

@@ -14,8 +14,6 @@ import (
 
 var tracer = otel.Tracer("api")
 
-var ()
-
 type api struct {
 	repository *service.Repository
 	service    service.Service

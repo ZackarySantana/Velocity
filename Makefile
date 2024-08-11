@@ -20,3 +20,15 @@ build-agent:
 
 agent:
 	$(GO) run cmd/agent/main.go
+
+dev:
+	docker compose -f docker-compose.dev.yml up -d
+
+dev-down:
+	docker compose -f docker-compose.dev.yml down
+
+prod:
+	docker compose -f docker-compose.prod.yml up -d
+
+prod-down:
+	docker compose -f docker-compose.prod.yml down

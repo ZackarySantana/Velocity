@@ -49,13 +49,25 @@ This configuration would expose a routine called "Full coverage" that would run 
 The project is ran using [docker compose](https://docs.docker.com/compose/). To start the project in detached mode, run the following command:
 
 ```bash
-docker compose up -d
+make dev
 ```
 
 To stop the project, run the following command:
 
 ```bash
-docker compose down
+make dev-down
+```
+
+To run the project using prod variables (A valid .env is needed):
+
+```bash
+make prod
+```
+
+To stop the project, run the following command:
+
+```bash
+make prod-down
 ```
 
 To view the logs of the project, run the following command:
