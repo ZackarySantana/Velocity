@@ -2,6 +2,8 @@ package mongo
 
 import (
 	"context"
+	"fmt"
+	"os"
 
 	"github.com/sysulq/dataloader-go"
 	"github.com/zackarysantana/velocity/internal/service"
@@ -11,6 +13,7 @@ import (
 	"github.com/zackarysantana/velocity/src/entities/test"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 const (
@@ -19,6 +22,18 @@ const (
 	imageCollection   = "images"
 	testCollection    = "tests"
 )
+
+func NewMongoClientFromEnv() (*mongo.Client, error) {
+	uri := fmt.Sprintf(os.Getenv("MONGODB_URI"), os.Getenv("MONGODB_USERNAME"), os.Getenv("MONGODB_PASSWORD"))
+	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(uri))
+	if err != nil {
+		return nil, err
+	}
+	if err := client.Ping(context.Background(), nil); err != nil {
+		return nil, err
+	}
+	return client, nil
+}
 
 func NewMongoRepository(db *mongo.Client, dbName string) *service.Repository {
 	return &service.Repository{

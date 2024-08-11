@@ -19,20 +19,23 @@ func New(processQueue service.ProcessQueue, client *velocity.AgentClient) *agent
 }
 
 func (a *agent) Start(ctx context.Context) error {
+	fmt.Println("Pinging server...")
 	_, err := a.client.Health()
 	if err != nil {
 		return err
 	}
+	fmt.Println("Pinged server")
 
-	err = a.processQueue.Consume(ctx, "tests", func(data []byte) error {
+	err = a.processQueue.Consume(ctx, "tests", func(data []byte) (bool, error) {
 		id := string(data)
+		fmt.Println("Received test:", id)
+		fmt.Println("Attempting to get test...")
 		_, res, err := a.client.GetTest(id)
-		fmt.Println("Trying to find:", id)
 		if err != nil {
-			return err
+			return false, err
 		}
-		fmt.Println("for: ", res)
-		return nil
+		fmt.Println("Got test", res)
+		return true, nil
 	})
 	if err != nil {
 		if err == context.Canceled {

@@ -3,6 +3,8 @@ package kafka
 import (
 	"context"
 	"crypto/tls"
+	"errors"
+	"io"
 	"os"
 
 	"github.com/segmentio/kafka-go"
@@ -21,16 +23,32 @@ type KafkaQueue struct {
 	r map[string]*kafka.Reader
 }
 
-func NewKafkaQueue(username, password, broker, groupId string) (service.ProcessQueue, error) {
+type KafkaQueueConfig struct {
+	Username string
+	Password string
+	Broker   string
+	GroupId  string
+}
+
+func NewKafkaQueueOptionsFromEnv() *KafkaQueueConfig {
+	return &KafkaQueueConfig{
+		Username: os.Getenv("KAFKA_USERNAME"),
+		Password: os.Getenv("KAFKA_PASSWORD"),
+		Broker:   os.Getenv("KAFKA_BROKER"),
+		GroupId:  os.Getenv("KAFKA_GROUP_ID"),
+	}
+}
+
+func NewKafkaQueue(config *KafkaQueueConfig) (service.ProcessQueue, error) {
 	k := &KafkaQueue{
-		broker:  broker,
-		groupId: groupId,
+		broker:  config.Broker,
+		groupId: config.GroupId,
 		r:       map[string]*kafka.Reader{},
 	}
 	// If this isn't dev mode, we need to set up the SASL mechanism.
 	// If it is, we can just use the default transport and dialer.
 	if os.Getenv("DEV_MODE") != "true" {
-		mechanism, err := scram.Mechanism(scram.SHA256, username, password)
+		mechanism, err := scram.Mechanism(scram.SHA256, config.Username, config.Password)
 		if err != nil {
 			return nil, err
 		}
@@ -44,7 +62,7 @@ func NewKafkaQueue(username, password, broker, groupId string) (service.ProcessQ
 		}
 	}
 	k.w = &kafka.Writer{
-		Addr:      kafka.TCP(broker),
+		Addr:      kafka.TCP(config.Broker),
 		Transport: k.transport,
 	}
 
@@ -59,19 +77,27 @@ func (k *KafkaQueue) Write(ctx context.Context, topic string, messages ...[]byte
 	return k.w.WriteMessages(ctx, kafkaMessages...)
 }
 
-func (k *KafkaQueue) Consume(ctx context.Context, topic string, f func([]byte) error) error {
+func (k *KafkaQueue) Consume(ctx context.Context, topic string, f func([]byte) (bool, error)) error {
 	r, err := k.getReader(topic)
 	if err != nil {
 		return err
 	}
 	for {
 		message, err := r.ReadMessage(ctx)
+		message, err = r.FetchMessage(ctx)
 		if err != nil {
+			if errors.Is(err, io.EOF) {
+				continue
+			}
 			return err
 		}
 
-		if err := f(message.Value); err != nil {
+		ok, err := f(message.Value)
+		if err != nil {
 			return err
+		}
+		if ok {
+			r.CommitMessages(ctx, message)
 		}
 	}
 }

@@ -1,8 +1,6 @@
 package main
 
 import (
-	"context"
-	"fmt"
 	"log"
 	"log/slog"
 	"net/http"
@@ -10,47 +8,38 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/zackarysantana/velocity/internal/api"
-	"github.com/zackarysantana/velocity/internal/service"
 	"github.com/zackarysantana/velocity/internal/service/domain"
 	"github.com/zackarysantana/velocity/internal/service/kafka"
 	mongodomain "github.com/zackarysantana/velocity/internal/service/mongo"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func main() {
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
+	logger.Debug("Loading env file")
 	if err := godotenv.Load(); err != nil {
 		log.Fatal("Error loading .env file", err)
 	}
+	logger.Debug("Loaded env file")
 
-	repository, err := loadMongoDB()
+	logger.Debug("Connecting to MongoDB")
+	client, err := mongodomain.NewMongoClientFromEnv()
 	if err != nil {
 		panic(err)
 	}
+	repository := mongodomain.NewMongoRepository(client, os.Getenv("MONGODB_DATABASE"))
+	logger.Debug("Connected to MongoDB")
 
-	pq, err := kafka.NewKafkaQueue(os.Getenv("KAFKA_USERNAME"), os.Getenv("KAFKA_PASSWORD"), os.Getenv("KAFKA_BROKER"), "agent")
+	logger.Debug("Connecting to Kafka")
+	pq, err := kafka.NewKafkaQueue(kafka.NewKafkaQueueOptionsFromEnv())
 	defer pq.Close()
 	if err != nil {
 		panic(err)
 	}
+	logger.Debug("Connected to Kafka")
 
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
 	service := domain.NewService(repository, pq, logger)
 
 	mux := api.New(repository, service, mongodomain.NewMongoIdCreator(), logger)
-	slog.Info("Starting server", "addr", ":8080")
+	logger.Info("Starting server", "addr", ":8080")
 	http.ListenAndServe(":8080", mux)
-}
-
-func loadMongoDB() (*service.Repository, error) {
-	uri := fmt.Sprintf(os.Getenv("MONGODB_URI"), os.Getenv("MONGODB_USERNAME"), os.Getenv("MONGODB_PASSWORD"))
-	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(uri))
-	if err != nil {
-		return nil, err
-	}
-	err = client.Ping(context.Background(), nil)
-	if err != nil {
-		return nil, err
-	}
-	return mongodomain.NewMongoRepository(client, os.Getenv("MONGODB_DATABASE")), nil
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"log/slog"
 	"os"
 	"time"
 
@@ -13,15 +14,20 @@ import (
 )
 
 func main() {
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
+	logger.Debug("Loading env file")
 	if err := godotenv.Load(); err != nil {
 		log.Fatal("Error loading .env file", err)
 	}
+	logger.Debug("Loaded env file")
 
-	pq, err := kafka.NewKafkaQueue(os.Getenv("KAFKA_USERNAME"), os.Getenv("KAFKA_PASSWORD"), os.Getenv("KAFKA_BROKER"), "agent")
+	logger.Debug("Connecting to Kafka")
+	pq, err := kafka.NewKafkaQueue(kafka.NewKafkaQueueOptionsFromEnv())
 	defer pq.Close()
 	if err != nil {
 		panic(err)
 	}
+	logger.Debug("Connected to Kafka")
 
 	velocity := velocity.NewAgent(os.Getenv("VELOCITY_URL"))
 
@@ -31,6 +37,7 @@ func main() {
 		time.Sleep(2 * time.Second)
 	}
 
+	logger.Debug("Starting agent")
 	agent := agent.New(pq, velocity)
 	err = agent.Start(context.Background())
 	if err != nil {
