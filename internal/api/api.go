@@ -36,7 +36,7 @@ func New(repository *service.Repository, service service.Service, idCreator serv
 				rw := &writer.Response{ResponseWriter: w}
 
 				// Call the next handler
-				next.ServeHTTP(w, r)
+				next.ServeHTTP(rw, r)
 
 				method := r.Method
 				if method == "" {
