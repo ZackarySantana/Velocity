@@ -13,4 +13,4 @@ COPY internal internal
 COPY cmd cmd
 COPY Makefile Makefile
 
-CMD make GO=gow BUILD_DIR=bin build-cli
+CMD make GO="gow -r=false" BUILD_DIR=bin build-cli

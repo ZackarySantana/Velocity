@@ -13,4 +13,4 @@ COPY internal internal
 COPY cmd cmd
 COPY Makefile Makefile
 
-CMD make GO=gow api
+CMD make GO="gow -r=false" api
