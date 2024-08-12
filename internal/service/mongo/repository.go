@@ -37,19 +37,19 @@ func NewMongoClientFromEnv() (*mongo.Client, error) {
 
 func NewMongoRepository(db *mongo.Client, dbName string) *service.Repository {
 	return &service.Repository{
-		Routine: service.RoutineRepository{
+		Routine: &service.RoutineRepository{
 			Interface: createTypeRepository[routine.Routine](db, dbName, routineCollection),
 			Put:       createPutType[routine.Routine](db, dbName, routineCollection),
 		},
-		Job: service.JobRepository{
+		Job: &service.JobRepository{
 			Interface: createTypeRepository[job.Job](db, dbName, jobCollection),
 			Put:       createPutType[job.Job](db, dbName, jobCollection),
 		},
-		Image: service.ImageRepository{
+		Image: &service.ImageRepository{
 			Interface: createTypeRepository[image.Image](db, dbName, imageCollection),
 			Put:       createPutType[image.Image](db, dbName, imageCollection),
 		},
-		Test: service.TestRepository{
+		Test: &service.TestRepository{
 			Interface: createTypeRepository[test.Test](db, dbName, testCollection),
 			Put:       createPutType[test.Test](db, dbName, testCollection),
 		},
@@ -70,20 +70,24 @@ func NewMongoRepository(db *mongo.Client, dbName string) *service.Repository {
 func createTypeRepository[T any](db *mongo.Client, database, collection string) dataloader.Interface[string, *T] {
 	return dataloader.New(
 		func(ctx context.Context, keys []string) []dataloader.Result[*T] {
+			fmt.Println("FInding:", database, ":", collection, ":", keys)
 			cur, err := db.Database(database).Collection(collection).Find(ctx, bson.M{
 				"_id": bson.M{"$in": keys},
 			})
 			if err != nil {
+				fmt.Println("Some error 1")
 				return []dataloader.Result[*T]{dataloader.Wrap[*T](nil, err)}
 			}
 
 			results := make([]dataloader.Result[*T], len(keys))
+			i := 0
 			for cur.Next(ctx) {
-				var r *T
+				var r T
 				if err := cur.Decode(&r); err != nil {
 					return []dataloader.Result[*T]{dataloader.Wrap[*T](nil, err)}
 				}
-				results = append(results, dataloader.Wrap(r, nil))
+				results[i] = dataloader.Wrap(&r, nil)
+				i++
 			}
 
 			return results

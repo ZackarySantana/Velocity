@@ -11,10 +11,10 @@ import (
 )
 
 type Repository struct {
-	Routine RoutineRepository
-	Job     JobRepository
-	Image   ImageRepository
-	Test    TestRepository
+	Routine *RoutineRepository
+	Job     *JobRepository
+	Image   *ImageRepository
+	Test    *TestRepository
 
 	WithTransaction func(context.Context, func(context.Context) error) error
 }

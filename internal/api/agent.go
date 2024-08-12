@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/zackarysantana/velocity/src/velocity"
@@ -15,6 +16,7 @@ func (a *api) agentGetTask() http.Handler {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+		fmt.Println(id, "test", test)
 		if test == nil {
 			http.Error(w, "not found", http.StatusNotFound)
 			return

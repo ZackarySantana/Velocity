@@ -83,8 +83,7 @@ func (k *KafkaQueue) Consume(ctx context.Context, topic string, f func([]byte) (
 		return err
 	}
 	for {
-		message, err := r.ReadMessage(ctx)
-		message, err = r.FetchMessage(ctx)
+		message, err := r.FetchMessage(ctx)
 		if err != nil {
 			if errors.Is(err, io.EOF) {
 				continue

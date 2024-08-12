@@ -22,13 +22,13 @@ agent:
 	$(GO) run cmd/agent/main.go
 
 dev:
-	docker compose -f docker-compose.dev.yml up -d
+	docker compose -f compose.dev.yml up -d
 
 dev-down:
-	docker compose -f docker-compose.dev.yml down
+	docker compose -f compose.dev.yml down
 
 prod:
-	docker compose -f docker-compose.prod.yml up -d
+	docker compose -f compose.prod.yml up -d
 
 prod-down:
-	docker compose -f docker-compose.prod.yml down
+	docker compose -f compose.prod.yml down
