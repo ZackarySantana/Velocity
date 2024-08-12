@@ -6,11 +6,17 @@ services:
             ZOOKEEPER_TICK_TIME: 2000
         networks:
             - internal
+        healthcheck:
+            test: nc -z localhost 2181 || exit -1
+            interval: 10s
+            timeout: 5s
+            retries: 3
 
     kafka:
         image: confluentinc/cp-kafka:7.5.0
         depends_on:
-            - zookeeper
+            zookeeper:
+                condition: service_healthy
         environment:
             KAFKA_BROKER_ID: 1
             KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -27,6 +33,11 @@ services:
             KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
         networks:
             - internal
+        healthcheck:
+            test: kafka-topics --bootstrap-server kafka:9092 --list
+            interval: 30s
+            timeout: 10s
+            retries: 3
         restart: on-failure
 
     redis:
@@ -35,6 +46,11 @@ services:
             - "6379:6379"
         networks:
             - internal
+        healthcheck:
+            test: redis-cli ping
+            interval: 10s
+            timeout: 5s
+            retries: 3
         restart: on-failure
 
     mongodb:
@@ -64,9 +80,12 @@ services:
             context: .
             dockerfile: Dockerfile.api.dev
         depends_on:
-            - kafka
-            - redis
-            - mongodb
+            kafka:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+            mongodb:
+                condition: service_healthy
         volumes:
             - .:/app
         environment:
