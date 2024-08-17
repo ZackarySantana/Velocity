@@ -2,9 +2,7 @@ package config
 
 import (
 	"github.com/samber/oops"
-	"github.com/zackarysantana/velocity/internal/service"
 	"github.com/zackarysantana/velocity/src/catcher"
-	"github.com/zackarysantana/velocity/src/entities/image"
 )
 
 type ImageSection []Image
@@ -35,14 +33,6 @@ func (i *ImageSection) error() oops.OopsErrorBuilder {
 	return oops.In("image_section")
 }
 
-func (i *ImageSection) ToEntities(ic service.IdCreator) []*image.Image {
-	images := make([]*image.Image, 0)
-	for _, img := range *i {
-		images = append(images, img.ToEntity(ic))
-	}
-	return images
-}
-
 type Image struct {
 	Name  string `yaml:"name"`
 	Image string `yaml:"image"`
@@ -61,12 +51,4 @@ func (i *Image) validateIntegrity(config *Config) error {
 
 func (i *Image) error() oops.OopsErrorBuilder {
 	return oops.With("image_name", i.Name)
-}
-
-func (i *Image) ToEntity(ic service.IdCreator) *image.Image {
-	return &image.Image{
-		Id:    ic(),
-		Name:  i.Name,
-		Image: i.Image,
-	}
 }

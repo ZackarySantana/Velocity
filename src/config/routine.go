@@ -2,10 +2,7 @@ package config
 
 import (
 	"github.com/samber/oops"
-	"github.com/zackarysantana/velocity/internal/service"
 	"github.com/zackarysantana/velocity/src/catcher"
-	"github.com/zackarysantana/velocity/src/entities"
-	"github.com/zackarysantana/velocity/src/entities/routine"
 )
 
 type RoutineSection []Routine
@@ -34,14 +31,6 @@ func (r *RoutineSection) validateIntegrity(c *Config) error {
 
 func (r *RoutineSection) error() oops.OopsErrorBuilder {
 	return oops.In("routine_section")
-}
-
-func (r *RoutineSection) ToEntities(ic service.IdCreator, ec *entities.ConfigEntity) []*routine.Routine {
-	routines := make([]*routine.Routine, 0)
-	for _, rt := range *r {
-		routines = append(routines, rt.ToEntity(ic, ec))
-	}
-	return routines
 }
 
 func (r *RoutineSection) GetRoutine(name string) *Routine {
@@ -86,21 +75,4 @@ func (r *Routine) validateIntegrity(config *Config) error {
 
 func (r *Routine) error() oops.OopsErrorBuilder {
 	return oops.With("routine_name", r.Name)
-}
-
-func (r *Routine) ToEntity(ic service.IdCreator, ec *entities.ConfigEntity) *routine.Routine {
-	jobs := make([]string, len(r.Jobs))
-	for i, jobName := range r.Jobs {
-		for _, job := range ec.Jobs {
-			if job.Name == jobName {
-				jobs[i] = job.Id
-				break
-			}
-		}
-	}
-	return &routine.Routine{
-		Id:   ic(),
-		Name: r.Name,
-		Jobs: jobs,
-	}
 }

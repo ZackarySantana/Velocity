@@ -17,3 +17,10 @@ type ConfigEntity struct {
 	Jobs     []*job.Job
 	Routines []*routine.Routine
 }
+
+func (c *ConfigEntity) Merge(other *ConfigEntity) {
+	c.Images = append(c.Images, other.Images...)
+	c.Tests = append(c.Tests, other.Tests...)
+	c.Jobs = append(c.Jobs, other.Jobs...)
+	c.Routines = append(c.Routines, other.Routines...)
+}

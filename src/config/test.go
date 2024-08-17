@@ -2,9 +2,7 @@ package config
 
 import (
 	"github.com/samber/oops"
-	"github.com/zackarysantana/velocity/internal/service"
 	"github.com/zackarysantana/velocity/src/catcher"
-	"github.com/zackarysantana/velocity/src/entities/test"
 )
 
 type TestSection []Test
@@ -35,14 +33,6 @@ func (t *TestSection) error() oops.OopsErrorBuilder {
 	return oops.In("test_section")
 }
 
-func (t *TestSection) ToEntities(ic service.IdCreator) []*test.Test {
-	tests := make([]*test.Test, 0)
-	for _, tst := range *t {
-		tests = append(tests, tst.ToEntity(ic))
-	}
-	return tests
-}
-
 type Command struct {
 	Shell string `yaml:"shell"`
 
@@ -64,14 +54,6 @@ func (c *Command) validateIntegrity(config *Config) error {
 
 func (c *Command) error() oops.OopsErrorBuilder {
 	return oops.With("shell", c.Shell).With("prebuilt", c.Prebuilt)
-}
-
-func (c *Command) ToEntity() test.Command {
-	return test.Command{
-		Shell:    c.Shell,
-		Prebuilt: c.Prebuilt,
-		Params:   c.Params,
-	}
 }
 
 type Test struct {
@@ -103,19 +85,4 @@ func (t *Test) validateIntegrity(config *Config) error {
 
 func (t *Test) error() oops.OopsErrorBuilder {
 	return oops.With("test_name", t.Name).With("language", t.Language).With("library", t.Library)
-}
-
-func (t *Test) ToEntity(ic service.IdCreator) *test.Test {
-	cmds := make([]test.Command, len(t.Commands))
-	for i, cmd := range t.Commands {
-		cmds[i] = cmd.ToEntity()
-	}
-	return &test.Test{
-		Id:        ic(),
-		Name:      t.Name,
-		Language:  t.Language,
-		Library:   t.Library,
-		Commands:  cmds,
-		Directory: t.Directory,
-	}
 }

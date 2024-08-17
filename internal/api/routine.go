@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/zackarysantana/velocity/src/config"
 	"github.com/zackarysantana/velocity/src/velocity"
 )
 
@@ -24,7 +25,14 @@ func (a *api) routineStart() http.Handler {
 			http.Error(w, fmt.Sprintf("'%s' routine not found", body.Routine), http.StatusBadRequest)
 			return
 		}
-		ec := body.Config.ToEntity(a.idCreator)
+		ec, err := body.Config.CreateEntity(config.CreateEntityOptions{
+			Ic:              a.idCreator,
+			FilterToRoutine: body.Routine,
+		})
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 		if err = a.service.StartRoutine(r.Context(), ec, body.Routine); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

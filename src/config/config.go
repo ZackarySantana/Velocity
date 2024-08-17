@@ -2,9 +2,7 @@ package config
 
 import (
 	"github.com/samber/oops"
-	"github.com/zackarysantana/velocity/internal/service"
 	"github.com/zackarysantana/velocity/src/catcher"
-	"github.com/zackarysantana/velocity/src/entities"
 	"gopkg.in/yaml.v3"
 )
 
@@ -27,14 +25,31 @@ func (c *Config) Validate() error {
 	return catcher.Resolve()
 }
 
-func (c *Config) ToEntity(ic service.IdCreator) *entities.ConfigEntity {
-	ec := &entities.ConfigEntity{
-		Images: c.Images.ToEntities(ic),
-		Tests:  c.Tests.ToEntities(ic),
+func (c *Config) GetJob(jobName string) (Job, error) {
+	for _, job := range c.Jobs {
+		if job.Name == jobName {
+			return job, nil
+		}
 	}
-	ec.Jobs = c.Jobs.ToEntities(ic, ec)
-	ec.Routines = c.Routines.ToEntities(ic, ec)
-	return ec
+	return Job{}, oops.Errorf("job not found: %s", jobName)
+}
+
+func (c *Config) GetImage(imageName string) (Image, error) {
+	for _, image := range c.Images {
+		if image.Name == imageName {
+			return image, nil
+		}
+	}
+	return Image{}, oops.Errorf("image not found: %s", imageName)
+}
+
+func (c *Config) GetTest(testName string) (Test, error) {
+	for _, test := range c.Tests {
+		if test.Name == testName {
+			return test, nil
+		}
+	}
+	return Test{}, oops.Errorf("test not found: %s", testName)
 }
 
 func Parse(bytes []byte) (*Config, error) {

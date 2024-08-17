@@ -37,14 +37,10 @@ func (s *Service) StartRoutine(ctx context.Context, ec *entities.ConfigEntity, n
 		}
 
 		for _, r := range ec.Routines {
-			if r.Name != name {
-				continue
-			}
 			err := s.repository.Routine.Put(ctx, []*routine.Routine{r})
 			if err != nil {
 				return err
 			}
-			break
 		}
 
 		testIds := make([][]byte, len(ec.Tests))
