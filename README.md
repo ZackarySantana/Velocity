@@ -61,8 +61,12 @@ make dev-stop
 make dev-start
 # Deletes the containers
 make dev-down
-# Remakes the containers
-make dev
+```
+
+The only special command is `make dev`, which will effectively run:
+
+```bash
+make dev-up ARGS="-d"
 ```
 
 These commands are also available for the prod environment (which pulls from the .env file).
