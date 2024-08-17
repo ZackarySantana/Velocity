@@ -42,10 +42,8 @@ func (a *agent) Start(ctx context.Context) error {
 		a.logger.Debug("Got test", "test", data)
 		return true, nil
 	})
-	if err != nil {
-		if err == context.Canceled {
-			return nil
-		}
+	if err == context.Canceled {
+		return nil
 	}
 	return err
 }
