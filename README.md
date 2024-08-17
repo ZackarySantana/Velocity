@@ -52,35 +52,24 @@ The project is ran using [docker compose](https://docs.docker.com/compose/). To 
 make dev
 ```
 
-To stop the project, run the following command:
+All docker commands are wrapped in the `make` command. For example:
 
 ```bash
+# To stop the containers
+make dev-stop
+# To start the containers
+make dev-start
+# Deletes the containers
 make dev-down
+# Remakes the containers
+make dev
 ```
 
-To run the project using prod variables (A valid .env is needed):
-
-```bash
-make prod
-```
-
-To stop the project, run the following command:
-
-```bash
-make prod-down
-```
-
-To view the logs of the project, run the following command:
-
-```bash
-docker compose logs -f
-```
-
-Or view it on the docker desktop app.
+These commands are also available for the prod environment (which pulls from the .env file).
 
 ### Developing on the project
 
-Once you have it running, you can access the API at `http://localhost:8080`, the CLI at bin/velocity, and the mongo database at `mongodb://localhost:27017/?directConnection=true`.
+Once you have it running, you can access the API at `http://localhost:8080`, the CLI at `bin/velocity`, and the mongo database at `mongodb://localhost:27017/?directConnection=true`.
 
 For example, you could start a routine like:
 

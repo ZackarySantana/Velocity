@@ -24,11 +24,11 @@ agent:
 dev:
 	docker compose -f compose.dev.yml up -d
 
-dev-down:
-	docker compose -f compose.dev.yml down
+dev-%:
+	docker compose -f compose.dev.yml $* $(ARGS)
 
 prod:
 	docker compose -f compose.prod.yml up -d
 
-prod-down:
-	docker compose -f compose.prod.yml down
+prod-%:
+	docker compose -f compose.prod.yml $* $(ARGS)
