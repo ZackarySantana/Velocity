@@ -14,7 +14,7 @@ func TestTestSectionSyntax(t *testing.T) {
 		err := config.ValidateSyntax(&config.TestSection{
 			{
 				Name:    "name",
-				Library: "library", // without language this should error
+				Library: "library",
 			},
 			{
 				Name:     "name-2",
