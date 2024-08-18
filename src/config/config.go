@@ -18,10 +18,10 @@ func (c *Config) Validate() error {
 		return oops.Errorf("config is nil")
 	}
 	catcher := catcher.New()
-	catcher.Catch(Validate(&c.Tests, c))
-	catcher.Catch(Validate(&c.Images, c))
-	catcher.Catch(Validate(&c.Jobs, c))
-	catcher.Catch(Validate(&c.Routines, c))
+	catcher.Wrap(Validate(&c.Tests, c), "validating tests")
+	catcher.Wrap(Validate(&c.Images, c), "validating images")
+	catcher.Wrap(Validate(&c.Jobs, c), "validating jobs")
+	catcher.Wrap(Validate(&c.Routines, c), "validating routines")
 	return catcher.Resolve()
 }
 

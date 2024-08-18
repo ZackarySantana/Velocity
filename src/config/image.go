@@ -10,24 +10,22 @@ import (
 type ImageSection []Image
 
 func (i *ImageSection) validateSyntax() error {
-	if i == nil {
-		return nil
-	}
-	catcher := catcher.New()
-	for idx, image := range *i {
-		catcher.Catch(image.error(idx).Wrap(image.validateSyntax()))
-	}
-	return catcher.Resolve()
+	return ValidateSyntaxMany(toValidators(i))
 }
 
 func (i *ImageSection) validateIntegrity(c *Config) error {
 	if i == nil {
-		return nil
+		return oops.Errorf("image section must exist and contain at least one image")
 	}
 	catcher := catcher.New()
+	catcher.ErrorWhen(len(*i) == 0, "at least one image is required")
+	names := make(map[string]int)
 	for idx, image := range *i {
-		catcher.Catch(image.error(idx).Wrap(image.validateIntegrity(c)))
+		idx2, ok := names[image.Name]
+		catcher.ErrorWhen(ok, "[index=%d, index_2=%d] duplicate image name: %s", idx, idx2, image.Name)
+		names[image.Name] = idx
 	}
+	catcher.Catch(ValidateIntegrityMany(toValidators(i), c))
 	return catcher.Resolve()
 }
 

@@ -26,7 +26,7 @@ func (c *Catcher) Wrap(err error, msg string, a ...any) {
 	if err == nil {
 		return
 	}
-	c.Catch(errors.Join(err, fmt.Errorf(msg, a...)))
+	c.Catch(joinOopsErrors(fmt.Errorf(msg, a...), err))
 }
 
 func (c *Catcher) Error(msg string, a ...any) {
@@ -57,5 +57,19 @@ func (c *Catcher) Resolve() error {
 			builder = builder.With(k, v)
 		}
 	}
-	return builder.Wrap(errors.Join(c.errs...))
+	return joinOopsErrors(c.errs...)
+}
+
+func joinOopsErrors(errs ...error) error {
+	var builder oops.OopsErrorBuilder
+	for _, e := range errs {
+		oopsErr, ok := oops.AsOops(e)
+		if !ok {
+			continue
+		}
+		for k, v := range oopsErr.Context() {
+			builder = builder.With(k, v)
+		}
+	}
+	return builder.Wrap(errors.Join(errs...))
 }
