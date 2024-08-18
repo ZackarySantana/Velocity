@@ -10,24 +10,24 @@ import (
 type TestSection []Test
 
 func (t *TestSection) validateSyntax() error {
-	if t == nil {
-		return nil
-	}
-	catcher := catcher.New()
-	for i, test := range *t {
-		catcher.Catch(test.error(i).Wrap(test.validateSyntax()))
-	}
-	return catcher.Resolve()
+	return ValidateSyntaxMany(toValidators(t))
 }
 
 func (t *TestSection) validateIntegrity(c *Config) error {
 	if t == nil {
-		return nil
+		return oops.Errorf("test section must exist and contain at least one test")
 	}
 	catcher := catcher.New()
-	for i, test := range *t {
-		catcher.Catch(test.error(i).Wrap(test.validateIntegrity(c)))
+	catcher.When(len(*t) == 0, "at least one test is required")
+	names := make(map[string]int)
+	for idx, test := range *t {
+		idx2, ok := names[test.Name]
+		if ok {
+			catcher.Wrap(oops.Errorf("duplicate test name: %s", test.Name), "[index=%d, index_2=%d]", idx, idx2)
+		}
+		names[test.Name] = idx
 	}
+	catcher.Catch(ValidateIntegrityMany(toValidators(t), c))
 	return catcher.Resolve()
 }
 
@@ -46,16 +46,12 @@ func (c *Command) validateSyntax() error {
 	catcher := catcher.New()
 	catcher.When(c.Shell == "" && c.Prebuilt == "", "must specify a shell or prebuilt command")
 	catcher.When(c.Shell != "" && c.Prebuilt != "", "cannot specify both a shell and prebuilt command")
-	catcher.When(c.Shell == "" && len(c.Params) > 0, "cannot specify params without a shell command")
+	catcher.When(c.Prebuilt == "" && len(c.Params) > 0, "cannot specify params without a prebuilt command")
 	return catcher.Resolve()
 }
 
 func (c *Command) validateIntegrity(config *Config) error {
 	return nil
-}
-
-func (c *Command) error(i int) oops.OopsErrorBuilder {
-	return oops.With(fmt.Sprintf("shell_%d", i), c.Shell).With(fmt.Sprintf("prebuilt_%d", i), c.Prebuilt)
 }
 
 type Test struct {
@@ -75,8 +71,8 @@ func (t *Test) validateSyntax() error {
 	catcher.When(t.Language == "" && len(t.Commands) == 0, "language or commands are required")
 	catcher.When(t.Language != "" && len(t.Commands) > 0, "cannot specify both a language and commands")
 	catcher.When(t.Library != "" && len(t.Commands) > 0, "cannot specify a library with commands")
-	for i, cmd := range t.Commands {
-		catcher.Catch(cmd.error(i).Wrap(cmd.validateSyntax()))
+	for _, cmd := range t.Commands {
+		catcher.Catch(cmd.validateSyntax())
 	}
 	return catcher.Resolve()
 }
@@ -86,5 +82,5 @@ func (t *Test) validateIntegrity(config *Config) error {
 }
 
 func (t *Test) error(i int) oops.OopsErrorBuilder {
-	return oops.With(fmt.Sprintf("test_name_%d", i), t.Name).With(fmt.Sprintf("language_%d", i), t.Language).With(fmt.Sprintf("library_%d", i), t.Library)
+	return oops.With(fmt.Sprintf("test_name_%d", i), t.Name).With(fmt.Sprintf("language_%d", i), t.Language).With(fmt.Sprintf("library_%d", i), t.Library).With(fmt.Sprintf("directory_%d", i), t.Directory).With(fmt.Sprintf("commands_%d", i), t.Commands)
 }

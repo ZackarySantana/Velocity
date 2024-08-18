@@ -10,7 +10,7 @@ import (
 )
 
 func TestImageSectionSyntax(t *testing.T) {
-	t.Run("section propogates error from images", func(t *testing.T) {
+	t.Run("section propogates error", func(t *testing.T) {
 		err := config.ValidateSyntax(&config.ImageSection{
 			{
 				Name: "name",
@@ -26,16 +26,20 @@ func TestImageSectionSyntax(t *testing.T) {
 			oops, ok := oops.AsOops(err)
 			require.True(t, ok)
 			assert.Equal(t, "image_section", oops.Domain())
+
+			// Image one
 			assert.Equal(t, "name", oops.Context()["image_name_0"])
 			assert.Equal(t, "", oops.Context()["image_0"])
-			assert.Equal(t, "image", oops.Context()["image_1"])
+
+			// Image two
 			assert.Equal(t, "", oops.Context()["image_name_1"])
+			assert.Equal(t, "image", oops.Context()["image_1"])
 		})
 	})
 
 	t.Run("section with no images should have no error", func(t *testing.T) {
 		err := config.ValidateSyntax(&config.ImageSection{})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	})
 }
 
@@ -58,7 +62,7 @@ func TestImageSectionIntegrity(t *testing.T) {
 			},
 		}, &config.Config{})
 		require.Error(t, err)
-		assert.EqualError(t, err, "validating integrity: [index=1, index_2=0] duplicate image name: name")
+		assert.EqualError(t, err, "validating integrity: [index=1, index_2=0]: duplicate image name: name")
 
 		t.Run("error fields propogate", func(t *testing.T) {
 			oops, ok := oops.AsOops(err)
@@ -117,6 +121,6 @@ func TestImageSyntax(t *testing.T) {
 			Name:  "name",
 			Image: "image",
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	})
 }

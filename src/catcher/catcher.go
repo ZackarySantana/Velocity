@@ -57,7 +57,7 @@ func (c *Catcher) Resolve() error {
 			builder = builder.With(k, v)
 		}
 	}
-	return errors.Join(c.errs...)
+	return builder.Wrap(errors.Join(c.errs...))
 }
 
 // This joins a single error chain
