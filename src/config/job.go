@@ -43,9 +43,9 @@ type Job struct {
 
 func (j *Job) validateSyntax() error {
 	catcher := catcher.New()
-	catcher.ErrorWhen(j.Name == "", "name is required")
-	catcher.ErrorWhen(len(j.Tests) == 0, "tests are required")
-	catcher.ErrorWhen(len(j.Images) == 0, "images are required")
+	catcher.When(j.Name == "", "name is required")
+	catcher.When(len(j.Tests) == 0, "tests are required")
+	catcher.When(len(j.Images) == 0, "images are required")
 	return catcher.Resolve()
 }
 
@@ -59,7 +59,7 @@ func (j *Job) validateIntegrity(config *Config) error {
 				break
 			}
 		}
-		catcher.ErrorWhen(!found, "test %s not found", testName)
+		catcher.When(!found, "test %s not found", testName)
 	}
 	for _, imageName := range j.Images {
 		found := false
@@ -69,7 +69,7 @@ func (j *Job) validateIntegrity(config *Config) error {
 				break
 			}
 		}
-		catcher.ErrorWhen(!found, "image %s not found", imageName)
+		catcher.When(!found, "image %s not found", imageName)
 	}
 	return catcher.Resolve()
 }

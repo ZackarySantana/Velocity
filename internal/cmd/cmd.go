@@ -3,7 +3,6 @@ package cmd
 import (
 	"context"
 	"log/slog"
-	"strings"
 
 	"github.com/samber/oops"
 	"github.com/urfave/cli/v3"
@@ -36,7 +35,7 @@ func CreateCommand() *cli.Command {
 					return
 				}
 			}
-			flags.Logger(cmd).Error("Exiting with error", "error", strings.ReplaceAll(err.Error(), "\n", ": "))
+			flags.Logger(cmd).Error("Exiting with error", "error", err.Error())
 		},
 	}
 }

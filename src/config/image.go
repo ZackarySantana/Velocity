@@ -18,11 +18,13 @@ func (i *ImageSection) validateIntegrity(c *Config) error {
 		return oops.Errorf("image section must exist and contain at least one image")
 	}
 	catcher := catcher.New()
-	catcher.ErrorWhen(len(*i) == 0, "at least one image is required")
+	catcher.When(len(*i) == 0, "at least one image is required")
 	names := make(map[string]int)
 	for idx, image := range *i {
 		idx2, ok := names[image.Name]
-		catcher.ErrorWhen(ok, "[index=%d, index_2=%d] duplicate image name: %s", idx, idx2, image.Name)
+		if ok {
+			catcher.Wrap(oops.Errorf("duplicate image name: %s", image.Name), "[index=%d, index_2=%d]", idx, idx2)
+		}
 		names[image.Name] = idx
 	}
 	catcher.Catch(ValidateIntegrityMany(toValidators(i), c))
@@ -40,8 +42,8 @@ type Image struct {
 
 func (i *Image) validateSyntax() error {
 	catcher := catcher.New()
-	catcher.ErrorWhen(i.Name == "", "name is required")
-	catcher.ErrorWhen(i.Image == "", "image is required")
+	catcher.When(i.Name == "", "name is required")
+	catcher.When(i.Image == "", "image is required")
 	return catcher.Resolve()
 }
 

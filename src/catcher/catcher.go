@@ -26,21 +26,21 @@ func (c *Catcher) Wrap(err error, msg string, a ...any) {
 	if err == nil {
 		return
 	}
-	c.Catch(joinOopsErrors(fmt.Errorf(msg, a...), err))
+	c.Catch(joinOopsErrorsChain(fmt.Errorf(msg, a...), err))
 }
 
-func (c *Catcher) Error(msg string, a ...any) {
+func (c *Catcher) New(msg string, a ...any) {
 	if msg == "" {
 		return
 	}
 	c.Catch(fmt.Errorf(msg, a...))
 }
 
-func (c *Catcher) ErrorWhen(cond bool, msg string, a ...any) {
+func (c *Catcher) When(cond bool, msg string, a ...any) {
 	if !cond {
 		return
 	}
-	c.Error(msg, a...)
+	c.New(msg, a...)
 }
 
 func (c *Catcher) Resolve() error {
@@ -57,10 +57,11 @@ func (c *Catcher) Resolve() error {
 			builder = builder.With(k, v)
 		}
 	}
-	return joinOopsErrors(c.errs...)
+	return errors.Join(c.errs...)
 }
 
-func joinOopsErrors(errs ...error) error {
+// This joins a single error chain
+func joinOopsErrorsChain(errs ...error) error {
 	var builder oops.OopsErrorBuilder
 	for _, e := range errs {
 		oopsErr, ok := oops.AsOops(e)
@@ -71,5 +72,24 @@ func joinOopsErrors(errs ...error) error {
 			builder = builder.With(k, v)
 		}
 	}
-	return builder.Wrap(errors.Join(errs...))
+	return builder.Wrap(join(errs...))
+}
+
+func join(errs ...error) error {
+	return &combinedError{errs}
+}
+
+type combinedError struct {
+	errs []error
+}
+
+func (e *combinedError) Error() string {
+	if len(e.errs) == 0 {
+		return ""
+	}
+	s := e.errs[0].Error()
+	for _, err := range e.errs[1:] {
+		s += ": " + err.Error()
+	}
+	return s
 }

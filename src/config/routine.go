@@ -52,10 +52,10 @@ type Routine struct {
 func (r *Routine) validateSyntax() error {
 	catcher := catcher.New()
 	if r.Name == "" {
-		catcher.Error("name is required")
+		catcher.New("name is required")
 	}
 	if len(r.Jobs) == 0 {
-		catcher.Error("jobs are required")
+		catcher.New("jobs are required")
 	}
 	return catcher.Resolve()
 }
@@ -70,7 +70,7 @@ func (r *Routine) validateIntegrity(config *Config) error {
 				break
 			}
 		}
-		catcher.ErrorWhen(!found, "job %s not found", jobName)
+		catcher.When(!found, "job %s not found", jobName)
 	}
 	return catcher.Resolve()
 }

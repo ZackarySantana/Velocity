@@ -44,9 +44,9 @@ type Command struct {
 
 func (c *Command) validateSyntax() error {
 	catcher := catcher.New()
-	catcher.ErrorWhen(c.Shell == "" && c.Prebuilt == "", "must specify a shell or prebuilt command")
-	catcher.ErrorWhen(c.Shell != "" && c.Prebuilt != "", "cannot specify both a shell and prebuilt command")
-	catcher.ErrorWhen(c.Shell == "" && len(c.Params) > 0, "cannot specify params without a shell command")
+	catcher.When(c.Shell == "" && c.Prebuilt == "", "must specify a shell or prebuilt command")
+	catcher.When(c.Shell != "" && c.Prebuilt != "", "cannot specify both a shell and prebuilt command")
+	catcher.When(c.Shell == "" && len(c.Params) > 0, "cannot specify params without a shell command")
 	return catcher.Resolve()
 }
 
@@ -71,10 +71,10 @@ type Test struct {
 
 func (t *Test) validateSyntax() error {
 	catcher := catcher.New()
-	catcher.ErrorWhen(t.Name == "", "name is required")
-	catcher.ErrorWhen(t.Language == "" && len(t.Commands) == 0, "language or commands are required")
-	catcher.ErrorWhen(t.Language != "" && len(t.Commands) > 0, "cannot specify both a language and commands")
-	catcher.ErrorWhen(t.Library != "" && len(t.Commands) > 0, "cannot specify a library with commands")
+	catcher.When(t.Name == "", "name is required")
+	catcher.When(t.Language == "" && len(t.Commands) == 0, "language or commands are required")
+	catcher.When(t.Language != "" && len(t.Commands) > 0, "cannot specify both a language and commands")
+	catcher.When(t.Library != "" && len(t.Commands) > 0, "cannot specify a library with commands")
 	for i, cmd := range t.Commands {
 		catcher.Catch(cmd.error(i).Wrap(cmd.validateSyntax()))
 	}
