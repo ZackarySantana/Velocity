@@ -1,6 +1,8 @@
 package config
 
 import (
+	"fmt"
+
 	"github.com/samber/oops"
 	"github.com/zackarysantana/velocity/src/catcher"
 )
@@ -12,8 +14,8 @@ func (r *RoutineSection) validateSyntax() error {
 		return nil
 	}
 	catcher := catcher.New()
-	for _, routine := range *r {
-		catcher.Catch(routine.error().Wrap(routine.validateSyntax()))
+	for i, routine := range *r {
+		catcher.Catch(routine.error(i).Wrap(routine.validateSyntax()))
 	}
 	return catcher.Resolve()
 }
@@ -23,13 +25,13 @@ func (r *RoutineSection) validateIntegrity(c *Config) error {
 		return nil
 	}
 	catcher := catcher.New()
-	for _, routine := range *r {
-		catcher.Catch(routine.error().Wrap(routine.validateIntegrity(c)))
+	for i, routine := range *r {
+		catcher.Catch(routine.error(i).Wrap(routine.validateIntegrity(c)))
 	}
 	return catcher.Resolve()
 }
 
-func (r *RoutineSection) error() oops.OopsErrorBuilder {
+func (r *RoutineSection) error(_ int) oops.OopsErrorBuilder {
 	return oops.In("routine_section")
 }
 
@@ -73,6 +75,6 @@ func (r *Routine) validateIntegrity(config *Config) error {
 	return catcher.Resolve()
 }
 
-func (r *Routine) error() oops.OopsErrorBuilder {
-	return oops.With("routine_name", r.Name)
+func (r *Routine) error(i int) oops.OopsErrorBuilder {
+	return oops.With(fmt.Sprintf("routine_name_%d", i), r.Name)
 }

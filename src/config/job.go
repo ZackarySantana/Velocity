@@ -1,6 +1,8 @@
 package config
 
 import (
+	"fmt"
+
 	"github.com/samber/oops"
 	"github.com/zackarysantana/velocity/src/catcher"
 )
@@ -12,8 +14,8 @@ func (j *JobSection) validateSyntax() error {
 		return nil
 	}
 	catcher := catcher.New()
-	for _, job := range *j {
-		catcher.Catch(job.error().Wrap(job.validateSyntax()))
+	for i, job := range *j {
+		catcher.Catch(job.error(i).Wrap(job.validateSyntax()))
 	}
 	return catcher.Resolve()
 }
@@ -23,13 +25,13 @@ func (j *JobSection) validateIntegrity(c *Config) error {
 		return nil
 	}
 	catcher := catcher.New()
-	for _, job := range *j {
-		catcher.Catch(job.error().Wrap(job.validateIntegrity(c)))
+	for i, job := range *j {
+		catcher.Catch(job.error(i).Wrap(job.validateIntegrity(c)))
 	}
 	return catcher.Resolve()
 }
 
-func (j *JobSection) error() oops.OopsErrorBuilder {
+func (j *JobSection) error(_ int) oops.OopsErrorBuilder {
 	return oops.In("job_section")
 }
 
@@ -72,6 +74,6 @@ func (j *Job) validateIntegrity(config *Config) error {
 	return catcher.Resolve()
 }
 
-func (j *Job) error() oops.OopsErrorBuilder {
-	return oops.With("job_name", j.Name)
+func (j *Job) error(i int) oops.OopsErrorBuilder {
+	return oops.With(fmt.Sprintf("job_name_%d", i), j.Name)
 }

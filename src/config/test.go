@@ -1,6 +1,8 @@
 package config
 
 import (
+	"fmt"
+
 	"github.com/samber/oops"
 	"github.com/zackarysantana/velocity/src/catcher"
 )
@@ -12,8 +14,8 @@ func (t *TestSection) validateSyntax() error {
 		return nil
 	}
 	catcher := catcher.New()
-	for _, test := range *t {
-		catcher.Catch(test.error().Wrap(test.validateSyntax()))
+	for i, test := range *t {
+		catcher.Catch(test.error(i).Wrap(test.validateSyntax()))
 	}
 	return catcher.Resolve()
 }
@@ -23,13 +25,13 @@ func (t *TestSection) validateIntegrity(c *Config) error {
 		return nil
 	}
 	catcher := catcher.New()
-	for _, test := range *t {
-		catcher.Catch(test.error().Wrap(test.validateIntegrity(c)))
+	for i, test := range *t {
+		catcher.Catch(test.error(i).Wrap(test.validateIntegrity(c)))
 	}
 	return catcher.Resolve()
 }
 
-func (t *TestSection) error() oops.OopsErrorBuilder {
+func (t *TestSection) error(_ int) oops.OopsErrorBuilder {
 	return oops.In("test_section")
 }
 
@@ -52,8 +54,8 @@ func (c *Command) validateIntegrity(config *Config) error {
 	return nil
 }
 
-func (c *Command) error() oops.OopsErrorBuilder {
-	return oops.With("shell", c.Shell).With("prebuilt", c.Prebuilt)
+func (c *Command) error(i int) oops.OopsErrorBuilder {
+	return oops.With(fmt.Sprintf("shell_%d", i), c.Shell).With(fmt.Sprintf("prebuilt_%d", i), c.Prebuilt)
 }
 
 type Test struct {
@@ -73,8 +75,8 @@ func (t *Test) validateSyntax() error {
 	catcher.ErrorWhen(t.Language == "" && len(t.Commands) == 0, "language or commands are required")
 	catcher.ErrorWhen(t.Language != "" && len(t.Commands) > 0, "cannot specify both a language and commands")
 	catcher.ErrorWhen(t.Library != "" && len(t.Commands) > 0, "cannot specify a library with commands")
-	for _, cmd := range t.Commands {
-		catcher.Catch(cmd.error().Wrap(cmd.validateSyntax()))
+	for i, cmd := range t.Commands {
+		catcher.Catch(cmd.error(i).Wrap(cmd.validateSyntax()))
 	}
 	return catcher.Resolve()
 }
@@ -83,6 +85,6 @@ func (t *Test) validateIntegrity(config *Config) error {
 	return nil
 }
 
-func (t *Test) error() oops.OopsErrorBuilder {
-	return oops.With("test_name", t.Name).With("language", t.Language).With("library", t.Library)
+func (t *Test) error(i int) oops.OopsErrorBuilder {
+	return oops.With(fmt.Sprintf("test_name_%d", i), t.Name).With(fmt.Sprintf("language_%d", i), t.Language).With(fmt.Sprintf("library_%d", i), t.Library)
 }

@@ -3,6 +3,8 @@ package catcher
 import (
 	"errors"
 	"fmt"
+
+	"github.com/samber/oops"
 )
 
 type Catcher struct {
@@ -45,5 +47,15 @@ func (c *Catcher) Resolve() error {
 	if len(c.errs) == 0 {
 		return nil
 	}
-	return errors.Join(c.errs...)
+	var builder oops.OopsErrorBuilder
+	for _, e := range c.errs {
+		oopsErr, ok := oops.AsOops(e)
+		if !ok {
+			continue
+		}
+		for k, v := range oopsErr.Context() {
+			builder = builder.With(k, v)
+		}
+	}
+	return builder.Wrap(errors.Join(c.errs...))
 }

@@ -2,35 +2,27 @@ package config
 
 import (
 	"github.com/samber/oops"
+	"github.com/zackarysantana/velocity/src/catcher"
 )
 
 type Validator interface {
 	validateSyntax() error
 	validateIntegrity(*Config) error
 
-	error() oops.OopsErrorBuilder
+	error(int) oops.OopsErrorBuilder
 }
 
-func validate(v Validator, c *Config) error {
-	if err := validateSyntax(v); err != nil {
-		return err
-	}
-	if err := validateIntegrity(v, c); err != nil {
-		return err
-	}
-	return nil
+func Validate(v Validator, c *Config) error {
+	catcher := catcher.New()
+	catcher.Wrap(v.validateSyntax(), "validating syntax")
+	catcher.Wrap(v.validateIntegrity(c), "validating integrity")
+	return catcher.Resolve()
 }
 
-func validateSyntax(v Validator) error {
-	if err := v.validateSyntax(); err != nil {
-		return v.error().Wrapf(err, "validating syntax")
-	}
-	return nil
+func ValidateSyntax(v Validator) error {
+	return v.error(0).Wrapf(v.validateSyntax(), "validating syntax")
 }
 
-func validateIntegrity(v Validator, c *Config) error {
-	if err := v.validateIntegrity(c); err != nil {
-		return v.error().Wrapf(err, "validating integrity")
-	}
-	return nil
+func ValidateIntegrity(v Validator, c *Config) error {
+	return v.error(0).Wrapf(v.validateIntegrity(c), "validating integrity")
 }

@@ -1,6 +1,8 @@
 package config
 
 import (
+	"fmt"
+
 	"github.com/samber/oops"
 	"github.com/zackarysantana/velocity/src/catcher"
 )
@@ -12,8 +14,8 @@ func (i *ImageSection) validateSyntax() error {
 		return nil
 	}
 	catcher := catcher.New()
-	for _, image := range *i {
-		catcher.Catch(image.error().Wrap(image.validateSyntax()))
+	for idx, image := range *i {
+		catcher.Catch(image.error(idx).Wrap(image.validateSyntax()))
 	}
 	return catcher.Resolve()
 }
@@ -23,13 +25,13 @@ func (i *ImageSection) validateIntegrity(c *Config) error {
 		return nil
 	}
 	catcher := catcher.New()
-	for _, image := range *i {
-		catcher.Catch(image.error().Wrap(image.validateIntegrity(c)))
+	for idx, image := range *i {
+		catcher.Catch(image.error(idx).Wrap(image.validateIntegrity(c)))
 	}
 	return catcher.Resolve()
 }
 
-func (i *ImageSection) error() oops.OopsErrorBuilder {
+func (i *ImageSection) error(_ int) oops.OopsErrorBuilder {
 	return oops.In("image_section")
 }
 
@@ -49,6 +51,6 @@ func (i *Image) validateIntegrity(config *Config) error {
 	return nil
 }
 
-func (i *Image) error() oops.OopsErrorBuilder {
-	return oops.With("image_name", i.Name)
+func (i *Image) error(idx int) oops.OopsErrorBuilder {
+	return oops.With(fmt.Sprintf("image_name_%d", idx), i.Name).With(fmt.Sprintf("image_%d", idx), i.Image)
 }
