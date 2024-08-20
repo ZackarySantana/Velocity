@@ -62,6 +62,10 @@ func (c *Catcher) Resolve() error {
 
 // This joins a single error chain
 func joinOopsErrorsChain(errs ...error) error {
+	return oopsBuilderWithAllContext(errs...).Wrap(Join(errs...))
+}
+
+func oopsBuilderWithAllContext(errs ...error) oops.OopsErrorBuilder {
 	var builder oops.OopsErrorBuilder
 	for _, e := range errs {
 		oopsErr, ok := oops.AsOops(e)
@@ -72,24 +76,5 @@ func joinOopsErrorsChain(errs ...error) error {
 			builder = builder.With(k, v)
 		}
 	}
-	return builder.Wrap(join(errs...))
-}
-
-func join(errs ...error) error {
-	return &combinedError{errs}
-}
-
-type combinedError struct {
-	errs []error
-}
-
-func (e *combinedError) Error() string {
-	if len(e.errs) == 0 {
-		return ""
-	}
-	s := e.errs[0].Error()
-	for _, err := range e.errs[1:] {
-		s += ": " + err.Error()
-	}
-	return s
+	return builder
 }
