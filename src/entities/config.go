@@ -11,14 +11,14 @@ import (
 // but as a DTO for an entity representation of the configuration
 // file.
 // This will be constructed images/tests -> jobs -> routines.
-type ConfigEntity struct {
-	Images   []*image.Image
-	Tests    []*test.Test
-	Jobs     []*job.Job
-	Routines []*routine.Routine
+type ConfigEntity[T any] struct {
+	Images   []*image.Image[T]
+	Tests    []*test.Test[T]
+	Jobs     []*job.Job[T]
+	Routines []*routine.Routine[T]
 }
 
-func (c *ConfigEntity) Merge(other *ConfigEntity) {
+func (c *ConfigEntity[T]) Merge(other *ConfigEntity[T]) {
 	c.Images = append(c.Images, other.Images...)
 	c.Tests = append(c.Tests, other.Tests...)
 	c.Jobs = append(c.Jobs, other.Jobs...)

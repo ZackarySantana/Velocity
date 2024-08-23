@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/sysulq/dataloader-go"
 	"github.com/zackarysantana/velocity/internal/service"
 	"github.com/zackarysantana/velocity/src/entities/image"
 	"github.com/zackarysantana/velocity/src/entities/job"
 	"github.com/zackarysantana/velocity/src/entities/routine"
 	"github.com/zackarysantana/velocity/src/entities/test"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -35,23 +35,23 @@ func NewMongoClientFromEnv() (*mongo.Client, error) {
 	return client, nil
 }
 
-func NewMongoRepository(db *mongo.Client, dbName string) *service.Repository {
-	return &service.Repository{
-		Routine: &service.RoutineRepository{
-			Interface: createTypeRepository[routine.Routine](db, dbName, routineCollection),
-			Put:       createPutType[routine.Routine](db, dbName, routineCollection),
+func NewMongoRepositoryManager(db *mongo.Client, dbName string) *service.RepositoryManager[primitive.ObjectID] {
+	return &service.RepositoryManager[primitive.ObjectID]{
+		Routine: &service.RoutineRepository[primitive.ObjectID]{
+			Load: createLoad[routine.Routine[primitive.ObjectID]](db, dbName, routineCollection),
+			Put:  createPutForType[routine.Routine[primitive.ObjectID]](db, dbName, routineCollection),
 		},
-		Job: &service.JobRepository{
-			Interface: createTypeRepository[job.Job](db, dbName, jobCollection),
-			Put:       createPutType[job.Job](db, dbName, jobCollection),
+		Job: &service.JobRepository[primitive.ObjectID]{
+			Load: createLoad[job.Job[primitive.ObjectID]](db, dbName, jobCollection),
+			Put:  createPutForType[job.Job[primitive.ObjectID]](db, dbName, jobCollection),
 		},
-		Image: &service.ImageRepository{
-			Interface: createTypeRepository[image.Image](db, dbName, imageCollection),
-			Put:       createPutType[image.Image](db, dbName, imageCollection),
+		Image: &service.ImageRepository[primitive.ObjectID]{
+			Load: createLoad[image.Image[primitive.ObjectID]](db, dbName, imageCollection),
+			Put:  createPutForType[image.Image[primitive.ObjectID]](db, dbName, imageCollection),
 		},
-		Test: &service.TestRepository{
-			Interface: createTypeRepository[test.Test](db, dbName, testCollection),
-			Put:       createPutType[test.Test](db, dbName, testCollection),
+		Test: &service.TestRepository[primitive.ObjectID]{
+			Load: createLoad[test.Test[primitive.ObjectID]](db, dbName, testCollection),
+			Put:  createPutForType[test.Test[primitive.ObjectID]](db, dbName, testCollection),
 		},
 		WithTransaction: func(ctx context.Context, fn func(context.Context) error) error {
 			session, err := db.StartSession()
@@ -67,35 +67,31 @@ func NewMongoRepository(db *mongo.Client, dbName string) *service.Repository {
 	}
 }
 
-func createTypeRepository[T any](db *mongo.Client, database, collection string) dataloader.Interface[string, *T] {
-	return dataloader.New(
-		func(ctx context.Context, keys []string) []dataloader.Result[*T] {
-			fmt.Println("FInding:", database, ":", collection, ":", keys)
-			cur, err := db.Database(database).Collection(collection).Find(ctx, bson.M{
-				"_id": bson.M{"$in": keys},
-			})
-			if err != nil {
-				fmt.Println("Some error 1")
-				return []dataloader.Result[*T]{dataloader.Wrap[*T](nil, err)}
-			}
+func createLoad[T any](db *mongo.Client, database, collection string) func(context.Context, []primitive.ObjectID) ([]*T, error) {
+	return func(ctx context.Context, keys []primitive.ObjectID) ([]*T, error) {
+		cur, err := db.Database(database).Collection(collection).Find(ctx, bson.M{
+			"_id": bson.M{"$in": keys},
+		})
+		if err != nil {
+			return nil, err
+		}
 
-			results := make([]dataloader.Result[*T], len(keys))
-			i := 0
-			for cur.Next(ctx) {
-				var r T
-				if err := cur.Decode(&r); err != nil {
-					return []dataloader.Result[*T]{dataloader.Wrap[*T](nil, err)}
-				}
-				results[i] = dataloader.Wrap(&r, nil)
-				i++
+		results := make([]*T, cur.RemainingBatchLength())
+		i := 0
+		for cur.Next(ctx) {
+			var r T
+			if err := cur.Decode(&r); err != nil {
+				return nil, err
 			}
+			results[i] = &r
+			i++
+		}
 
-			return results
-		},
-	)
+		return results, nil
+	}
 }
 
-func createPutType[T any](db *mongo.Client, database, collection string) func(context.Context, []*T) error {
+func createPutForType[T any](db *mongo.Client, database, collection string) func(context.Context, []*T) error {
 	return func(ctx context.Context, t []*T) error {
 		items := make([]interface{}, len(t))
 		for i, v := range t {

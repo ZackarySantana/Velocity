@@ -9,20 +9,20 @@ import (
 	"github.com/zackarysantana/velocity/src/entities/test"
 )
 
-type CreateEntityOptions struct {
-	Ic service.IdCreator
+type CreateEntityOptions[T any] struct {
+	Id service.IdCreator[T]
 
 	FilterToRoutine string
 }
 
-func (c *Config) CreateEntity(opts CreateEntityOptions) (*entities.ConfigEntity, error) {
-	ec := &entities.ConfigEntity{}
+func CreateEntity[T any](config *Config, opts CreateEntityOptions[T]) (*entities.ConfigEntity[T], error) {
+	ec := &entities.ConfigEntity[T]{}
 
-	for _, cRoutine := range c.Routines {
+	for _, cRoutine := range config.Routines {
 		if opts.FilterToRoutine != "" && cRoutine.Name != opts.FilterToRoutine {
 			continue
 		}
-		other, err := c.createConfigEntityForRoutine(cRoutine, opts)
+		other, err := createConfigEntityForRoutine(config, cRoutine, opts)
 		if err != nil {
 			return nil, err
 		}
@@ -32,39 +32,39 @@ func (c *Config) CreateEntity(opts CreateEntityOptions) (*entities.ConfigEntity,
 	return ec, nil
 }
 
-func (c *Config) createConfigEntityForRoutine(cRoutine Routine, opts CreateEntityOptions) (*entities.ConfigEntity, error) {
-	ec := &entities.ConfigEntity{}
-	eRoutine := routine.Routine{
-		Id:   opts.Ic(),
+func createConfigEntityForRoutine[T any](config *Config, cRoutine Routine, opts CreateEntityOptions[T]) (*entities.ConfigEntity[T], error) {
+	ec := &entities.ConfigEntity[T]{}
+	eRoutine := routine.Routine[T]{
+		Id:   opts.Id.Create(),
 		Name: cRoutine.Name,
-		Jobs: []string{},
+		Jobs: []T{},
 	}
 
 	for _, jobName := range cRoutine.Jobs {
-		cJob, err := c.GetJob(jobName)
+		cJob, err := config.GetJob(jobName)
 		if err != nil {
 			return nil, err
 		}
-		eJob := job.Job{
-			Id:     opts.Ic(),
+		eJob := job.Job[T]{
+			Id:     opts.Id.Create(),
 			Name:   cJob.Name,
-			Tests:  []string{},
-			Images: []string{},
+			Tests:  []T{},
+			Images: []T{},
 		}
 
 		for _, imageName := range cJob.Images {
-			cImage, err := c.GetImage(imageName)
+			cImage, err := config.GetImage(imageName)
 			if err != nil {
 				return nil, err
 			}
-			eImage := image.Image{
-				Id:    opts.Ic(),
+			eImage := image.Image[T]{
+				Id:    opts.Id.Create(),
 				Name:  cImage.Name,
 				Image: cImage.Image,
 			}
 
 			for _, testName := range cJob.Tests {
-				cTest, err := c.GetTest(testName)
+				cTest, err := config.GetTest(testName)
 				if err != nil {
 					return nil, err
 				}
@@ -76,8 +76,8 @@ func (c *Config) createConfigEntityForRoutine(cRoutine Routine, opts CreateEntit
 						Params:   cCommand.Params,
 					}
 				}
-				eTest := test.Test{
-					Id:        opts.Ic(),
+				eTest := test.Test[T]{
+					Id:        opts.Id.Create(),
 					RoutineId: eRoutine.Id,
 					JobId:     eJob.Id,
 					ImageId:   eImage.Id,

@@ -2,24 +2,27 @@ package domain
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 
+	"github.com/samber/oops"
 	"github.com/zackarysantana/velocity/internal/service"
 	"github.com/zackarysantana/velocity/src/entities"
 	"github.com/zackarysantana/velocity/src/entities/routine"
 )
 
-type Service struct {
-	repository *service.Repository
+type Service[T any] struct {
+	repository *service.RepositoryManager[T]
 	pq         service.ProcessQueue
+	idCreator  service.IdCreator[T]
 	logger     *slog.Logger
 }
 
-func NewService(repository *service.Repository, pq service.ProcessQueue, logger *slog.Logger) service.Service {
-	return &Service{repository: repository, pq: pq, logger: logger}
+func NewService[T any](repository *service.RepositoryManager[T], pq service.ProcessQueue, idCreator service.IdCreator[T], logger *slog.Logger) service.Service[T] {
+	return &Service[T]{repository: repository, pq: pq, idCreator: idCreator, logger: logger}
 }
 
-func (s *Service) StartRoutine(ctx context.Context, ec *entities.ConfigEntity, name string) error {
+func (s *Service[T]) StartRoutine(ctx context.Context, ec *entities.ConfigEntity[T], name string) error {
 	return s.repository.WithTransaction(ctx, func(ctx context.Context) error {
 		err := s.repository.Test.Put(ctx, ec.Tests)
 		if err != nil {
@@ -37,7 +40,7 @@ func (s *Service) StartRoutine(ctx context.Context, ec *entities.ConfigEntity, n
 		}
 
 		for _, r := range ec.Routines {
-			err := s.repository.Routine.Put(ctx, []*routine.Routine{r})
+			err := s.repository.Routine.Put(ctx, []*routine.Routine[T]{r})
 			if err != nil {
 				return err
 			}
@@ -45,7 +48,11 @@ func (s *Service) StartRoutine(ctx context.Context, ec *entities.ConfigEntity, n
 
 		testIds := make([][]byte, len(ec.Tests))
 		for i, t := range ec.Tests {
-			testIds[i] = []byte(t.Id)
+			id, err := s.idCreator.Read(t.Id)
+			if err != nil {
+				return oops.Wrapf(err, "id is invalid")
+			}
+			testIds[i] = []byte(fmt.Sprintf("%v", id))
 		}
 
 		return s.pq.Write(ctx, "tests", testIds...)

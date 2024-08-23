@@ -1,12 +1,12 @@
 package test
 
-type Test struct {
-	Id string `bson:"_id"`
+type Test[T any] struct {
+	Id T `bson:"_id"`
 
 	// These are populated when the routine is created.
-	ImageId   string
-	JobId     string
-	RoutineId string
+	ImageId   T
+	JobId     T
+	RoutineId T
 
 	Name string
 

@@ -25,7 +25,7 @@ type APIStartRoutineRequest struct {
 }
 
 type APIStartRoutineResponse struct {
-	Id string `json:"id"`
+	Id interface{} `json:"id"`
 }
 
 // StartRoutine

@@ -6,6 +6,6 @@ import (
 	"github.com/zackarysantana/velocity/src/entities"
 )
 
-type Service interface {
-	StartRoutine(context.Context, *entities.ConfigEntity, string) error
+type Service[T any] interface {
+	StartRoutine(context.Context, *entities.ConfigEntity[T], string) error
 }

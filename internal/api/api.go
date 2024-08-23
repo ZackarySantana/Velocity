@@ -14,15 +14,15 @@ import (
 
 var tracer = otel.Tracer("api")
 
-type api struct {
-	repository *service.Repository
-	service    service.Service
-	idCreator  service.IdCreator
+type api[T any] struct {
+	repository *service.RepositoryManager[T]
+	service    service.Service[T]
+	idCreator  service.IdCreator[T]
 	logger     *slog.Logger
 }
 
-func New(repository *service.Repository, service service.Service, idCreator service.IdCreator, logger *slog.Logger) http.Handler {
-	a := &api{service: service, idCreator: idCreator, repository: repository, logger: logger}
+func New[T any](repository *service.RepositoryManager[T], service service.Service[T], idCreator service.IdCreator[T], logger *slog.Logger) http.Handler {
+	a := &api[T]{service: service, idCreator: idCreator, repository: repository, logger: logger}
 
 	middlewares := []func(http.Handler) http.Handler{
 		func(next http.Handler) http.Handler {

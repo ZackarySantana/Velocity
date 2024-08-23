@@ -9,7 +9,7 @@ import (
 	"github.com/zackarysantana/velocity/src/velocity"
 )
 
-func (a *api) routineStart() http.Handler {
+func (a *api[T]) routineStart() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		body := velocity.APIStartRoutineRequest{}
 		err := json.NewDecoder(r.Body).Decode(&body)
@@ -25,8 +25,8 @@ func (a *api) routineStart() http.Handler {
 			http.Error(w, fmt.Sprintf("'%s' routine not found", body.Routine), http.StatusBadRequest)
 			return
 		}
-		ec, err := body.Config.CreateEntity(config.CreateEntityOptions{
-			Ic:              a.idCreator,
+		ec, err := config.CreateEntity(&body.Config, config.CreateEntityOptions[T]{
+			Id:              a.idCreator,
 			FilterToRoutine: body.Routine,
 		})
 		if err != nil {
@@ -37,12 +37,12 @@ func (a *api) routineStart() http.Handler {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		w.WriteHeader(http.StatusOK)
 		resp := velocity.APIStartRoutineResponse{Id: ec.Routines[0].Id}
 		err = json.NewEncoder(w).Encode(resp)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+		w.WriteHeader(http.StatusOK)
 	})
 }

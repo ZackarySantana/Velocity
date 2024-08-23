@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"log"
 	"log/slog"
 	"net/http"
@@ -11,6 +13,7 @@ import (
 	"github.com/zackarysantana/velocity/internal/service/domain"
 	"github.com/zackarysantana/velocity/internal/service/kafka"
 	mongodomain "github.com/zackarysantana/velocity/internal/service/mongo"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func main() {
@@ -26,7 +29,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	repository := mongodomain.NewMongoRepository(client, os.Getenv("MONGODB_DATABASE"))
+	repository := mongodomain.NewMongoRepositoryManager(client, os.Getenv("MONGODB_DATABASE"))
 	logger.Debug("Connected to MongoDB")
 
 	logger.Debug("Connecting to Kafka")
@@ -37,9 +40,19 @@ func main() {
 	}
 	logger.Debug("Connected to Kafka")
 
-	service := domain.NewService(repository, pq, logger)
+	serviceImpl := domain.NewService(repository, pq, mongodomain.NewMongoIdCreator(), logger)
 
-	mux := api.New(repository, service, mongodomain.NewMongoIdCreator(), logger)
+	// delete
+	// TODO: test of priority queue via mongodb.
+	pqt := mongodomain.NewMongoPriorityQueue[string](client, mongodomain.NewMongoIdCreator(), os.Getenv("MONGODB_DATABASE"))
+	// err = pqt.Push(context.TODO(), "test_queue", service.PriorityQueueItem[string]{Priority: 1, Payload: "testing this thing"}, service.PriorityQueueItem[string]{Priority: 2, Payload: "testing this thing 2"}, service.PriorityQueueItem[string]{Priority: 3, Payload: "testing this thing 3"})
+	// fmt.Println(err)
+
+	item, err := pqt.Pop(context.TODO(), "test_queue")
+	fmt.Println(item, err)
+	// delete
+
+	mux := api.New[primitive.ObjectID](repository, serviceImpl, mongodomain.NewMongoIdCreator(), logger)
 	logger.Info("Starting server", "addr", ":8080")
 	http.ListenAndServe(":8080", mux)
 }

@@ -1,7 +1,7 @@
 package image
 
-type Image struct {
-	Id string `bson:"_id"`
+type Image[T any] struct {
+	Id T `bson:"_id"`
 
 	Name string
 

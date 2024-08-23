@@ -1,13 +1,13 @@
 package job
 
-type Job struct {
-	Id string `bson:"_id"`
+type Job[T any] struct {
+	Id T `bson:"_id"`
 
 	Name string
 
 	// Tests is a list of test ids.
-	Tests []string
+	Tests []T
 
 	// Images is a list of image ids.
-	Images []string
+	Images []T
 }

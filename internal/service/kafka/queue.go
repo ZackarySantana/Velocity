@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 
@@ -72,7 +73,7 @@ func NewKafkaQueue(config *KafkaQueueConfig) (service.ProcessQueue, error) {
 func (k *KafkaQueue) Write(ctx context.Context, topic string, messages ...[]byte) error {
 	kafkaMessages := make([]kafka.Message, len(messages))
 	for i, message := range messages {
-		kafkaMessages[i] = kafka.Message{Value: message, Topic: topic}
+		kafkaMessages[i] = kafka.Message{Value: message, Topic: topic, Key: []byte(fmt.Sprintf("%d", i))}
 	}
 	return k.w.WriteMessages(ctx, kafkaMessages...)
 }
@@ -91,6 +92,7 @@ func (k *KafkaQueue) Consume(ctx context.Context, topic string, f func([]byte) (
 			return err
 		}
 
+		fmt.Println("Received message", string(message.Key), ": ", string(message.Value))
 		ok, err := f(message.Value)
 		if err != nil {
 			return err

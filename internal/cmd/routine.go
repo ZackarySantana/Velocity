@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/samber/oops"
@@ -33,7 +34,7 @@ var (
 				return oops.Code("request").Wrap(err)
 			}
 
-			flags.Logger(cmd).Info(data.Id)
+			flags.Logger(cmd).Info(fmt.Sprintf("%v", data.Id))
 
 			return nil
 		},
