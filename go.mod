@@ -7,7 +7,6 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/samber/oops v1.12.1
 	github.com/samber/slog-multi v1.2.0
-	github.com/sysulq/dataloader-go v0.2.0
 	github.com/urfave/cli/v3 v3.0.0-alpha9
 	go.opentelemetry.io/otel v1.28.0
 	golang.org/x/tools v0.23.0
@@ -20,7 +19,6 @@ require (
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
-	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/klauspost/compress v1.15.9 // indirect
 	github.com/montanaflynn/stats v0.7.1 // indirect
 	github.com/pierrec/lz4/v4 v4.1.15 // indirect
