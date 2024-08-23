@@ -4,13 +4,6 @@ import (
 	"context"
 )
 
-type ProcessQueue interface {
-	Write(context.Context, string, ...[]byte) error
-	Consume(context.Context, string, func([]byte) (bool, error)) error
-
-	Close() error
-}
-
 type PriorityQueue[T any, V any] interface {
 	// Push pushes an item into the given queue.
 	Push(context.Context, string, ...PriorityQueueItem[T]) error
