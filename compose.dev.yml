@@ -1,84 +1,14 @@
+# This file overrides the compose.yml file for development purposes.
+# It removes the .env env_file from the api and agent services, and adds the DEV_SERVICES environment variable
+# as now the services use local services.
+
 services:
-    zookeeper:
-        image: confluentinc/cp-zookeeper:7.5.0
-        environment:
-            ZOOKEEPER_CLIENT_PORT: 2181
-            ZOOKEEPER_TICK_TIME: 2000
-        networks:
-            - internal
-        healthcheck:
-            test: nc -z localhost 2181 || exit -1
-            interval: 10s
-            timeout: 5s
-            retries: 3
-
-    kafka:
-        image: confluentinc/cp-kafka:7.5.0
-        depends_on:
-            zookeeper:
-                condition: service_healthy
-        environment:
-            KAFKA_BROKER_ID: 1
-            KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-            KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-            KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-            KAFKA_SASL_ENABLED_MECHANISMS: SCRAM-SHA-256
-            KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: SCRAM-SHA-256
-            KAFKA_SASL_JAAS_CONFIG: >
-                org.apache.kafka.common.security.scram.ScramLoginModule required
-                username="admin"
-                password="password";
-            KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,SASL_PLAINTEXT:SASL_PLAINTEXT
-            KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-            KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
-        networks:
-            - internal
-        healthcheck:
-            test: kafka-topics --bootstrap-server kafka:9092 --list
-            interval: 30s
-            timeout: 10s
-            retries: 3
-        restart: on-failure
-
-    redis:
-        image: redis:7.0-alpine
-        ports:
-            - "6379:6379"
-        networks:
-            - internal
-        healthcheck:
-            test: redis-cli ping
-            interval: 10s
-            timeout: 5s
-            retries: 3
-        restart: on-failure
-
-    mongodb:
-        image: mongo:7.0
-        command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
-        ports:
-            - "27017:27017"
-        environment:
-            MONGO_INITDB_DATABASE: velocity
-        volumes:
-            - mongo-data:/data/db
-            - mongo-config:/data/configdb
-        networks:
-            - internal
-            - external
-        healthcheck:
-            test: echo "try { rs.status() } catch (err) { rs.initiate({_id:'rs0',members:[{_id:0,host:'host.docker.internal:27017'}]}) }" | mongosh --port 27017 --quiet
-            interval: 5s
-            timeout: 30s
-            start_period: 0s
-            start_interval: 1s
-            retries: 30
-        restart: on-failure
-
     api:
-        build:
-            context: .
-            dockerfile: Dockerfile.api.dev
+        environment:
+            DEV_MODE: true
+            DEV_SERVICES: true
+        env_file:
+            - env/.env.agent
         depends_on:
             kafka:
                 condition: service_healthy
@@ -86,66 +16,10 @@ services:
                 condition: service_healthy
             mongodb:
                 condition: service_healthy
-        volumes:
-            - .:/app
-        environment:
-            MONGODB_USERNAME: ""
-            MONGODB_PASSWORD: ""
-            MONGODB_DATABASE: velocity
-            KAFKA_USERNAME: admin
-            KAFKA_PASSWORD: password
-            KAFKA_BROKER: kafka:9092
-            KAFKA_GROUP_ID: api
-            REDIS_URL: redis:6379
-            MONGODB_URI: mongodb://%s%smongodb:27017/?replicaSet=rs0
-            DEV_MODE: true
-            DEV_SERVICES: true
-        ports:
-            - "8080:8080"
-        networks:
-            - internal
-            - external
-        healthcheck:
-            test: curl --fail http://localhost:8080/health || exit 1
-            interval: 10s
-            start_period: 30s
-        restart: on-failure
-
-    cli:
-        build:
-            context: .
-            dockerfile: Dockerfile.cli.dev
-        volumes:
-            - .:/app
-        restart: on-failure
 
     agent:
-        build:
-            context: .
-            dockerfile: Dockerfile.agent.dev
-        depends_on:
-            api:
-                condition: service_healthy
-        volumes:
-            - .:/app
         environment:
-            KAFKA_USERNAME: admin
-            KAFKA_PASSWORD: password
-            KAFKA_BROKER: kafka:9092
-            KAFKA_GROUP_ID: agent
-            VELOCITY_URL: http://api:8080
             DEV_MODE: true
             DEV_SERVICES: true
-        networks:
-            - internal
-        restart: on-failure
-
-volumes:
-    mongo-data:
-    mongo-config:
-
-networks:
-    internal:
-        driver: bridge
-    external:
-        driver: bridge
+        env_file:
+            - env/.env.agent

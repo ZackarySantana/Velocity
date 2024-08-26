@@ -31,12 +31,12 @@ type KafkaQueueConfig struct {
 	GroupId  string
 }
 
-func NewKafkaQueueOptionsFromEnv() *KafkaQueueConfig {
+func NewKafkaQueueOptionsFromEnv(groupId string) *KafkaQueueConfig {
 	return &KafkaQueueConfig{
 		Username: os.Getenv("KAFKA_USERNAME"),
 		Password: os.Getenv("KAFKA_PASSWORD"),
 		Broker:   os.Getenv("KAFKA_BROKER"),
-		GroupId:  os.Getenv("KAFKA_GROUP_ID"),
+		GroupId:  groupId,
 	}
 }
 

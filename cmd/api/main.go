@@ -18,11 +18,13 @@ import (
 
 func main() {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
-	logger.Debug("Loading env file")
-	if err := godotenv.Load(); err != nil {
-		log.Fatal("Error loading .env file", err)
+	if os.Getenv("DEV_MODE") != "true" {
+		logger.Debug("Loading env file")
+		if err := godotenv.Load("env/.env.prod"); err != nil {
+			log.Fatal("Error loading .env file", err)
+		}
+		logger.Debug("Loaded env file")
 	}
-	logger.Debug("Loaded env file")
 
 	logger.Debug("Connecting to MongoDB")
 	client, err := mongodomain.NewMongoClientFromEnv()
@@ -33,7 +35,7 @@ func main() {
 	logger.Debug("Connected to MongoDB")
 
 	logger.Debug("Connecting to Kafka")
-	pq, err := kafka.NewKafkaQueue(kafka.NewKafkaQueueOptionsFromEnv())
+	pq, err := kafka.NewKafkaQueue(kafka.NewKafkaQueueOptionsFromEnv(os.Getenv("KAFKA_GROUP_ID_API")))
 	defer pq.Close()
 	if err != nil {
 		panic(err)
