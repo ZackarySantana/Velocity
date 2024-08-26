@@ -28,7 +28,7 @@ dev-%:
 	docker compose -f compose.yml -f compose.dev.yml --profile dev $* $(ARGS)
 
 prod:
-	docker compose --profile prod up -d
+	docker compose -f compose.yml -f compose.prod.yml --profile prod up -d
 
 prod-%:
-	docker compose --profile prod $* $(ARGS)
+	docker compose -f compose.yml -f compose.prod.yml --profile prod $* $(ARGS)

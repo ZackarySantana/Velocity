@@ -1,0 +1,18 @@
+# This file overrides the compose.yml file for running locally with production services.
+
+services:
+    api:
+        environment:
+            DEV_MODE: true
+            DEV_SERVICES: false
+        env_file:
+            - env/.env.api
+            - env/.env.prod
+
+    agent:
+        environment:
+            DEV_MODE: true
+            DEV_SERVICES: false
+        env_file:
+            - env/.env.agent
+            - env/.env.prod

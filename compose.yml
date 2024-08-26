@@ -70,11 +70,6 @@ services:
             dockerfile: Dockerfile.api
         volumes:
             - .:/app
-        environment:
-            DEV_MODE: true
-        env_file:
-            - env/.env.api
-            - env/.env.prod
         ports:
             - "8080:8080"
         networks:
@@ -105,11 +100,6 @@ services:
                 condition: service_healthy
         volumes:
             - .:/app
-        environment:
-            DEV_MODE: true
-        env_file:
-            - env/.env.agent
-            - env/.env.prod
         networks:
             - internal
         restart: on-failure

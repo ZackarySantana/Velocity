@@ -1,6 +1,4 @@
-# This file overrides the compose.yml file for development purposes.
-# It removes the .env env_file from the api and agent services, and adds the DEV_SERVICES environment variable
-# as now the services use local services.
+# This file overrides the compose.yml file for running locally with dev services.
 
 services:
     api:
@@ -8,7 +6,7 @@ services:
             DEV_MODE: true
             DEV_SERVICES: true
         env_file:
-            - env/.env.agent
+            - env/.env.api
         depends_on:
             kafka:
                 condition: service_healthy
