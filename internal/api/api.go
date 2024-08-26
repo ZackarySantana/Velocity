@@ -82,13 +82,13 @@ func New[T any](repository *service.RepositoryManager[T], service service.Servic
 	rootMux := http.NewServeMux()
 
 	apiMux := http.NewServeMux()
-	apiMux.Handle("GET /health", a.health())
-	apiMux.Handle("POST /routine/start", a.routineStart())
+	apiMux.HandleFunc("GET /health", a.health)
+	apiMux.HandleFunc("POST /routine/start", a.routineStart)
 	rootMux.Handle("/", applyMiddleware(apiMux, apiMiddlewares...))
 
 	agentMux := http.NewServeMux()
-	agentMux.Handle("GET /health", a.health())
-	agentMux.Handle("GET /test/{id}", a.agentGetTask())
+	agentMux.HandleFunc("GET /health", a.health)
+	agentMux.HandleFunc("GET /test/{id}", a.agentGetTask)
 	rootMux.Handle("/agent/", http.StripPrefix("/agent", applyMiddleware(agentMux, agentMiddlewares...)))
 
 	return applyMiddleware(rootMux, middlewares...)
