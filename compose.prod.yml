@@ -3,16 +3,16 @@
 services:
     api:
         environment:
-            DEV_MODE: true
             DEV_SERVICES: false
         env_file:
+            - env/.env.shared
             - env/.env.api
             - env/.env.prod
 
     agent:
         environment:
-            DEV_MODE: true
             DEV_SERVICES: false
         env_file:
+            - env/.env.shared
             - env/.env.agent
             - env/.env.prod

@@ -5,18 +5,25 @@ import (
 	"fmt"
 	"log"
 	"log/slog"
+	"net"
 	"net/http"
 	"os"
+	"os/signal"
+	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/zackarysantana/velocity/internal/api"
+	"github.com/zackarysantana/velocity/internal/otel"
 	"github.com/zackarysantana/velocity/internal/service/domain"
 	"github.com/zackarysantana/velocity/internal/service/kafka"
 	mongodomain "github.com/zackarysantana/velocity/internal/service/mongo"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func main() {
+	// Handle SIGINT (CTRL+C) gracefully.
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer stop()
+
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
 	if os.Getenv("DEV_MODE") != "true" {
 		logger.Debug("Loading env file")
@@ -50,11 +57,42 @@ func main() {
 	// err = pqt.Push(context.TODO(), "test_queue", service.PriorityQueueItem[string]{Priority: 1, Payload: "testing this thing"}, service.PriorityQueueItem[string]{Priority: 2, Payload: "testing this thing 2"}, service.PriorityQueueItem[string]{Priority: 3, Payload: "testing this thing 3"})
 	// fmt.Println(err)
 
-	item, err := pqt.Pop(context.TODO(), "test_queue")
+	item, err := pqt.Pop(ctx, "test_queue")
 	fmt.Println(item, err)
 	// delete
 
-	mux := api.New[primitive.ObjectID](repository, serviceImpl, mongodomain.NewMongoIdCreator(), logger)
+	shutdown, err := otel.Setup(ctx)
+	defer shutdown(ctx)
+	if err != nil {
+		panic(err)
+	}
+
+	mux := api.New(repository, serviceImpl, mongodomain.NewMongoIdCreator(), logger)
 	logger.Info("Starting server", "addr", ":8080")
-	http.ListenAndServe(":8080", mux)
+	srv := &http.Server{
+		Addr:         ":8080",
+		BaseContext:  func(_ net.Listener) context.Context { return ctx },
+		ReadTimeout:  time.Second,
+		WriteTimeout: 10 * time.Second,
+		Handler:      mux,
+	}
+	srvErr := make(chan error, 1)
+	go func() {
+		srvErr <- srv.ListenAndServe()
+	}()
+
+	// Wait for interruption.
+	select {
+	case err = <-srvErr:
+		// Error when starting HTTP server.
+		return
+	case <-ctx.Done():
+		// Wait for first CTRL+C.
+		// Stop receiving signal notifications as soon as possible.
+		stop()
+	}
+
+	// When Shutdown is called, ListenAndServe immediately returns ErrServerClosed.
+	err = srv.Shutdown(context.Background())
+	return
 }

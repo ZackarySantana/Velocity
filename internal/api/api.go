@@ -79,16 +79,20 @@ func New[T any](repository *service.RepositoryManager[T], service service.Servic
 		},
 	}
 
+	h := func(mux *http.ServeMux, pattern string, handler func(http.ResponseWriter, *http.Request)) {
+		mux.Handle(pattern, otelhttp.NewHandler(http.HandlerFunc(handler), pattern))
+	}
+
 	rootMux := http.NewServeMux()
 
 	apiMux := http.NewServeMux()
-	apiMux.HandleFunc("GET /health", a.health)
-	apiMux.HandleFunc("POST /routine/start", a.routineStart)
+	h(apiMux, "GET /health", a.health)
+	h(apiMux, "POST /routine/start", a.routineStart)
 	rootMux.Handle("/", applyMiddleware(apiMux, apiMiddlewares...))
 
 	agentMux := http.NewServeMux()
-	agentMux.HandleFunc("GET /health", a.health)
-	agentMux.HandleFunc("GET /test/{id}", a.agentGetTask)
+	h(agentMux, "GET /health", a.health)
+	h(agentMux, "GET /test/{id}", a.agentGetTask)
 	rootMux.Handle("/agent/", http.StripPrefix("/agent", applyMiddleware(agentMux, agentMiddlewares...)))
 
 	return applyMiddleware(rootMux, middlewares...)

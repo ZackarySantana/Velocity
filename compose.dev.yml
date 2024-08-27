@@ -4,7 +4,9 @@ services:
     zookeeper:
         image: confluentinc/cp-zookeeper:7.5.0
         profiles: ["dev"]
-        env_file: env/.env.zookeeper
+        environment:
+            ZOOKEEPER_CLIENT_PORT: 2181
+            ZOOKEEPER_TICK_TIME: 2000
         networks:
             - internal
         healthcheck:
@@ -19,7 +21,20 @@ services:
         depends_on:
             zookeeper:
                 condition: service_healthy
-        env_file: env/.env.kafka
+        environment:
+            KAFKA_BROKER_ID: 1
+            KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+            KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+            KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+            KAFKA_SASL_ENABLED_MECHANISMS: SCRAM-SHA-256
+            KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: SCRAM-SHA-256
+            KAFKA_SASL_JAAS_CONFIG: >
+                org.apache.kafka.common.security.scram.ScramLoginModule required\
+                username="admin"\
+                password="password";
+            KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,SASL_PLAINTEXT:SASL_PLAINTEXT
+            KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+            KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
         networks:
             - internal
         healthcheck:
@@ -49,7 +64,8 @@ services:
         command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
         ports:
             - "27017:27017"
-        env_file: env/.env.mongodb
+        environment:
+            MONGO_INITDB_DATABASE: velocity
         volumes:
             - mongo-data:/data/db
             - mongo-config:/data/configdb
@@ -65,11 +81,31 @@ services:
             retries: 30
         restart: on-failure
 
+    collector:
+        image: grafana/otel-lgtm
+        profiles: ["dev"]
+        ports:
+            - "3000:3000"
+        networks:
+            - internal
+            - external
+        restart: on-failure
+
     api:
         environment:
-            DEV_MODE: true
+            MONGODB_USERNAME: ""
+            MONGODB_PASSWORD: ""
+            MONGODB_DATABASE: velocity
+            KAFKA_USERNAME: admin
+            KAFKA_PASSWORD: password
+            KAFKA_BROKER: kafka:9092
+            REDIS_URL: redis:6379
+            MONGODB_URI: "mongodb://%s%smongodb:27017/?replicaSet=rs0"
+            OTEL_EXPORTER_OTLP_INSECURE: true
+            OTEL_EXPORTER_OTLP_ENDPOINT: http://collector:4318
             DEV_SERVICES: true
         env_file:
+            - env/.env.shared
             - env/.env.api
         depends_on:
             kafka:
@@ -81,7 +117,12 @@ services:
 
     agent:
         environment:
-            DEV_MODE: true
+            KAFKA_USERNAME: admin
+            KAFKA_PASSWORD: password
+            KAFKA_BROKER: kafka:9092
+            OTEL_EXPORTER_OTLP_INSECURE: "true"
+            OTEL_EXPORTER_OTLP_ENDPOINT: http://collector:4318
             DEV_SERVICES: true
         env_file:
+            - env/.env.shared
             - env/.env.agent
