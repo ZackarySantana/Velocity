@@ -5,6 +5,7 @@ import (
 	"log"
 	"log/slog"
 	"os"
+	"os/signal"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -14,6 +15,10 @@ import (
 )
 
 func main() {
+	// Handle SIGINT (CTRL+C) gracefully.
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer stop()
+
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
 	if os.Getenv("DEV_MODE") != "true" {
 		logger.Debug("Loading env file")
@@ -41,7 +46,7 @@ func main() {
 
 	logger.Debug("Starting agent")
 	agent := agent.New(pq, velocity, logger)
-	err = agent.Start(context.Background())
+	err = agent.Start(ctx)
 	if err != nil {
 		panic(err)
 	}
