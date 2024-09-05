@@ -27,6 +27,8 @@ func URIFromEnv() *options.ClientOptions {
 	return options.Client().ApplyURI(uri)
 }
 
+// NewMongoRepositoryManager creates a new RepositoryManager with the provided mongo client and database name.
+// The type provided is used as the Key type for the documents.
 func NewMongoRepositoryManager[T any](db *mongo.Client, dbName string) *service.RepositoryManager[T] {
 	return &service.RepositoryManager[T]{
 		Routine: &service.RoutineRepository[T]{

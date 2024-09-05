@@ -21,6 +21,8 @@ type api[T any] struct {
 	logger     *slog.Logger
 }
 
+// New creates a new http.Handler that serves the API. The given type is the
+// type of the ids for data.
 func New[T any](repository *service.RepositoryManager[T], service service.Service[T], idCreator service.IdCreator[T], logger *slog.Logger) http.Handler {
 	a := &api[T]{service: service, idCreator: idCreator, repository: repository, logger: logger}
 
