@@ -23,16 +23,9 @@ const (
 	testCollection    = "tests"
 )
 
-func NewMongoClientFromEnv() (*mongo.Client, error) {
+func URIFromEnv() *options.ClientOptions {
 	uri := fmt.Sprintf(os.Getenv("MONGODB_URI"), os.Getenv("MONGODB_USERNAME"), os.Getenv("MONGODB_PASSWORD"))
-	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(uri))
-	if err != nil {
-		return nil, err
-	}
-	if err := client.Ping(context.Background(), nil); err != nil {
-		return nil, err
-	}
-	return client, nil
+	return options.Client().ApplyURI(uri)
 }
 
 func NewMongoRepositoryManager(db *mongo.Client, dbName string) *service.RepositoryManager[primitive.ObjectID] {

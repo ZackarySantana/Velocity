@@ -17,6 +17,7 @@ import (
 	"github.com/zackarysantana/velocity/internal/service/domain"
 	"github.com/zackarysantana/velocity/internal/service/kafka"
 	mongodomain "github.com/zackarysantana/velocity/internal/service/mongo"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func main() {
@@ -34,8 +35,11 @@ func main() {
 	}
 
 	logger.Debug("Connecting to MongoDB")
-	client, err := mongodomain.NewMongoClientFromEnv()
+	client, err := mongo.Connect(context.Background(), mongodomain.URIFromEnv())
 	if err != nil {
+		panic(err)
+	}
+	if err := client.Ping(context.Background(), nil); err != nil {
 		panic(err)
 	}
 	repository := mongodomain.NewMongoRepositoryManager(client, os.Getenv("MONGODB_DATABASE"))
@@ -52,10 +56,7 @@ func main() {
 	serviceImpl := domain.NewService(repository, pq, mongodomain.NewMongoIdCreator(), logger)
 
 	// delete
-	// TODO: test of priority queue via mongodb.
 	pqt := mongodomain.NewMongoPriorityQueue[string](client, mongodomain.NewMongoIdCreator(), os.Getenv("MONGODB_DATABASE"))
-	// err = pqt.Push(context.TODO(), "test_queue", service.PriorityQueueItem[string]{Priority: 1, Payload: "testing this thing"}, service.PriorityQueueItem[string]{Priority: 2, Payload: "testing this thing 2"}, service.PriorityQueueItem[string]{Priority: 3, Payload: "testing this thing 3"})
-	// fmt.Println(err)
 
 	item, err := pqt.Pop(ctx, "test_queue")
 	fmt.Println(item, err)
