@@ -17,6 +17,7 @@ import (
 	"github.com/zackarysantana/velocity/internal/service/domain"
 	"github.com/zackarysantana/velocity/internal/service/kafka"
 	mongodomain "github.com/zackarysantana/velocity/internal/service/mongo"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -42,7 +43,7 @@ func main() {
 	if err := client.Ping(context.Background(), nil); err != nil {
 		panic(err)
 	}
-	repository := mongodomain.NewMongoRepositoryManager(client, os.Getenv("MONGODB_DATABASE"))
+	repository := mongodomain.NewMongoRepositoryManager[primitive.ObjectID](client, os.Getenv("MONGODB_DATABASE"))
 	logger.Debug("Connected to MongoDB")
 
 	logger.Debug("Connecting to Kafka")
