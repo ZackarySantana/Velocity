@@ -2,6 +2,11 @@ package service
 
 import (
 	"context"
+	"errors"
+)
+
+var (
+	ErrEmptyQueue = errors.New("no items in queue")
 )
 
 type PriorityQueue[T any, V any] interface {

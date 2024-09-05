@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/samber/oops"
 	"github.com/zackarysantana/velocity/internal/service"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -76,7 +75,7 @@ func (p *priorityQueue[T, V]) Pop(ctx context.Context, coll string) (service.Pri
 	).Decode(&item)
 
 	if err == mongo.ErrNoDocuments {
-		return service.PriorityQueuePoppedItem[T, V]{}, oops.Errorf("no items in queue")
+		return service.PriorityQueuePoppedItem[T, V]{}, service.ErrEmptyQueue
 	}
 
 	return service.PriorityQueuePoppedItem[T, V]{
