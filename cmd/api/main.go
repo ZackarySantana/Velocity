@@ -54,10 +54,10 @@ func main() {
 	}
 	logger.Debug("Connected to Kafka")
 
-	serviceImpl := domain.NewService(repository, pq, mongodomain.NewMongoIdCreator(), logger)
+	serviceImpl := domain.NewService(repository, pq, mongodomain.NewObjectIDCreator(), logger)
 
 	// delete
-	pqt := mongodomain.NewMongoPriorityQueue[string](client, mongodomain.NewMongoIdCreator(), os.Getenv("MONGODB_DATABASE"))
+	pqt := mongodomain.NewMongoPriorityQueue[string](client, mongodomain.NewObjectIDCreator(), os.Getenv("MONGODB_DATABASE"))
 
 	item, err := pqt.Pop(ctx, "test_queue")
 	fmt.Println(item, err)
@@ -69,7 +69,7 @@ func main() {
 		panic(err)
 	}
 
-	mux := api.New(repository, serviceImpl, mongodomain.NewMongoIdCreator(), logger)
+	mux := api.New(repository, serviceImpl, mongodomain.NewObjectIDCreator(), logger)
 	logger.Info("Starting server", "addr", ":8080")
 	srv := &http.Server{
 		Addr:         ":8080",

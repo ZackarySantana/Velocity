@@ -10,7 +10,7 @@ import (
 )
 
 type CreateEntityOptions[T any] struct {
-	Id service.IdCreator[T]
+	Id service.IDCreator[T]
 
 	FilterToRoutine string
 }

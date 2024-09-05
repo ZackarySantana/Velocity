@@ -13,11 +13,11 @@ import (
 type Service[T any] struct {
 	repository *service.RepositoryManager[T]
 	pq         service.ProcessQueue
-	idCreator  service.IdCreator[T]
+	idCreator  service.IDCreator[T]
 	logger     *slog.Logger
 }
 
-func NewService[T any](repository *service.RepositoryManager[T], pq service.ProcessQueue, idCreator service.IdCreator[T], logger *slog.Logger) service.Service[T] {
+func NewService[T any](repository *service.RepositoryManager[T], pq service.ProcessQueue, idCreator service.IDCreator[T], logger *slog.Logger) service.Service[T] {
 	return &Service[T]{repository: repository, pq: pq, idCreator: idCreator, logger: logger}
 }
 

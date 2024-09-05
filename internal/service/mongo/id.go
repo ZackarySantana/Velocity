@@ -5,17 +5,18 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func NewMongoIdCreator() service.IdCreator[primitive.ObjectID] {
-	return &mongoIdCreator{}
+// NewObjectIDCreator creates a new IdCreator for MongoDB ObjectIDs.
+func NewObjectIDCreator() service.IDCreator[primitive.ObjectID] {
+	return &mongoIDCreator{}
 }
 
-type mongoIdCreator struct{}
+type mongoIDCreator struct{}
 
-func (m *mongoIdCreator) Create() primitive.ObjectID {
+func (m *mongoIDCreator) Create() primitive.ObjectID {
 	return primitive.NewObjectID()
 }
 
-func (m *mongoIdCreator) Read(id interface{}) (primitive.ObjectID, error) {
+func (m *mongoIDCreator) Read(id interface{}) (primitive.ObjectID, error) {
 	objectId, ok := id.(primitive.ObjectID)
 	if ok {
 		return objectId, nil
@@ -29,6 +30,6 @@ func (m *mongoIdCreator) Read(id interface{}) (primitive.ObjectID, error) {
 	return primitive.ObjectID{}, service.ErrInvalidId
 }
 
-func (m *mongoIdCreator) String(id primitive.ObjectID) string {
+func (m *mongoIDCreator) String(id primitive.ObjectID) string {
 	return id.Hex()
 }

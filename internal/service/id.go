@@ -6,7 +6,7 @@ var (
 	ErrInvalidId = errors.New("id not found")
 )
 
-type IdCreator[T any] interface {
+type IDCreator[T any] interface {
 	Create() T
 	Read(interface{}) (T, error)
 	String(T) string

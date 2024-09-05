@@ -17,13 +17,13 @@ var tracer = otel.Tracer("api")
 type api[T any] struct {
 	repository *service.RepositoryManager[T]
 	service    service.Service[T]
-	idCreator  service.IdCreator[T]
+	idCreator  service.IDCreator[T]
 	logger     *slog.Logger
 }
 
 // New creates a new http.Handler that serves the API. The given type is the
 // type of the ids for data.
-func New[T any](repository *service.RepositoryManager[T], service service.Service[T], idCreator service.IdCreator[T], logger *slog.Logger) http.Handler {
+func New[T any](repository *service.RepositoryManager[T], service service.Service[T], idCreator service.IDCreator[T], logger *slog.Logger) http.Handler {
 	a := &api[T]{service: service, idCreator: idCreator, repository: repository, logger: logger}
 
 	middlewares := []func(http.Handler) http.Handler{

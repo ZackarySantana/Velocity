@@ -22,7 +22,9 @@ type queueItem[T any, V any] struct {
 	CreatedOn time.Time
 }
 
-func NewMongoPriorityQueue[T any, V any](db *mongo.Client, idCreator service.IdCreator[V], dbName string) service.PriorityQueue[T, V] {
+// NewMongoPriorityQueue creates a new PriorityQueue that uses MongoDB as the backend.
+// The provided type T is used as the Payload type and V is used as the ID type.
+func NewMongoPriorityQueue[T any, V any](db *mongo.Client, idCreator service.IDCreator[V], dbName string) service.PriorityQueue[T, V] {
 	return &priorityQueue[T, V]{
 		db:        db,
 		dbName:    dbName,
@@ -34,7 +36,7 @@ type priorityQueue[T any, V any] struct {
 	db     *mongo.Client
 	dbName string
 
-	idCreator service.IdCreator[V]
+	idCreator service.IDCreator[V]
 }
 
 func (p *priorityQueue[T, V]) Push(ctx context.Context, coll string, payloads ...service.PriorityQueueItem[T]) error {
