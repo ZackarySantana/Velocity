@@ -52,26 +52,11 @@ The project is ran using [docker compose](https://docs.docker.com/compose/). To 
 make dev
 ```
 
-All docker commands are wrapped in the `make` command. For example:
+To find out more, run:
 
 ```bash
-# To stop the containers
-make dev-stop
-# To start the containers
-make dev-start
-# Deletes the containers
-make dev-down
+make
 ```
-
-To create and start the containers, run:
-
-```bash
-make dev
-```
-
-When you start the services in dev mode, some services might take a little to fully start up (like kafka). If you see errors, try waiting 1-2 minutes to make sure that all the services are stable.
-
-These commands are also available for the prod environment (which pulls from the .env file).
 
 ### Developing on the project
 

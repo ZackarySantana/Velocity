@@ -3,6 +3,21 @@ GO=go
 
 BUILD_DIR=$(HOME)/go/bin
 
+help:
+	@echo "Usage: make [target]"
+	@echo ""
+	@echo "Targets:"
+	@echo "  build-cli       Build the CLI"
+	@echo "  cli             Run the CLI"
+	@echo "  build-api       Build the API"
+	@echo "  api             Run the API"
+	@echo "  build-agent     Build the Agent"
+	@echo "  agent           Run the Agent"
+	@echo "  dev             Run the development environment"
+	@echo "  dev-%           Run a specific command in the development environment"
+	@echo "  prod            Run the production environment"
+	@echo "  prod-%          Run a specific command in the production environment"
+
 build-cli:
 	$(GO) build -o $(BUILD_DIR)/velocity cmd/cli/main.go
 
