@@ -4,6 +4,7 @@ import (
 	"context"
 	"log/slog"
 
+	"github.com/samber/oops"
 	"github.com/zackarysantana/velocity/internal/service"
 	"github.com/zackarysantana/velocity/src/velocity"
 )
@@ -24,7 +25,7 @@ func (a *agent) Start(ctx context.Context) error {
 	a.logger.Debug("Pinging server...")
 	_, err := a.client.Health()
 	if err != nil {
-		return err
+		return oops.Wrapf(err, "failed to ping server")
 	}
 	a.logger.Debug("Pinged server")
 
@@ -39,7 +40,7 @@ func (a *agent) Start(ctx context.Context) error {
 			}
 			return false, err
 		}
-		a.logger.Debug("Got test", "test", data)
+		a.logger.Debug("Found test", "test", data)
 		return true, nil
 	})
 	if err == context.Canceled {

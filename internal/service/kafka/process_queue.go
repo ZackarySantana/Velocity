@@ -92,7 +92,6 @@ func (k *KafkaQueue) Consume(ctx context.Context, topic string, f func([]byte) (
 			return err
 		}
 
-		fmt.Println("Received message", string(message.Key), ": ", string(message.Value))
 		ok, err := f(message.Value)
 		if err != nil {
 			return err

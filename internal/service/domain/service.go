@@ -2,7 +2,6 @@ package domain
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 
 	"github.com/samber/oops"
@@ -52,7 +51,7 @@ func (s *Service[T]) StartRoutine(ctx context.Context, ec *entities.ConfigEntity
 			if err != nil {
 				return oops.Wrapf(err, "id is invalid")
 			}
-			testIds[i] = []byte(fmt.Sprintf("%v", id))
+			testIds[i] = []byte(s.idCreator.String(id))
 		}
 
 		return s.pq.Write(ctx, "tests", testIds...)
