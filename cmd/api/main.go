@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"log/slog"
 	"net"
 	"net/http"
@@ -12,13 +11,10 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
+	"github.com/zackarysantana/velocity/cmd/api/internal"
 	"github.com/zackarysantana/velocity/internal/api"
 	"github.com/zackarysantana/velocity/internal/otel"
 	"github.com/zackarysantana/velocity/internal/service/domain"
-	"github.com/zackarysantana/velocity/internal/service/kafka"
-	mongodomain "github.com/zackarysantana/velocity/internal/service/mongo"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func main() {
@@ -30,34 +26,29 @@ func main() {
 	if os.Getenv("DEV_MODE") != "true" {
 		logger.Debug("Loading env file")
 		if err := godotenv.Load("env/.env.prod"); err != nil {
-			log.Fatal("Error loading .env file", err)
+			logger.Debug("Error loading .env file", "error", err)
 		}
 		logger.Debug("Loaded env file")
 	}
 
-	logger.Debug("Connecting to MongoDB")
-	client, err := mongo.Connect(context.Background(), mongodomain.URIFromEnv())
-	if err != nil {
-		panic(err)
-	}
-	if err := client.Ping(context.Background(), nil); err != nil {
-		panic(err)
-	}
-	repository := mongodomain.NewMongoRepositoryManager[primitive.ObjectID](client, os.Getenv("MONGODB_DATABASE"))
-	logger.Debug("Connected to MongoDB")
+	idCreator := internal.GetIDCreator[any](logger)
 
-	logger.Debug("Connecting to Kafka")
-	pq, err := kafka.NewKafkaQueue(kafka.NewKafkaQueueOptionsFromEnv(os.Getenv("KAFKA_GROUP_ID_API")))
+	logger.Debug("Connecting to repository manager...")
+	repository := internal.GetRepositoryManager(logger, idCreator)
+	logger.Debug("Connected to repository manager")
+
+	logger.Debug("Connecting to process queue...")
+	pq := internal.GetProcessQueue(logger)
 	defer pq.Close()
-	if err != nil {
-		panic(err)
-	}
-	logger.Debug("Connected to Kafka")
+	logger.Debug("Connected to process queue")
 
-	serviceImpl := domain.NewService(repository, pq, mongodomain.NewObjectIDCreator(), logger)
+	serviceImpl := domain.NewService(repository, pq, idCreator, logger)
 
 	// delete
-	pqt := mongodomain.NewMongoPriorityQueue[string](client, mongodomain.NewObjectIDCreator(), os.Getenv("MONGODB_DATABASE"))
+	logger.Debug("Connecting to priority queue...")
+	pqt := internal.GetPriorityQueue[any, string](logger)
+	logger.Debug("Connected to priority queue")
+	// pqt := mongodomain.NewMongoPriorityQueue[string](client, mongodomain.NewObjectIDCreator(), os.Getenv("MONGODB_DATABASE"))
 
 	item, err := pqt.Pop(ctx, "test_queue")
 	fmt.Println(item, err)
@@ -69,7 +60,7 @@ func main() {
 		panic(err)
 	}
 
-	mux := api.New(repository, serviceImpl, mongodomain.NewObjectIDCreator(), logger)
+	mux := api.New(repository, serviceImpl, idCreator, logger)
 	logger.Info("Starting server", "addr", ":8080")
 	srv := &http.Server{
 		Addr:         ":8080",

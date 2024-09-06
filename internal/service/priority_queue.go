@@ -9,19 +9,20 @@ var (
 	ErrEmptyQueue = errors.New("no items in queue")
 )
 
-type PriorityQueue[T any, V any] interface {
+// The provided type T is used as the Payload type and V is used as the ID type.
+type PriorityQueue[ID any, Payload any] interface {
 	// Push pushes an item into the given queue.
-	Push(context.Context, string, ...PriorityQueueItem[T]) error
+	Push(context.Context, string, ...PriorityQueueItem[Payload]) error
 	// Pop pops an item from the given queue.
-	Pop(context.Context, string) (PriorityQueuePoppedItem[T, V], error)
+	Pop(context.Context, string) (PriorityQueuePoppedItem[ID, Payload], error)
 }
 
-type PriorityQueueItem[T any] struct {
+type PriorityQueueItem[Payload any] struct {
 	Priority int
-	Payload  T
+	Payload  Payload
 }
 
-type PriorityQueuePoppedItem[T any, V any] struct {
-	Id      V
-	Payload T
+type PriorityQueuePoppedItem[ID any, Payload any] struct {
+	Id      ID
+	Payload Payload
 }

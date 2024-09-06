@@ -29,23 +29,23 @@ func URIFromEnv() *options.ClientOptions {
 
 // NewMongoRepositoryManager creates a new RepositoryManager with the provided mongo client and database name.
 // The type provided is used as the Key type for the documents.
-func NewMongoRepositoryManager[T any](db *mongo.Client, dbName string) *service.RepositoryManager[T] {
+func NewMongoRepositoryManager[T comparable](db *mongo.Client, dbName string) *service.RepositoryManager[T] {
 	return &service.RepositoryManager[T]{
 		Routine: &service.RoutineRepository[T]{
 			Load: createLoad[routine.Routine[T], T](db, dbName, routineCollection),
-			Put:  createPutForType[routine.Routine[T]](db, dbName, routineCollection),
+			Put:  createPutForType[routine.Routine[T], T](db, dbName, routineCollection),
 		},
 		Job: &service.JobRepository[T]{
 			Load: createLoad[job.Job[T], T](db, dbName, jobCollection),
-			Put:  createPutForType[job.Job[T]](db, dbName, jobCollection),
+			Put:  createPutForType[job.Job[T], T](db, dbName, jobCollection),
 		},
 		Image: &service.ImageRepository[T]{
 			Load: createLoad[image.Image[T], T](db, dbName, imageCollection),
-			Put:  createPutForType[image.Image[T]](db, dbName, imageCollection),
+			Put:  createPutForType[image.Image[T], T](db, dbName, imageCollection),
 		},
 		Test: &service.TestRepository[T]{
 			Load: createLoad[test.Test[T], T](db, dbName, testCollection),
-			Put:  createPutForType[test.Test[T]](db, dbName, testCollection),
+			Put:  createPutForType[test.Test[T], T](db, dbName, testCollection),
 		},
 		WithTransaction: func(ctx context.Context, fn func(context.Context) error) error {
 			session, err := db.StartSession()
@@ -61,7 +61,7 @@ func NewMongoRepositoryManager[T any](db *mongo.Client, dbName string) *service.
 	}
 }
 
-func createLoad[T any, V any](db *mongo.Client, database, collection string) func(context.Context, []V) ([]*T, error) {
+func createLoad[T any, V comparable](db *mongo.Client, database, collection string) func(context.Context, []V) ([]*T, error) {
 	return func(ctx context.Context, keys []V) ([]*T, error) {
 		cur, err := db.Database(database).Collection(collection).Find(ctx, bson.M{
 			"_id": bson.M{"$in": keys},
@@ -85,13 +85,21 @@ func createLoad[T any, V any](db *mongo.Client, database, collection string) fun
 	}
 }
 
-func createPutForType[T any](db *mongo.Client, database, collection string) func(context.Context, []*T) error {
-	return func(ctx context.Context, t []*T) error {
+func createPutForType[T any, V comparable](db *mongo.Client, database, collection string) func(context.Context, []*T) ([]V, error) {
+	return func(ctx context.Context, t []*T) ([]V, error) {
 		items := make([]interface{}, len(t))
 		for i, v := range t {
 			items[i] = v
 		}
-		_, err := db.Database(database).Collection(collection).InsertMany(ctx, items)
-		return err
+		insertedIDs, err := db.Database(database).Collection(collection).InsertMany(ctx, items)
+		if err != nil {
+			return nil, err
+		}
+
+		keys := make([]V, len(insertedIDs.InsertedIDs))
+		for i, id := range insertedIDs.InsertedIDs {
+			keys[i] = id.(V)
+		}
+		return keys, nil
 	}
 }

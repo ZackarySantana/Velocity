@@ -1,0 +1,55 @@
+# Add compatability for reading env and parsing it here
+
+config:
+    project: velocity
+    registry: docker.io/library
+    server: http://localhost:8080
+    ui: http://localhost:8080
+
+images:
+    - name: golang
+      image: golang:1.23-rc-bookworm
+      default: true
+
+builds:
+    api:
+        image: golang # Optional (because default)
+        directory: . # Optional
+        cmd: make OUT=./bin build-api
+        out: ./bin/velocity-api
+    agent:
+        cmd: make OUT=./bin build-agent
+        out: ./bin/velocity-agent
+    cli:
+        cmd: make OUT=./bin build-cli
+        out: ./bin/velocity
+
+tests:
+    - name: Functional
+      lib: golang-std
+    - name: Smoke api
+      binary: api
+      steps:
+          - cmd: make api
+            params:
+                background: true
+          - prebuilt: curl
+            params:
+                path: http://localhost:8080/health
+                code: 200
+    - name: Smoke agent
+      binary: agent
+      steps:
+          - cmd: make agent
+            params:
+                background: true
+          - prebuilt: curl
+            params:
+
+deployments:
+    - name: api
+      url: DEPLOY_API_URL
+    - name: agent
+      url: DEPLOY_AGENT_URL
+    - name: cli
+      url: DEPLOY_CLI_URL

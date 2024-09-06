@@ -5,31 +5,32 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// NewObjectIDCreator creates a new IdCreator for MongoDB ObjectIDs.
-func NewObjectIDCreator() service.IDCreator[primitive.ObjectID] {
-	return &mongoIDCreator{}
+func NewObjectIDCreator[T any]() service.IDCreator[T] {
+	return &mongoIDCreator[T]{}
 }
 
-type mongoIDCreator struct{}
+type mongoIDCreator[T any] struct{}
 
-func (m *mongoIDCreator) Create() primitive.ObjectID {
-	return primitive.NewObjectID()
+func (m *mongoIDCreator[T]) Create() T {
+	var result any = primitive.NewObjectID()
+	return result.(T)
 }
 
-func (m *mongoIDCreator) Read(id interface{}) (primitive.ObjectID, error) {
-	objectId, ok := id.(primitive.ObjectID)
-	if ok {
-		return objectId, nil
-	}
-	str, ok := id.(string)
-	if ok {
-		if id, err := primitive.ObjectIDFromHex(str); err == nil {
-			return id, nil
+func (m *mongoIDCreator[T]) Read(id interface{}) (T, error) {
+	switch v := id.(type) {
+	case primitive.ObjectID:
+		return any(v).(T), nil
+	case string:
+		if objID, err := primitive.ObjectIDFromHex(v); err == nil {
+			return any(objID).(T), nil
 		}
 	}
-	return primitive.ObjectID{}, service.ErrInvalidId
+	return *new(T), service.ErrInvalidId
 }
 
-func (m *mongoIDCreator) String(id primitive.ObjectID) string {
-	return id.Hex()
+func (m *mongoIDCreator[T]) String(id T) string {
+	if objID, ok := any(id).(primitive.ObjectID); ok {
+		return objID.Hex()
+	}
+	return ""
 }

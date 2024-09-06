@@ -10,11 +10,11 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type queueItem[T any, V any] struct {
-	Id       V `bson:"_id,omitempty"`
+type queueItem[ID any, Payload any] struct {
+	Id       ID `bson:"_id,omitempty"`
 	Priority int
 
-	Payload T
+	Payload Payload
 
 	StartTime *time.Time
 	EndTime   *time.Time
@@ -23,25 +23,25 @@ type queueItem[T any, V any] struct {
 
 // NewMongoPriorityQueue creates a new PriorityQueue that uses MongoDB as the backend.
 // The provided type T is used as the Payload type and V is used as the ID type.
-func NewMongoPriorityQueue[T any, V any](db *mongo.Client, idCreator service.IDCreator[V], dbName string) service.PriorityQueue[T, V] {
-	return &priorityQueue[T, V]{
+func NewMongoPriorityQueue[ID any, Payload any](db *mongo.Client, idCreator service.IDCreator[ID], dbName string) service.PriorityQueue[ID, Payload] {
+	return &priorityQueue[ID, Payload]{
 		db:        db,
 		dbName:    dbName,
 		idCreator: idCreator,
 	}
 }
 
-type priorityQueue[T any, V any] struct {
+type priorityQueue[ID any, Payload any] struct {
 	db     *mongo.Client
 	dbName string
 
-	idCreator service.IDCreator[V]
+	idCreator service.IDCreator[ID]
 }
 
-func (p *priorityQueue[T, V]) Push(ctx context.Context, coll string, payloads ...service.PriorityQueueItem[T]) error {
+func (p *priorityQueue[ID, Payload]) Push(ctx context.Context, coll string, payloads ...service.PriorityQueueItem[Payload]) error {
 	items := make([]interface{}, len(payloads))
 	for i, payload := range payloads {
-		items[i] = queueItem[T, V]{
+		items[i] = queueItem[ID, Payload]{
 			Id:        p.idCreator.Create(),
 			Priority:  payload.Priority,
 			Payload:   payload.Payload,
@@ -55,8 +55,8 @@ func (p *priorityQueue[T, V]) Push(ctx context.Context, coll string, payloads ..
 	return err
 }
 
-func (p *priorityQueue[T, V]) Pop(ctx context.Context, coll string) (service.PriorityQueuePoppedItem[T, V], error) {
-	item := queueItem[T, V]{}
+func (p *priorityQueue[ID, Payload]) Pop(ctx context.Context, coll string) (service.PriorityQueuePoppedItem[ID, Payload], error) {
+	item := queueItem[ID, Payload]{}
 	err := p.db.Database(p.dbName).Collection(coll).FindOneAndUpdate(ctx,
 		bson.M{
 			"starttime": nil,
@@ -75,10 +75,10 @@ func (p *priorityQueue[T, V]) Pop(ctx context.Context, coll string) (service.Pri
 	).Decode(&item)
 
 	if err == mongo.ErrNoDocuments {
-		return service.PriorityQueuePoppedItem[T, V]{}, service.ErrEmptyQueue
+		return service.PriorityQueuePoppedItem[ID, Payload]{}, service.ErrEmptyQueue
 	}
 
-	return service.PriorityQueuePoppedItem[T, V]{
+	return service.PriorityQueuePoppedItem[ID, Payload]{
 		Id:      item.Id,
 		Payload: item.Payload,
 	}, err

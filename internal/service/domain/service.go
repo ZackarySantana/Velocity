@@ -23,23 +23,23 @@ func NewService[T any](repository *service.RepositoryManager[T], pq service.Proc
 
 func (s *Service[T]) StartRoutine(ctx context.Context, ec *entities.ConfigEntity[T], name string) error {
 	return s.repository.WithTransaction(ctx, func(ctx context.Context) error {
-		err := s.repository.Test.Put(ctx, ec.Tests)
+		_, err := s.repository.Test.Put(ctx, ec.Tests)
 		if err != nil {
 			return err
 		}
 
-		err = s.repository.Image.Put(ctx, ec.Images)
+		_, err = s.repository.Image.Put(ctx, ec.Images)
 		if err != nil {
 			return err
 		}
 
-		err = s.repository.Job.Put(ctx, ec.Jobs)
+		_, err = s.repository.Job.Put(ctx, ec.Jobs)
 		if err != nil {
 			return err
 		}
 
 		for _, r := range ec.Routines {
-			err := s.repository.Routine.Put(ctx, []*routine.Routine[T]{r})
+			_, err := s.repository.Routine.Put(ctx, []*routine.Routine[T]{r})
 			if err != nil {
 				return err
 			}
