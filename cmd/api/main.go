@@ -14,6 +14,7 @@ import (
 	"github.com/zackarysantana/velocity/cmd/api/internal"
 	"github.com/zackarysantana/velocity/internal/api"
 	"github.com/zackarysantana/velocity/internal/otel"
+	"github.com/zackarysantana/velocity/internal/service"
 	"github.com/zackarysantana/velocity/internal/service/domain"
 )
 
@@ -44,15 +45,12 @@ func main() {
 
 	serviceImpl := domain.NewService(repository, pq, idCreator, logger)
 
-	// delete
 	logger.Debug("Connecting to priority queue...")
 	pqt := internal.GetPriorityQueue[any, string](logger)
 	logger.Debug("Connected to priority queue")
-	// pqt := mongodomain.NewMongoPriorityQueue[string](client, mongodomain.NewObjectIDCreator(), os.Getenv("MONGODB_DATABASE"))
 
-	item, err := pqt.Pop(ctx, "test_queue")
-	fmt.Println(item, err)
-	// delete
+	pqt.Push(ctx, "test_queue", service.PriorityQueueItem[string]{Priority: 1, Payload: "1"})
+	fmt.Println(pqt.Pop(ctx, "test_queue"))
 
 	shutdown, err := otel.Setup(ctx)
 	defer shutdown(ctx)
