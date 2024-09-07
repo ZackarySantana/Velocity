@@ -4,6 +4,7 @@ go 1.23rc2
 
 require (
 	github.com/fatih/color v1.17.0
+	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
 	github.com/samber/oops v1.12.1
 	github.com/samber/slog-multi v1.2.0
@@ -26,7 +27,6 @@ require (
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.22.0 // indirect
 	github.com/klauspost/compress v1.15.9 // indirect
 	github.com/montanaflynn/stats v0.7.1 // indirect
