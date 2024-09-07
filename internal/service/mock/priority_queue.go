@@ -22,6 +22,7 @@ type priorityQueue[ID comparable, Payload any] struct {
 type queueItem[ID comparable, Payload any] struct {
 	ID       ID
 	Priority int
+	coll     string
 	Payload  Payload
 	Started  bool
 }
@@ -31,6 +32,7 @@ func (p *priorityQueue[ID, Payload]) Push(ctx context.Context, coll string, payl
 		p.items = append(p.items, &queueItem[ID, Payload]{
 			ID:       p.idCreator.Create(),
 			Priority: payload.Priority,
+			coll:     coll,
 			Payload:  payload.Payload,
 			Started:  false,
 		})
@@ -43,7 +45,7 @@ func (p *priorityQueue[ID, Payload]) Pop(ctx context.Context, coll string) (serv
 	highestPriority := -1
 
 	for _, item := range p.items {
-		if item.Started {
+		if item.Started || item.coll != coll {
 			continue
 		}
 		if item.Priority > highestPriority {
@@ -56,7 +58,7 @@ func (p *priorityQueue[ID, Payload]) Pop(ctx context.Context, coll string) (serv
 	}
 
 	for _, item := range p.items {
-		if item.Priority != highestPriority || item.Started {
+		if item.Started || item.coll != coll || item.Priority != highestPriority {
 			continue
 		}
 
