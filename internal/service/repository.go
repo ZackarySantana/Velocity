@@ -10,7 +10,9 @@ import (
 )
 
 type TypeRepository[ID any, DataType any] interface {
+	// Load gets the data for the given IDs.
 	Load(context.Context, []ID) ([]*DataType, error)
+	// Put saves the data and returns the inserted IDs.
 	Put(context.Context, []*DataType) ([]ID, error)
 }
 
@@ -27,6 +29,8 @@ type RepositoryManager[ID any] interface {
 	WithTransaction(context.Context, func(context.Context) error) error
 }
 
+// NewRepositoryManager holds the given repositories and transaction function
+// and returns/calls them when needed.
 func NewRepositoryManager[ID any](
 	routine RoutineRepository[ID],
 	job JobRepository[ID],
