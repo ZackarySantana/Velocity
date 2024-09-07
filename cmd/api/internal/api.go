@@ -63,7 +63,12 @@ func GetProcessQueue(logger *slog.Logger) service.ProcessQueue {
 	panic("No process queue set")
 }
 
-func GetPriorityQueue[ID any, Payload any](logger *slog.Logger) service.PriorityQueue[ID, Payload] {
+func GetPriorityQueue[ID comparable, Payload any](logger *slog.Logger) service.PriorityQueue[ID, Payload] {
+	useMock := os.Getenv("MOCK_PRIORITY_QUEUE")
+	if useMock == "true" {
+		logger.Debug("Using mock priority queue")
+		return mock.NewPriorityQueue[ID, Payload](GetIDCreator[ID](logger))
+	}
 	useMongo := os.Getenv("MONGO_PRIORITY_QUEUE")
 	if useMongo == "true" {
 		logger.Debug("Using mongo priority queue")
