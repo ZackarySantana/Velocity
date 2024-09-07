@@ -129,7 +129,7 @@ func Setup(ctx context.Context) (shutdown func(context.Context) error, err error
 	err = runtime.Start(runtime.WithMinimumReadMemStatsInterval(time.Second))
 	if err != nil {
 		// If runtime instrumentation fails, log the error using the OTel logger.
-		logger.ErrorContext(ctx, "otel runtime instrumentation failed:", err)
+		logger.ErrorContext(ctx, "otel runtime instrumentation failed:", "error", err)
 	}
 
 	// Return the shutdown function and any error encountered during setup (nil if none).
