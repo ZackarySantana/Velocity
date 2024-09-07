@@ -2,6 +2,7 @@ package mongo
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/zackarysantana/velocity/internal/service"
@@ -33,9 +34,9 @@ type queueItem[ID any, Payload any] struct {
 
 	Payload Payload
 
-	StartTime *time.Time
-	EndTime   *time.Time
 	CreatedOn time.Time
+	StartedOn *time.Time
+	EndedOn   *time.Time
 }
 
 func (p *priorityQueue[ID, Payload]) Push(ctx context.Context, coll string, payloads ...service.PriorityQueueItem[Payload]) error {
@@ -45,9 +46,9 @@ func (p *priorityQueue[ID, Payload]) Push(ctx context.Context, coll string, payl
 			Id:        p.idCreator.Create(),
 			Priority:  payload.Priority,
 			Payload:   payload.Payload,
-			StartTime: nil,
-			EndTime:   nil,
 			CreatedOn: time.Now(),
+			StartedOn: nil,
+			EndedOn:   nil,
 		}
 		i++
 	}
@@ -59,11 +60,11 @@ func (p *priorityQueue[ID, Payload]) Pop(ctx context.Context, coll string) (serv
 	item := queueItem[ID, Payload]{}
 	err := p.db.Database(p.dbName).Collection(coll).FindOneAndUpdate(ctx,
 		bson.M{
-			"starttime": nil,
+			"startedon": nil,
 		},
 		bson.M{
 			"$set": bson.M{
-				"starttime": time.Now(),
+				"startedon": time.Now(),
 			},
 		},
 		options.FindOneAndUpdate().SetSort(
@@ -79,8 +80,9 @@ func (p *priorityQueue[ID, Payload]) Pop(ctx context.Context, coll string) (serv
 	}
 
 	return service.PriorityQueuePoppedItem[ID, Payload]{
-		Id:      item.Id,
-		Payload: item.Payload,
+		Id:        item.Id,
+		Payload:   item.Payload,
+		CreatedOn: item.CreatedOn,
 	}, err
 }
 
@@ -91,13 +93,47 @@ func (p *priorityQueue[ID, Payload]) MarkAsDone(ctx context.Context, coll string
 		},
 		bson.M{
 			"$set": bson.M{
-				"endtime": time.Now(),
+				"endedon": time.Now(),
 			},
 		},
 	)
 	return err
 }
 
-func (p *priorityQueue[T, V]) Close() error {
+func (p *priorityQueue[ID, Payload]) UnfinishedItems(ctx context.Context, coll string) ([]service.PriorityQueueUnfinishedItem[ID, Payload], error) {
+	items := []queueItem[ID, Payload]{}
+
+	cursor, err := p.db.Database(p.dbName).Collection(coll).Find(ctx, bson.M{
+		"startedon": bson.M{"$ne": nil},
+		"endedon":   nil,
+	})
+	if err == mongo.ErrNoDocuments {
+		return nil, service.ErrEmptyQueue
+	}
+	if err != nil {
+		return nil, err
+	}
+	err = cursor.All(ctx, &items)
+	if err != nil {
+		return nil, err
+	}
+
+	unfinishedItems := make([]service.PriorityQueueUnfinishedItem[ID, Payload], len(items))
+	for i, item := range items {
+		if item.StartedOn == nil {
+			return nil, fmt.Errorf("item %v has no start time", item.Id)
+		}
+		unfinishedItems[i] = service.PriorityQueueUnfinishedItem[ID, Payload]{
+			Id:        item.Id,
+			Payload:   item.Payload,
+			CreatedOn: item.CreatedOn,
+			StartedOn: *item.StartedOn,
+		}
+	}
+
+	return unfinishedItems, err
+}
+
+func (p *priorityQueue[ID, Payload]) Close() error {
 	return nil
 }

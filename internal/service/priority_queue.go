@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"time"
 )
 
 var (
@@ -17,6 +18,8 @@ type PriorityQueue[ID any, Payload any] interface {
 	Pop(context.Context, string) (PriorityQueuePoppedItem[ID, Payload], error)
 	// MarkAsDone marks an item as done.
 	MarkAsDone(context.Context, string, ID) error
+	// UnfinishedItems returns all unfinished items.
+	UnfinishedItems(context.Context, string) ([]PriorityQueueUnfinishedItem[ID, Payload], error)
 	// Close closes the queue.
 	Close() error
 }
@@ -27,6 +30,14 @@ type PriorityQueueItem[Payload any] struct {
 }
 
 type PriorityQueuePoppedItem[ID any, Payload any] struct {
-	Id      ID
-	Payload Payload
+	Id        ID
+	Payload   Payload
+	CreatedOn time.Time
+}
+
+type PriorityQueueUnfinishedItem[ID any, Payload any] struct {
+	Id        ID
+	Payload   Payload
+	CreatedOn time.Time
+	StartedOn time.Time
 }
