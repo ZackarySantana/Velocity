@@ -29,10 +29,10 @@ func URIFromEnv() *options.ClientOptions {
 
 func NewMongoRepositoryManager[ID any](client *mongo.Client, database string) service.RepositoryManager[ID] {
 	return service.NewRepositoryManager(
-		newExampleMongoRepository[ID, routine.Routine[ID]](client, database, routineCollection),
-		newExampleMongoRepository[ID, job.Job[ID]](client, database, jobCollection),
-		newExampleMongoRepository[ID, image.Image[ID]](client, database, imageCollection),
-		newExampleMongoRepository[ID, test.Test[ID]](client, database, testCollection),
+		newTypeRepository[ID, routine.Routine[ID]](client, database, routineCollection),
+		newTypeRepository[ID, job.Job[ID]](client, database, jobCollection),
+		newTypeRepository[ID, image.Image[ID]](client, database, imageCollection),
+		newTypeRepository[ID, test.Test[ID]](client, database, testCollection),
 		func(ctx context.Context, fn func(context.Context) error) error {
 			session, err := client.StartSession()
 			if err != nil {
@@ -47,21 +47,21 @@ func NewMongoRepositoryManager[ID any](client *mongo.Client, database string) se
 	)
 }
 
-func newExampleMongoRepository[ID any, DataType any](client *mongo.Client, database string, collection string) service.TypeRepository[ID, DataType] {
-	return &exampleMongoRepository[ID, DataType]{
+func newTypeRepository[ID any, DataType any](client *mongo.Client, database string, collection string) service.TypeRepository[ID, DataType] {
+	return &typeRepository[ID, DataType]{
 		client:     client,
 		database:   database,
 		collection: collection,
 	}
 }
 
-type exampleMongoRepository[ID any, DataType any] struct {
+type typeRepository[ID any, DataType any] struct {
 	client     *mongo.Client
 	database   string
 	collection string
 }
 
-func (e *exampleMongoRepository[ID, DataType]) Load(ctx context.Context, keys []ID) ([]*DataType, error) {
+func (e *typeRepository[ID, DataType]) Load(ctx context.Context, keys []ID) ([]*DataType, error) {
 	cur, err := e.client.Database(e.database).Collection(e.collection).Find(ctx, bson.M{
 		"_id": bson.M{"$in": keys},
 	})
@@ -83,7 +83,7 @@ func (e *exampleMongoRepository[ID, DataType]) Load(ctx context.Context, keys []
 	return results, nil
 }
 
-func (e *exampleMongoRepository[ID, DataType]) Put(ctx context.Context, data []*DataType) ([]ID, error) {
+func (e *typeRepository[ID, DataType]) Put(ctx context.Context, data []*DataType) ([]ID, error) {
 	items := make([]interface{}, len(data))
 	for i, v := range data {
 		items[i] = v
