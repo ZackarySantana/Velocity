@@ -27,28 +27,14 @@ func URIFromEnv() *options.ClientOptions {
 	return options.Client().ApplyURI(uri)
 }
 
-// NewMongoRepositoryManager creates a new RepositoryManager with the provided mongo client and database name.
-// The type provided is used as the Key type for the documents.
-func NewMongoRepositoryManager[T comparable](db *mongo.Client, dbName string) *service.RepositoryManager[T] {
-	return &service.RepositoryManager[T]{
-		Routine: &service.RoutineRepository[T]{
-			Load: createLoad[routine.Routine[T], T](db, dbName, routineCollection),
-			Put:  createPutForType[routine.Routine[T], T](db, dbName, routineCollection),
-		},
-		Job: &service.JobRepository[T]{
-			Load: createLoad[job.Job[T], T](db, dbName, jobCollection),
-			Put:  createPutForType[job.Job[T], T](db, dbName, jobCollection),
-		},
-		Image: &service.ImageRepository[T]{
-			Load: createLoad[image.Image[T], T](db, dbName, imageCollection),
-			Put:  createPutForType[image.Image[T], T](db, dbName, imageCollection),
-		},
-		Test: &service.TestRepository[T]{
-			Load: createLoad[test.Test[T], T](db, dbName, testCollection),
-			Put:  createPutForType[test.Test[T], T](db, dbName, testCollection),
-		},
-		WithTransaction: func(ctx context.Context, fn func(context.Context) error) error {
-			session, err := db.StartSession()
+func NewMongoRepositoryManager[ID any](client *mongo.Client, database string) service.RepositoryManager[ID] {
+	return service.NewRepositoryManager(
+		newExampleMongoRepository[ID, routine.Routine[ID]](client, database, routineCollection),
+		newExampleMongoRepository[ID, job.Job[ID]](client, database, jobCollection),
+		newExampleMongoRepository[ID, image.Image[ID]](client, database, imageCollection),
+		newExampleMongoRepository[ID, test.Test[ID]](client, database, testCollection),
+		func(ctx context.Context, fn func(context.Context) error) error {
+			session, err := client.StartSession()
 			if err != nil {
 				return err
 			}
@@ -58,48 +44,57 @@ func NewMongoRepositoryManager[T comparable](db *mongo.Client, dbName string) *s
 			})
 			return err
 		},
+	)
+}
+
+func newExampleMongoRepository[ID any, DataType any](client *mongo.Client, database string, collection string) service.TypeRepository[ID, DataType] {
+	return &exampleMongoRepository[ID, DataType]{
+		client:     client,
+		database:   database,
+		collection: collection,
 	}
 }
 
-func createLoad[T any, V comparable](db *mongo.Client, database, collection string) func(context.Context, []V) ([]*T, error) {
-	return func(ctx context.Context, keys []V) ([]*T, error) {
-		cur, err := db.Database(database).Collection(collection).Find(ctx, bson.M{
-			"_id": bson.M{"$in": keys},
-		})
-		if err != nil {
-			return nil, err
-		}
-
-		results := make([]*T, cur.RemainingBatchLength())
-		i := 0
-		for cur.Next(ctx) {
-			var r T
-			if err := cur.Decode(&r); err != nil {
-				return nil, err
-			}
-			results[i] = &r
-			i++
-		}
-
-		return results, nil
-	}
+type exampleMongoRepository[ID any, DataType any] struct {
+	client     *mongo.Client
+	database   string
+	collection string
 }
 
-func createPutForType[T any, V comparable](db *mongo.Client, database, collection string) func(context.Context, []*T) ([]V, error) {
-	return func(ctx context.Context, t []*T) ([]V, error) {
-		items := make([]interface{}, len(t))
-		for i, v := range t {
-			items[i] = v
-		}
-		insertedIDs, err := db.Database(database).Collection(collection).InsertMany(ctx, items)
-		if err != nil {
+func (e *exampleMongoRepository[ID, DataType]) Load(ctx context.Context, keys []ID) ([]*DataType, error) {
+	cur, err := e.client.Database(e.database).Collection(e.collection).Find(ctx, bson.M{
+		"_id": bson.M{"$in": keys},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	results := make([]*DataType, cur.RemainingBatchLength())
+	i := 0
+	for cur.Next(ctx) {
+		var r DataType
+		if err := cur.Decode(&r); err != nil {
 			return nil, err
 		}
-
-		keys := make([]V, len(insertedIDs.InsertedIDs))
-		for i, id := range insertedIDs.InsertedIDs {
-			keys[i] = id.(V)
-		}
-		return keys, nil
+		results[i] = &r
+		i++
 	}
+
+	return results, nil
+}
+
+func (e *exampleMongoRepository[ID, DataType]) Put(ctx context.Context, data []*DataType) ([]ID, error) {
+	items := make([]interface{}, len(data))
+	for i, v := range data {
+		items[i] = v
+	}
+	insertedIDs, err := e.client.Database(e.database).Collection(e.collection).InsertMany(ctx, items)
+	if err != nil {
+		return nil, err
+	}
+	keys := make([]ID, len(insertedIDs.InsertedIDs))
+	for i, id := range insertedIDs.InsertedIDs {
+		keys[i] = id.(ID)
+	}
+	return keys, nil
 }

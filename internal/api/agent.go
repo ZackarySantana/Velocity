@@ -14,7 +14,7 @@ func (a *api[T]) agentGetTask(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "incorrectly formatted id", http.StatusNotFound)
 		return
 	}
-	tests, err := a.repository.Test.Load(r.Context(), []T{id})
+	tests, err := a.repository.Test().Load(r.Context(), []T{id})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

@@ -27,7 +27,7 @@ func GetIDCreator[T any](logger *slog.Logger) service.IDCreator[T] {
 	panic("No ID creator set")
 }
 
-func GetRepositoryManager[T comparable](logger *slog.Logger, idCreator service.IDCreator[T]) *service.RepositoryManager[T] {
+func GetRepositoryManager[T comparable](logger *slog.Logger, idCreator service.IDCreator[T]) service.RepositoryManager[T] {
 	useMock := os.Getenv("MOCK_REPOSITORY_MANAGER")
 	if useMock == "true" {
 		logger.Debug("Using mock repository manager")
