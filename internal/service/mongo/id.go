@@ -5,18 +5,18 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func NewObjectIDCreator[T any]() service.IDCreator[T] {
-	return &mongoIDCreator[T]{}
+func NewIDCreator[T any]() service.IDCreator[T] {
+	return &idCreator[T]{}
 }
 
-type mongoIDCreator[T any] struct{}
+type idCreator[T any] struct{}
 
-func (m *mongoIDCreator[T]) Create() T {
+func (m *idCreator[T]) Create() T {
 	var result any = primitive.NewObjectID()
 	return result.(T)
 }
 
-func (m *mongoIDCreator[T]) Read(id interface{}) (T, error) {
+func (m *idCreator[T]) Read(id interface{}) (T, error) {
 	switch v := id.(type) {
 	case primitive.ObjectID:
 		return any(v).(T), nil
@@ -28,7 +28,7 @@ func (m *mongoIDCreator[T]) Read(id interface{}) (T, error) {
 	return *new(T), service.ErrInvalidId
 }
 
-func (m *mongoIDCreator[T]) String(id T) string {
+func (m *idCreator[T]) String(id T) string {
 	if objID, ok := any(id).(primitive.ObjectID); ok {
 		return objID.Hex()
 	}

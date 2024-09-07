@@ -5,7 +5,7 @@ import (
 	"github.com/zackarysantana/velocity/internal/service"
 )
 
-func NewMockIDCreator[T any]() service.IDCreator[T] {
+func NewIDCreator[T any]() service.IDCreator[T] {
 	return &mockIDCreator[T]{}
 }
 

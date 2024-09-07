@@ -14,7 +14,7 @@ import (
 	"github.com/zackarysantana/velocity/src/catcher"
 )
 
-type KafkaQueue struct {
+type processQueue struct {
 	transport kafka.RoundTripper
 	dialer    *kafka.Dialer
 	broker    string
@@ -24,15 +24,15 @@ type KafkaQueue struct {
 	r map[string]*kafka.Reader
 }
 
-type KafkaQueueConfig struct {
+type ProcessQueueConfig struct {
 	Username string
 	Password string
 	Broker   string
 	GroupId  string
 }
 
-func NewKafkaQueueOptionsFromEnv(groupId string) *KafkaQueueConfig {
-	return &KafkaQueueConfig{
+func NewProcessQueueConfigFromEnv(groupId string) *ProcessQueueConfig {
+	return &ProcessQueueConfig{
 		Username: os.Getenv("KAFKA_USERNAME"),
 		Password: os.Getenv("KAFKA_PASSWORD"),
 		Broker:   os.Getenv("KAFKA_BROKER"),
@@ -40,8 +40,8 @@ func NewKafkaQueueOptionsFromEnv(groupId string) *KafkaQueueConfig {
 	}
 }
 
-func NewKafkaQueue(config *KafkaQueueConfig) (service.ProcessQueue, error) {
-	k := &KafkaQueue{
+func NewProcessQueue(config *ProcessQueueConfig) (service.ProcessQueue, error) {
+	k := &processQueue{
 		broker:  config.Broker,
 		groupId: config.GroupId,
 		r:       map[string]*kafka.Reader{},
@@ -70,7 +70,7 @@ func NewKafkaQueue(config *KafkaQueueConfig) (service.ProcessQueue, error) {
 	return k, nil
 }
 
-func (k *KafkaQueue) Write(ctx context.Context, topic string, messages ...[]byte) error {
+func (k *processQueue) Write(ctx context.Context, topic string, messages ...[]byte) error {
 	kafkaMessages := make([]kafka.Message, len(messages))
 	for i, message := range messages {
 		kafkaMessages[i] = kafka.Message{Value: message, Topic: topic, Key: []byte(fmt.Sprintf("%d", i))}
@@ -78,7 +78,7 @@ func (k *KafkaQueue) Write(ctx context.Context, topic string, messages ...[]byte
 	return k.w.WriteMessages(ctx, kafkaMessages...)
 }
 
-func (k *KafkaQueue) Consume(ctx context.Context, topic string, f func([]byte) (bool, error)) error {
+func (k *processQueue) Consume(ctx context.Context, topic string, f func([]byte) (bool, error)) error {
 	r, err := k.getReader(topic)
 	if err != nil {
 		return err
@@ -102,7 +102,7 @@ func (k *KafkaQueue) Consume(ctx context.Context, topic string, f func([]byte) (
 	}
 }
 
-func (k *KafkaQueue) Close() error {
+func (k *processQueue) Close() error {
 	catcher := catcher.New()
 	catcher.Catch(k.w.Close())
 	for _, r := range k.r {
@@ -111,7 +111,7 @@ func (k *KafkaQueue) Close() error {
 	return catcher.Resolve()
 }
 
-func (k *KafkaQueue) getReader(topic string) (*kafka.Reader, error) {
+func (k *processQueue) getReader(topic string) (*kafka.Reader, error) {
 	if _, ok := k.r[topic]; !ok {
 		k.r[topic] = kafka.NewReader(kafka.ReaderConfig{
 			Brokers: []string{k.broker},

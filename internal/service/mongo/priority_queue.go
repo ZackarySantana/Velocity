@@ -10,20 +10,9 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type queueItem[ID any, Payload any] struct {
-	Id       ID `bson:"_id,omitempty"`
-	Priority int
-
-	Payload Payload
-
-	StartTime *time.Time
-	EndTime   *time.Time
-	CreatedOn time.Time
-}
-
-// NewMongoPriorityQueue creates a new PriorityQueue that uses MongoDB as the backend.
+// NewPriorityQueue creates a new PriorityQueue that uses MongoDB as the backend.
 // The provided type T is used as the Payload type and V is used as the ID type.
-func NewMongoPriorityQueue[ID any, Payload any](db *mongo.Client, idCreator service.IDCreator[ID], dbName string) service.PriorityQueue[ID, Payload] {
+func NewPriorityQueue[ID any, Payload any](db *mongo.Client, idCreator service.IDCreator[ID], dbName string) service.PriorityQueue[ID, Payload] {
 	return &priorityQueue[ID, Payload]{
 		db:        db,
 		dbName:    dbName,
@@ -36,6 +25,17 @@ type priorityQueue[ID any, Payload any] struct {
 	dbName string
 
 	idCreator service.IDCreator[ID]
+}
+
+type queueItem[ID any, Payload any] struct {
+	Id       ID `bson:"_id,omitempty"`
+	Priority int
+
+	Payload Payload
+
+	StartTime *time.Time
+	EndTime   *time.Time
+	CreatedOn time.Time
 }
 
 func (p *priorityQueue[ID, Payload]) Push(ctx context.Context, coll string, payloads ...service.PriorityQueueItem[Payload]) error {
@@ -84,10 +84,10 @@ func (p *priorityQueue[ID, Payload]) Pop(ctx context.Context, coll string) (serv
 	}, err
 }
 
-func (p *priorityQueue[T, V]) CloseItem(ctx context.Context, coll string, payload T) error {
+func (p *priorityQueue[ID, Payload]) MarkAsDone(ctx context.Context, coll string, id ID) error {
 	_, err := p.db.Database(p.dbName).Collection(coll).UpdateOne(ctx,
 		bson.M{
-			"payload": payload,
+			"_id": id,
 		},
 		bson.M{
 			"$set": bson.M{
@@ -99,5 +99,5 @@ func (p *priorityQueue[T, V]) CloseItem(ctx context.Context, coll string, payloa
 }
 
 func (p *priorityQueue[T, V]) Close() error {
-	return p.db.Disconnect(context.Background())
+	return nil
 }

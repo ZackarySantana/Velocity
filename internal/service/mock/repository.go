@@ -10,7 +10,7 @@ import (
 	"github.com/zackarysantana/velocity/src/entities/test"
 )
 
-func NewMockRepositoryManager[ID comparable](idCreator service.IDCreator[ID]) service.RepositoryManager[ID] {
+func NewRepositoryManager[ID comparable](idCreator service.IDCreator[ID]) service.RepositoryManager[ID] {
 	routines := make(map[ID]*routine.Routine[ID])
 	jobs := make(map[ID]*job.Job[ID])
 	images := make(map[ID]*image.Image[ID])

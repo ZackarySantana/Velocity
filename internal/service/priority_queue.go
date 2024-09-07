@@ -15,6 +15,10 @@ type PriorityQueue[ID any, Payload any] interface {
 	Push(context.Context, string, ...PriorityQueueItem[Payload]) error
 	// Pop pops an item from the given queue.
 	Pop(context.Context, string) (PriorityQueuePoppedItem[ID, Payload], error)
+	// MarkAsDone marks an item as done.
+	MarkAsDone(context.Context, string, ID) error
+	// Close closes the queue.
+	Close() error
 }
 
 type PriorityQueueItem[Payload any] struct {

@@ -27,7 +27,7 @@ func URIFromEnv() *options.ClientOptions {
 	return options.Client().ApplyURI(uri)
 }
 
-func NewMongoRepositoryManager[ID any](client *mongo.Client, database string) service.RepositoryManager[ID] {
+func NewRepositoryManager[ID any](client *mongo.Client, database string) service.RepositoryManager[ID] {
 	return service.NewRepositoryManager(
 		newTypeRepository[ID, routine.Routine[ID]](client, database, routineCollection),
 		newTypeRepository[ID, job.Job[ID]](client, database, jobCollection),

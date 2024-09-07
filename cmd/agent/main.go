@@ -29,7 +29,7 @@ func main() {
 	}
 
 	logger.Debug("Connecting to Kafka")
-	pq, err := kafka.NewKafkaQueue(kafka.NewKafkaQueueOptionsFromEnv(os.Getenv("KAFKA_GROUP_ID_AGENT")))
+	pq, err := kafka.NewProcessQueue(kafka.NewProcessQueueConfigFromEnv(os.Getenv("KAFKA_GROUP_ID_AGENT")))
 	defer pq.Close()
 	if err != nil {
 		panic(err)
