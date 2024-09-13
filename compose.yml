@@ -30,7 +30,7 @@ services:
         profiles: ["dev", "prod"]
         build:
             context: .
-            dockerfile: Dockerfile.agenv
+            dockerfile: Dockerfile.agent
         depends_on:
             api:
                 condition: service_healthy
