@@ -2,7 +2,7 @@
 
 config:
     project: velocity
-    registry: docker.io/library
+    registry: docker.io/library # Optional if it is the docker hub
     server: http://localhost:8080
     ui: http://localhost:8080
 
@@ -43,13 +43,15 @@ tests:
           - cmd: make agent
             params:
                 background: true
-          - prebuilt: curl
-            params:
+          - exec: ./bin/velocity-agent
 
 deployments:
     - name: api
       url: DEPLOY_API_URL
+      build: api
     - name: agent
       url: DEPLOY_AGENT_URL
+      build: agent
     - name: cli
       url: DEPLOY_CLI_URL
+      build: cli
