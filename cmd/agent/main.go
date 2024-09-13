@@ -20,7 +20,8 @@ func main() {
 	defer stop()
 
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
-	if os.Getenv("DEV_MODE") != "true" {
+
+	if os.Getenv("DEV_MODE") == "true" && os.Getenv("DEV_SERVICES") != "true" {
 		logger.Debug("Loading env file")
 		if err := godotenv.Load("env/.env.prod"); err != nil {
 			log.Fatal("Error loading .env file", err)

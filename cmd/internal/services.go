@@ -13,13 +13,12 @@ import (
 )
 
 func GetIDCreator[T any](logger *slog.Logger) service.IDCreator[T] {
-	useMock := os.Getenv("MOCK_ID_CREATOR")
-	if useMock == "true" {
+	idCreator := os.Getenv("ID_CREATOR")
+	if idCreator == "mock" {
 		logger.Debug("Using mock ID creator")
 		return mock.NewIDCreator[T]()
 	}
-	useMongo := os.Getenv("MONGO_ID_CREATOR")
-	if useMongo == "true" {
+	if idCreator == "mongo" {
 		logger.Debug("Using mongo ID creator")
 		return mongodomain.NewIDCreator[T]().(service.IDCreator[T])
 	}
@@ -28,13 +27,12 @@ func GetIDCreator[T any](logger *slog.Logger) service.IDCreator[T] {
 }
 
 func GetRepositoryManager[T comparable](logger *slog.Logger, idCreator service.IDCreator[T]) service.RepositoryManager[T] {
-	useMock := os.Getenv("MOCK_REPOSITORY_MANAGER")
-	if useMock == "true" {
+	repositoryManager := os.Getenv("REPOSITORY_MANAGER")
+	if repositoryManager == "mock" {
 		logger.Debug("Using mock repository manager")
 		return mock.NewRepositoryManager[T](GetIDCreator[T](logger))
 	}
-	useMongo := os.Getenv("MONGO_REPOSITORY_MANAGER")
-	if useMongo == "true" {
+	if repositoryManager == "mongo" {
 		logger.Debug("Using mongo repository manager")
 		client, err := mongo.Connect(context.Background(), mongodomain.URIFromEnv())
 		if err != nil {
@@ -50,8 +48,8 @@ func GetRepositoryManager[T comparable](logger *slog.Logger, idCreator service.I
 }
 
 func GetProcessQueue(logger *slog.Logger) service.ProcessQueue {
-	useKafka := os.Getenv("KAFKA_PROCESS_QUEUE")
-	if useKafka == "true" {
+	processQueue := os.Getenv("PROCESS_QUEUE")
+	if processQueue == "kafka" {
 		logger.Debug("Using kafka process queue")
 		pq, err := kafka.NewProcessQueue(kafka.NewProcessQueueConfigFromEnv(os.Getenv("KAFKA_GROUP_ID_API")))
 		if err != nil {
@@ -64,13 +62,12 @@ func GetProcessQueue(logger *slog.Logger) service.ProcessQueue {
 }
 
 func GetPriorityQueue[ID comparable, Payload any](logger *slog.Logger) service.PriorityQueue[ID, Payload] {
-	useMock := os.Getenv("MOCK_PRIORITY_QUEUE")
-	if useMock == "true" {
+	priorityQueue := os.Getenv("PRIORITY_QUEUE")
+	if priorityQueue == "mock" {
 		logger.Debug("Using mock priority queue")
 		return mock.NewPriorityQueue[ID, Payload](GetIDCreator[ID](logger))
 	}
-	useMongo := os.Getenv("MONGO_PRIORITY_QUEUE")
-	if useMongo == "true" {
+	if priorityQueue == "mongo" {
 		logger.Debug("Using mongo priority queue")
 		client, err := mongo.Connect(context.Background(), mongodomain.URIFromEnv())
 		if err != nil {

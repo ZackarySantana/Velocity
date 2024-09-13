@@ -3,6 +3,22 @@ GO=go
 
 OUT=$(HOME)/go/bin
 
+# Default services
+ID_CREATOR?=mock
+REPOSITORY_MANAGER?=mock
+PROCESS_QUEUE?=mock
+PRIORITY_QUEUE?=mock
+
+export ID_CREATOR
+export REPOSITORY_MANAGER
+export PROCESS_QUEUE
+export PRIORITY_QUEUE
+
+# Default variables
+PORT?=8080
+
+export PORT
+
 help:
 	@echo "Usage: make [target]"
 	@echo ""

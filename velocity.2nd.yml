@@ -28,22 +28,23 @@ tests:
     - name: Functional
       lib: golang-std
     - name: Smoke api
-      binary: api
+      build: api # this is the build name from builds
       steps:
           - cmd: make api
             params:
-                background: true
+                background: true # Optional, default is false
+                wait_seconds: 1 # Optional, default is 1
           - prebuilt: curl
             params:
                 path: http://localhost:8080/health
                 code: 200
     - name: Smoke agent
-      binary: agent
+      build: agent
       steps:
           - cmd: make agent
             params:
                 background: true
-          - exec: ./bin/velocity-agent
+          - cmd: ./bin/velocity-agent
 
 deployments:
     - name: api

@@ -11,10 +11,9 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
-	"github.com/zackarysantana/velocity/cmd/api/internal"
+	"github.com/zackarysantana/velocity/cmd/internal"
 	"github.com/zackarysantana/velocity/internal/api"
 	"github.com/zackarysantana/velocity/internal/otel"
-	"github.com/zackarysantana/velocity/internal/service"
 	"github.com/zackarysantana/velocity/internal/service/domain"
 )
 
@@ -24,7 +23,8 @@ func main() {
 	defer stop()
 
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
-	if os.Getenv("DEV_MODE") != "true" {
+
+	if os.Getenv("DEV_MODE") == "true" && os.Getenv("DEV_SERVICES") != "true" {
 		logger.Debug("Loading env file")
 		if err := godotenv.Load("env/.env.prod"); err != nil {
 			logger.Debug("Error loading .env file", "error", err)
@@ -38,19 +38,17 @@ func main() {
 	repository := internal.GetRepositoryManager(logger, idCreator)
 	logger.Debug("Connected to repository manager")
 
-	logger.Debug("Connecting to process queue...")
-	pq := internal.GetProcessQueue(logger)
-	defer pq.Close()
-	logger.Debug("Connected to process queue")
-
-	serviceImpl := domain.NewService(repository, pq, idCreator, logger)
+	// ProcessQueue no longer in use.
+	// logger.Debug("Connecting to process queue...")
+	// pq := internal.GetProcessQueue(logger)
+	// defer pq.Close()
+	// logger.Debug("Connected to process queue")
 
 	logger.Debug("Connecting to priority queue...")
-	pqt := internal.GetPriorityQueue[any, string](logger)
+	pqt := internal.GetPriorityQueue[any, any](logger)
 	logger.Debug("Connected to priority queue")
 
-	pqt.Push(ctx, "test_queue", service.PriorityQueueItem[string]{Priority: 1, Payload: "1"})
-	fmt.Println(pqt.Pop(ctx, "test_queue"))
+	serviceImpl := domain.NewService(repository, pqt, idCreator, logger)
 
 	shutdown, err := otel.Setup(ctx)
 	defer shutdown(ctx)
@@ -58,10 +56,15 @@ func main() {
 		panic(err)
 	}
 
+	port := ":8080"
+	if os.Getenv("PORT") != "" {
+		port = ":" + os.Getenv("PORT")
+	}
+
 	mux := api.New(repository, serviceImpl, idCreator, logger)
-	logger.Info("Starting server", "addr", ":8080")
+	logger.Info("Starting server", "addr", port)
 	srv := &http.Server{
-		Addr:         ":8080",
+		Addr:         port,
 		BaseContext:  func(_ net.Listener) context.Context { return ctx },
 		ReadTimeout:  time.Second,
 		WriteTimeout: 10 * time.Second,
@@ -76,14 +79,17 @@ func main() {
 	select {
 	case err = <-srvErr:
 		// Error when starting HTTP server.
-		return
+		panic(err)
 	case <-ctx.Done():
 		// Wait for first CTRL+C.
 		// Stop receiving signal notifications as soon as possible.
+		fmt.Println("Shutting down server...")
 		stop()
 	}
 
 	// When Shutdown is called, ListenAndServe immediately returns ErrServerClosed.
 	err = srv.Shutdown(context.Background())
-	return
+	if err != nil {
+		panic(err)
+	}
 }

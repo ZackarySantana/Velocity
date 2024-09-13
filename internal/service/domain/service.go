@@ -12,12 +12,12 @@ import (
 
 type Service[T any] struct {
 	repository service.RepositoryManager[T]
-	pq         service.ProcessQueue
+	pq         service.PriorityQueue[T, any]
 	idCreator  service.IDCreator[T]
 	logger     *slog.Logger
 }
 
-func NewService[T any](repository service.RepositoryManager[T], pq service.ProcessQueue, idCreator service.IDCreator[T], logger *slog.Logger) service.Service[T] {
+func NewService[T any](repository service.RepositoryManager[T], pq service.PriorityQueue[T, any], idCreator service.IDCreator[T], logger *slog.Logger) service.Service[T] {
 	return &Service[T]{repository: repository, pq: pq, idCreator: idCreator, logger: logger}
 }
 
@@ -45,15 +45,16 @@ func (s *Service[T]) StartRoutine(ctx context.Context, ec *entities.ConfigEntity
 			}
 		}
 
-		testIds := make([][]byte, len(ec.Tests))
+		// testIds := make([][]byte, len(ec.Tests))
+		tests := make([]service.PriorityQueueItem[any], len(ec.Tests))
 		for i, t := range ec.Tests {
 			id, err := s.idCreator.Read(t.Id)
 			if err != nil {
 				return oops.Wrapf(err, "id is invalid")
 			}
-			testIds[i] = []byte(s.idCreator.String(id))
+			tests[i] = service.PriorityQueueItem[any]{Priority: 1, Payload: s.idCreator.String(id)}
 		}
 
-		return s.pq.Write(ctx, "tests", testIds...)
+		return s.pq.Push(ctx, "tests", tests...)
 	})
 }
