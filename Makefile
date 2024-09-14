@@ -52,14 +52,63 @@ build-agent:
 agent:
 	$(GO) run cmd/agent/main.go
 
-dev:
-	docker compose -f compose.yml -f compose.dev.yml --profile dev up -d
+# add_service_compose_file returns the compose file for the service if
+# the service is not a mock service.
+define add_service_compose_file
+	$(if $(filter-out mock,$(1)),-f compose/compose.dev.$(1).yml)
+endef
 
+# Dev compiles the compose files for the needed services and runs the dev profile.
+dev:
+	docker compose \
+		-f compose.yml \
+		-f compose/compose.dev.yml \
+		-f compose/compose.dev.grafana.yml \
+		$(call add_service_compose_file,$(ID_CREATOR)) \
+		$(call add_service_compose_file,$(REPOSITORY_MANAGER)) \
+		$(call add_service_compose_file,$(PROCESS_QUEUE)) \
+		$(call add_service_compose_file,$(PRIORITY_QUEUE)) \
+		--profile dev \
+		-p velocity \
+		up -d
+
+dev-down:
+	docker compose -p velocity down
+
+mongo-dev:
+	ID_CREATOR=mongodb \
+	REPOSITORY_MANAGER=mongodb \
+	PROCESS_QUEUE=mongodb \
+	PRIORITY_QUEUE=mongodb \
+	$(MAKE) dev
+
+# Dev-% compiles the compose files for the needed services and runs the dev profile with the given command.
 dev-%:
-	docker compose -f compose.yml -f compose.dev.yml --profile dev $* $(ARGS)
+	docker compose \
+		-f compose.yml \
+		-f compose/compose.dev.yml \
+		-f compose/compose.dev.grafana.yml \
+		$(call add_service_compose_file,$(ID_CREATOR)) \
+		$(call add_service_compose_file,$(REPOSITORY_MANAGER)) \
+		$(call add_service_compose_file,$(PROCESS_QUEUE)) \
+		$(call add_service_compose_file,$(PRIORITY_QUEUE)) \
+		--profile dev \
+		$* $(ARGS)
 
 prod:
-	docker compose -f compose.yml -f compose.prod.yml --profile prod up -d
+	docker compose \
+		-f compose.yml \
+		-f compose/compose.prod.yml \
+		--profile prod \
+		-p velocity-prod \
+		up -d
+
+prod-down:
+	docker compose -p velocity-prod down
 
 prod-%:
-	docker compose -f compose.yml -f compose.prod.yml --profile prod $* $(ARGS)
+	docker compose \
+		-f compose.yml \
+		-f compose/compose.prod.yml \
+		--profile prod \
+		$* $(ARGS)

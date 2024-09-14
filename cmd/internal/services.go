@@ -18,7 +18,7 @@ func GetIDCreator[T any](logger *slog.Logger) service.IDCreator[T] {
 		logger.Debug("Using mock ID creator")
 		return mock.NewIDCreator[T]()
 	}
-	if idCreator == "mongo" {
+	if idCreator == "mongodb" {
 		logger.Debug("Using mongo ID creator")
 		return mongodomain.NewIDCreator[T]().(service.IDCreator[T])
 	}
@@ -32,7 +32,7 @@ func GetRepositoryManager[T comparable](logger *slog.Logger, idCreator service.I
 		logger.Debug("Using mock repository manager")
 		return mock.NewRepositoryManager[T](GetIDCreator[T](logger))
 	}
-	if repositoryManager == "mongo" {
+	if repositoryManager == "mongodb" {
 		logger.Debug("Using mongo repository manager")
 		client, err := mongo.Connect(context.Background(), mongodomain.URIFromEnv())
 		if err != nil {
@@ -47,11 +47,11 @@ func GetRepositoryManager[T comparable](logger *slog.Logger, idCreator service.I
 	panic("No repository manager set")
 }
 
-func GetProcessQueue(logger *slog.Logger) service.ProcessQueue {
+func GetProcessQueue(logger *slog.Logger, groupID string) service.ProcessQueue {
 	processQueue := os.Getenv("PROCESS_QUEUE")
 	if processQueue == "kafka" {
 		logger.Debug("Using kafka process queue")
-		pq, err := kafka.NewProcessQueue(kafka.NewProcessQueueConfigFromEnv(os.Getenv("KAFKA_GROUP_ID_API")))
+		pq, err := kafka.NewProcessQueue(kafka.NewProcessQueueConfigFromEnv(groupID))
 		if err != nil {
 			panic(err)
 		}
@@ -67,7 +67,7 @@ func GetPriorityQueue[ID comparable, Payload any](logger *slog.Logger) service.P
 		logger.Debug("Using mock priority queue")
 		return mock.NewPriorityQueue[ID, Payload](GetIDCreator[ID](logger))
 	}
-	if priorityQueue == "mongo" {
+	if priorityQueue == "mongodb" {
 		logger.Debug("Using mongo priority queue")
 		client, err := mongo.Connect(context.Background(), mongodomain.URIFromEnv())
 		if err != nil {

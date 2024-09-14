@@ -1,0 +1,10 @@
+# This file overrides the compose.yml file for running locally with dev services.
+
+services:
+    api:
+        environment:
+            DEV_SERVICES: true
+
+    agent:
+        environment:
+            DEV_SERVICES: true

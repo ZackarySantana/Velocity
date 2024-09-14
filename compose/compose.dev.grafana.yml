@@ -1,0 +1,20 @@
+services:
+    collector:
+        image: grafana/otel-lgtm
+        profiles: ["dev"]
+        ports:
+            - "3000:3000"
+        networks:
+            - internal
+            - external
+        restart: on-failure
+
+    api:
+        environment:
+            OTEL_EXPORTER_OTLP_INSECURE: true
+            OTEL_EXPORTER_OTLP_ENDPOINT: http://collector:4318
+
+    agent:
+        environment:
+            OTEL_EXPORTER_OTLP_INSECURE: true
+            OTEL_EXPORTER_OTLP_ENDPOINT: http://collector:4318

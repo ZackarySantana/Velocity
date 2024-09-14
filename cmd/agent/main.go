@@ -9,9 +9,13 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
+	"github.com/zackarysantana/velocity/cmd/internal"
 	"github.com/zackarysantana/velocity/internal/agent"
-	"github.com/zackarysantana/velocity/internal/service/kafka"
 	"github.com/zackarysantana/velocity/src/velocity"
+)
+
+var (
+	agentGroupID = "velocity-agent"
 )
 
 func main() {
@@ -29,25 +33,22 @@ func main() {
 		logger.Debug("Loaded env file")
 	}
 
-	logger.Debug("Connecting to Kafka")
-	pq, err := kafka.NewProcessQueue(kafka.NewProcessQueueConfigFromEnv(os.Getenv("KAFKA_GROUP_ID_AGENT")))
+	logger.Debug("Connecting to process queue...")
+	pq := internal.GetProcessQueue(logger, agentGroupID)
 	defer pq.Close()
-	if err != nil {
-		panic(err)
-	}
-	logger.Debug("Connected to Kafka")
+	logger.Debug("Connected to process queue")
 
 	velocity := velocity.NewAgent(os.Getenv("VELOCITY_URL"))
 
 	// If this is in dev mode, we wait a little because
 	// both services usually get restarted at the same time.
-	if os.Getenv("DEV_MODE") == "true" {
+	if os.Getenv("DEV_SERVICES") == "true" {
 		time.Sleep(2 * time.Second)
 	}
 
 	logger.Debug("Starting agent")
 	agent := agent.New(pq, velocity, logger)
-	err = agent.Start(ctx)
+	err := agent.Start(ctx)
 	if err != nil {
 		panic(err)
 	}

@@ -1,0 +1,43 @@
+services:
+    mongodb:
+        image: mongo:7.0
+        profiles: ["dev"]
+        command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
+        ports:
+            - "27017:27017"
+        environment:
+            MONGO_INITDB_DATABASE: velocity
+        volumes:
+            - mongo-data:/data/db
+            - mongo-config:/data/configdb
+        networks:
+            - internal
+            - external
+        healthcheck:
+            test: echo "try { rs.status() } catch (err) { rs.initiate({_id:'rs0',members:[{_id:0,host:'host.docker.internal:27017'}]}) }" | mongosh --port 27017 --quiet
+            interval: 5s
+            timeout: 30s
+            start_period: 0s
+            start_interval: 1s
+            retries: 30
+        restart: on-failure
+
+    api:
+        environment:
+            # Update, if not set, the different implementations to use.
+            ID_CREATOR: ${ID_CREATOR:-mongo}
+            REPOSITORY_MANAGER: ${REPOSITORY_MANAGER:-mongo}
+            PRIORITY_QUEUE: ${PRIORITY_QUEUE:-mongo}
+        env_file:
+            - env/.env.mongodb
+
+    agent:
+        environment:
+            # Update, if not set, the different implementations to use.
+            PRIORITY_QUEUE: ${PRIORITY_QUEUE:-mongo}
+        env_file:
+            - env/.env.mongodb
+
+volumes:
+    mongo-data:
+    mongo-config:

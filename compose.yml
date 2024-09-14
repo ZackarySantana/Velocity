@@ -4,6 +4,10 @@ services:
         build:
             context: .
             dockerfile: Dockerfile.api
+        environment:
+            OTEL_RESOURCE_ATTRIBUTES: service.name=api,service.instance.id=api
+        env_file:
+            - env/.env.shared
         volumes:
             - .:/app
         ports:
@@ -31,6 +35,11 @@ services:
         build:
             context: .
             dockerfile: Dockerfile.agent
+        environment:
+            OTEL_RESOURCE_ATTRIBUTES: service.name=agent,service.instance.id=agent
+            VELOCITY_URL: http://api:8080
+        env_file:
+            - env/.env.shared
         depends_on:
             api:
                 condition: service_healthy
@@ -39,10 +48,6 @@ services:
         networks:
             - internal
         restart: on-failure
-
-volumes:
-    mongo-data:
-    mongo-config:
 
 networks:
     internal:

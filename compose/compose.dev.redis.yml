@@ -1,0 +1,18 @@
+services:
+    redis:
+        image: redis:7.0-alpine
+        profiles: ["dev"]
+        ports:
+            - "6379:6379"
+        networks:
+            - internal
+        healthcheck:
+            test: redis-cli ping
+            interval: 10s
+            timeout: 5s
+            retries: 3
+        restart: on-failure
+
+    api:
+        environment:
+            REDIS_URL: redis:6379
