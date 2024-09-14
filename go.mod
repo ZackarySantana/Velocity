@@ -1,6 +1,6 @@
 module github.com/zackarysantana/velocity
 
-go 1.23rc2
+go 1.23.1
 
 require (
 	github.com/fatih/color v1.17.0

@@ -1,4 +1,4 @@
-ARG GO_VERSION=1.23-rc-bookworm
+ARG GO_VERSION=1.23.1-bookworm
 FROM golang:${GO_VERSION}
 
 RUN go install github.com/mitranim/gow@latest

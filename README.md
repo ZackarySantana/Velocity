@@ -22,7 +22,7 @@ tests:
 
 images:
     - name: Latest supported golang
-      image: golang:1.23-rc-bookworm
+      image: golang:1.23.1-bookworm
     - name: Oldest supported golang
       image: golang:1.22
 
