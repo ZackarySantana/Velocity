@@ -2,6 +2,7 @@ package velocity
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -23,7 +24,7 @@ func newBaseClient(base string) *baseClient {
 	}
 }
 
-func (c *baseClient) do(method, path string, payload interface{}) (*http.Response, error) {
+func (c *baseClient) do(ctx context.Context, method, path string, payload interface{}) (*http.Response, error) {
 	var body io.Reader
 	if payload != nil {
 		bodyBuffer := &bytes.Buffer{}
@@ -34,7 +35,7 @@ func (c *baseClient) do(method, path string, payload interface{}) (*http.Respons
 		body = bodyBuffer
 	}
 
-	req, err := http.NewRequest(method, c.base+path, body)
+	req, err := http.NewRequestWithContext(ctx, method, c.base+path, body)
 	if err != nil {
 		return nil, err
 	}
@@ -56,4 +57,13 @@ func (c *baseClient) do(method, path string, payload interface{}) (*http.Respons
 		return resp, oops.Code("status").Wrap(oops.With("status", resp.StatusCode).Errorf("unexpected error: %s", string(respBody)))
 	}
 	return resp, nil
+}
+
+func (c *baseClient) doAndDecode(ctx context.Context, method, path string, payload, dest interface{}) (*http.Response, error) {
+	resp, err := c.do(ctx, method, path, payload)
+	if err != nil {
+		return resp, err
+	}
+	defer resp.Body.Close()
+	return resp, json.NewDecoder(resp.Body).Decode(dest)
 }

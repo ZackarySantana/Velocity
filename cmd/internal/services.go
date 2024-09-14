@@ -9,6 +9,8 @@ import (
 	"github.com/zackarysantana/velocity/internal/service/kafka"
 	"github.com/zackarysantana/velocity/internal/service/mock"
 	mongodomain "github.com/zackarysantana/velocity/internal/service/mongo"
+	velocitydomain "github.com/zackarysantana/velocity/internal/service/velocity"
+	"github.com/zackarysantana/velocity/src/velocity"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -78,6 +80,10 @@ func GetPriorityQueue[ID comparable, Payload any](logger *slog.Logger) service.P
 		}
 		idCreator := GetIDCreator[ID](logger)
 		return mongodomain.NewPriorityQueue[ID, Payload](client, idCreator, os.Getenv("MONGODB_DATABASE"))
+	}
+	if priorityQueue == "velocity" {
+		logger.Debug("Using velocity priority queue")
+		return velocitydomain.NewPriorityQueue[ID, Payload](velocity.NewAgentClient(os.Getenv("VELOCITY_URL")))
 	}
 
 	panic("No priority queue set")

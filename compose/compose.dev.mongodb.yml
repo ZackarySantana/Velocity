@@ -31,13 +31,6 @@ services:
         env_file:
             - env/.env.mongodb
 
-    agent:
-        environment:
-            # Update, if not set, the different implementations to use.
-            PRIORITY_QUEUE: ${PRIORITY_QUEUE:-mongo}
-        env_file:
-            - env/.env.mongodb
-
 volumes:
     mongo-data:
     mongo-config:

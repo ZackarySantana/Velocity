@@ -23,7 +23,7 @@ func New(processQueue service.ProcessQueue, client *velocity.AgentClient, logger
 
 func (a *agent) Start(ctx context.Context) error {
 	a.logger.Debug("Pinging server...")
-	_, err := a.client.Health()
+	_, err := a.client.Health(ctx)
 	if err != nil {
 		return oops.Wrapf(err, "failed to ping server")
 	}
@@ -32,7 +32,7 @@ func (a *agent) Start(ctx context.Context) error {
 	err = a.processQueue.Consume(ctx, "tests", func(idMsg []byte) (bool, error) {
 		id := string(idMsg)
 		a.logger.Debug("Received test", "id", id)
-		resp, data, err := a.client.GetTest(id)
+		resp, data, err := a.client.GetTest(ctx, id)
 		if err != nil {
 			if resp.StatusCode == 404 {
 				a.logger.Debug("Test not found. Skipping", "id", id)

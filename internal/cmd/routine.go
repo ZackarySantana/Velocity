@@ -29,7 +29,7 @@ var (
 		Action: func(ctx context.Context, cmd *cli.Command) error {
 			c := flags.Config(cmd)
 			routine := strings.Join(cmd.Args().Slice(), " ")
-			_, data, err := flags.API(cmd).StartRoutine(c, routine)
+			_, data, err := flags.API(cmd).StartRoutine(ctx, c, routine)
 			if err != nil {
 				return oops.Code("request").Wrap(err)
 			}

@@ -21,5 +21,5 @@ func SetAPI(_ context.Context, cmd *cli.Command) error {
 }
 
 func API(cmd *cli.Command) *velocity.APIClient {
-	return velocity.NewAPI(cmd.Metadata[APIFlag.Name].(string))
+	return velocity.NewAPIClient(cmd.Metadata[APIFlag.Name].(string))
 }

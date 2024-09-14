@@ -1,7 +1,7 @@
 package velocity
 
 import (
-	"encoding/json"
+	"context"
 	"net/http"
 
 	"github.com/zackarysantana/velocity/src/config"
@@ -11,12 +11,12 @@ type APIClient struct {
 	*baseClient
 }
 
-func NewAPI(base string) *APIClient {
+func NewAPIClient(base string) *APIClient {
 	return &APIClient{baseClient: newBaseClient(base)}
 }
 
-func (c *APIClient) Health() (*http.Response, error) {
-	return c.do("GET", "/health", nil)
+func (c *APIClient) Health(ctx context.Context) (*http.Response, error) {
+	return c.do(ctx, "GET", "/health", nil)
 }
 
 type APIStartRoutineRequest struct {
@@ -28,13 +28,8 @@ type APIStartRoutineResponse struct {
 	Id interface{} `json:"id"`
 }
 
-// StartRoutine
-func (c *APIClient) StartRoutine(config *config.Config, routine string) (*http.Response, *APIStartRoutineResponse, error) {
-	resp, err := c.do("POST", "/routine/start", APIStartRoutineRequest{Config: *config, Routine: routine})
-	if err != nil {
-		return resp, nil, err
-	}
+func (c *APIClient) StartRoutine(ctx context.Context, config *config.Config, routine string) (*http.Response, *APIStartRoutineResponse, error) {
 	decodedResp := APIStartRoutineResponse{}
-	defer resp.Body.Close()
-	return resp, &decodedResp, json.NewDecoder(resp.Body).Decode(&decodedResp)
+	resp, err := c.doAndDecode(ctx, "POST", "/routine/start", APIStartRoutineRequest{Config: *config, Routine: routine}, &decodedResp)
+	return resp, &decodedResp, err
 }

@@ -38,7 +38,7 @@ func main() {
 	defer pq.Close()
 	logger.Debug("Connected to process queue")
 
-	velocity := velocity.NewAgent(os.Getenv("VELOCITY_URL"))
+	velocity := velocity.NewAgentClient(os.Getenv("VELOCITY_URL"))
 
 	// If this is in dev mode, we wait a little because
 	// both services usually get restarted at the same time.
