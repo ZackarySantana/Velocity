@@ -10,15 +10,17 @@ import (
 	"github.com/zackarysantana/velocity/src/entities/routine"
 )
 
-type Service[T any] struct {
-	repository service.RepositoryManager[T]
-	pq         service.PriorityQueue[T, any]
-	idCreator  service.IDCreator[T]
-	logger     *slog.Logger
+type Service[ID any] struct {
+	idCreator  service.IDCreator[ID]
+	repository service.RepositoryManager[ID]
+
+	testQueue service.PriorityQueue[ID, ID]
+
+	logger *slog.Logger
 }
 
-func NewService[T any](repository service.RepositoryManager[T], pq service.PriorityQueue[T, any], idCreator service.IDCreator[T], logger *slog.Logger) service.Service[T] {
-	return &Service[T]{repository: repository, pq: pq, idCreator: idCreator, logger: logger}
+func NewService[T any](repository service.RepositoryManager[T], pq service.PriorityQueue[T, T], idCreator service.IDCreator[T], logger *slog.Logger) service.Service[T] {
+	return &Service[T]{repository: repository, testQueue: pq, idCreator: idCreator, logger: logger}
 }
 
 func (s *Service[T]) StartRoutine(ctx context.Context, ec *entities.ConfigEntity[T], name string) error {
@@ -46,15 +48,15 @@ func (s *Service[T]) StartRoutine(ctx context.Context, ec *entities.ConfigEntity
 		}
 
 		// testIds := make([][]byte, len(ec.Tests))
-		tests := make([]service.PriorityQueueItem[any], len(ec.Tests))
+		tests := make([]service.PriorityQueueItem[T], len(ec.Tests))
 		for i, t := range ec.Tests {
 			id, err := s.idCreator.Read(t.Id)
 			if err != nil {
 				return oops.Wrapf(err, "id is invalid")
 			}
-			tests[i] = service.PriorityQueueItem[any]{Priority: 1, Payload: s.idCreator.String(id)}
+			tests[i] = service.PriorityQueueItem[T]{Priority: 1, Payload: id}
 		}
 
-		return s.pq.Push(ctx, "tests", tests...)
+		return s.testQueue.Push(ctx, "tests", tests...)
 	})
 }

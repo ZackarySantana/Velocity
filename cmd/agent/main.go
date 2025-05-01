@@ -34,7 +34,7 @@ func main() {
 	}
 
 	logger.Debug("Connecting to process queue...")
-	pq := internal.GetProcessQueue(logger, agentGroupID)
+	pq := internal.GetPriorityQueue[any, []byte](logger)
 	defer pq.Close()
 	logger.Debug("Connected to process queue")
 
@@ -48,8 +48,23 @@ func main() {
 
 	logger.Debug("Starting agent")
 	agent := agent.New(pq, velocity, logger)
-	err := agent.Start(ctx)
-	if err != nil {
-		panic(err)
+
+	// TODO: make this reset when enough time has passed.
+	errors := []error{}
+	for {
+		if len(errors) == 4 {
+			logger.Error("Agent failed 5 times. Exiting")
+			os.Exit(1)
+		}
+		if len(errors) > 0 {
+			logger.Error("Agent failed. Restarting in 5 seconds", "errors", errors)
+			time.Sleep(5 * time.Second)
+		}
+
+		err := agent.Start(ctx)
+		if err != nil {
+			logger.Error("Agent failed", "error", err)
+			errors = append(errors, err)
+		}
 	}
 }

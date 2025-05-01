@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/samber/oops"
+	"github.com/zackarysantana/velocity/internal/service"
 )
 
 type baseClient struct {
@@ -54,7 +55,7 @@ func (c *baseClient) do(ctx context.Context, method, path string, payload interf
 		if err != nil {
 			return resp, oops.Code("decoding").Wrap(err)
 		}
-		return resp, oops.Code("status").Wrap(oops.With("status", resp.StatusCode).Errorf("unexpected error: %s", string(respBody)))
+		return resp, oops.Code("status").Wrap(oops.With("status", resp.StatusCode).Errorf("%s", string(respBody)))
 	}
 	return resp, nil
 }
@@ -62,7 +63,7 @@ func (c *baseClient) do(ctx context.Context, method, path string, payload interf
 func (c *baseClient) doAndDecode(ctx context.Context, method, path string, payload, dest interface{}) (*http.Response, error) {
 	resp, err := c.do(ctx, method, path, payload)
 	if err != nil {
-		return resp, err
+		return resp, service.ParseError(err)
 	}
 	defer resp.Body.Close()
 	return resp, json.NewDecoder(resp.Body).Decode(dest)

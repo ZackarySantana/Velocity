@@ -61,7 +61,7 @@ func main() {
 		port = ":" + os.Getenv("PORT")
 	}
 
-	mux := api.New(repository, serviceImpl, idCreator, logger)
+	mux := api.New(idCreator, repository, serviceImpl, pq, logger)
 	logger.Info("Starting server", "addr", port)
 	srv := &http.Server{
 		Addr:         port,

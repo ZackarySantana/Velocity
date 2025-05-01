@@ -14,17 +14,20 @@ import (
 
 var tracer = otel.Tracer("api")
 
-type api[T any] struct {
-	repository service.RepositoryManager[T]
-	service    service.Service[T]
-	idCreator  service.IDCreator[T]
-	logger     *slog.Logger
+type api[ID any] struct {
+	idCreator  service.IDCreator[ID]
+	repository service.RepositoryManager[ID]
+	service    service.Service[ID]
+
+	testQueue service.PriorityQueue[ID, ID]
+
+	logger *slog.Logger
 }
 
 // New creates a new http.Handler that serves the API. The given type is the
 // type of the ids for data.
-func New[T any](repository service.RepositoryManager[T], service service.Service[T], idCreator service.IDCreator[T], logger *slog.Logger) http.Handler {
-	a := &api[T]{service: service, idCreator: idCreator, repository: repository, logger: logger}
+func New[T any](idCreator service.IDCreator[T], repository service.RepositoryManager[T], service service.Service[T], testQueue service.PriorityQueue[T, T], logger *slog.Logger) http.Handler {
+	a := &api[T]{idCreator: idCreator, repository: repository, service: service, testQueue: testQueue, logger: logger}
 
 	middlewares := []func(http.Handler) http.Handler{
 		func(next http.Handler) http.Handler {
@@ -95,6 +98,9 @@ func New[T any](repository service.RepositoryManager[T], service service.Service
 	agentMux := http.NewServeMux()
 	h(agentMux, "GET /health", a.health)
 	h(agentMux, "GET /test/{id}", a.agentGetTask)
+	h(agentMux, "POST /priority_queue/pop", a.agentPriorityQueuePop)
+	h(agentMux, "POST /priority_queue/done", a.agentGetTask)
+	h(agentMux, "POST /priority_queue/unfinished", a.agentGetTask)
 	rootMux.Handle("/agent/", http.StripPrefix("/agent", applyMiddleware(agentMux, agentMiddlewares...)))
 
 	return applyMiddleware(rootMux, middlewares...)
