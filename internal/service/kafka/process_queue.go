@@ -22,6 +22,8 @@ type processQueue struct {
 
 	w *kafka.Writer
 	r map[string]*kafka.Reader
+
+	closed bool
 }
 
 type ProcessQueueConfig struct {
@@ -71,6 +73,10 @@ func NewProcessQueue(config *ProcessQueueConfig) (service.ProcessQueue, error) {
 }
 
 func (k *processQueue) Write(ctx context.Context, topic string, messages ...[]byte) error {
+	if k.closed {
+		return errors.New("queue is closed")
+	}
+
 	kafkaMessages := make([]kafka.Message, len(messages))
 	for i, message := range messages {
 		kafkaMessages[i] = kafka.Message{Value: message, Topic: topic, Key: []byte(fmt.Sprintf("%d", i))}
@@ -78,12 +84,21 @@ func (k *processQueue) Write(ctx context.Context, topic string, messages ...[]by
 	return k.w.WriteMessages(ctx, kafkaMessages...)
 }
 
-func (k *processQueue) Consume(ctx context.Context, topic string, f func([]byte) (bool, error)) error {
+func (k *processQueue) Consume(ctx context.Context, topic string, consumerFunc func(message []byte) (processed bool, err error)) error {
+	if k.closed {
+		return errors.New("queue is closed")
+	}
+
 	r, err := k.getReader(topic)
 	if err != nil {
 		return err
 	}
+
 	for {
+		if k.closed {
+			return errors.New("queue is closed")
+		}
+
 		message, err := r.FetchMessage(ctx)
 		if err != nil {
 			if errors.Is(err, io.EOF) {
@@ -92,22 +107,26 @@ func (k *processQueue) Consume(ctx context.Context, topic string, f func([]byte)
 			return err
 		}
 
-		ok, err := f(message.Value)
+		processed, err := consumerFunc(message.Value)
 		if err != nil {
 			return err
 		}
-		if ok {
+		if processed {
 			r.CommitMessages(ctx, message)
 		}
 	}
 }
 
 func (k *processQueue) Close() error {
+	if k.closed {
+		return errors.New("queue already closed")
+	}
 	catcher := catcher.New()
 	catcher.Catch(k.w.Close())
 	for _, r := range k.r {
 		catcher.Catch(r.Close())
 	}
+	k.closed = true
 	return catcher.Resolve()
 }
 

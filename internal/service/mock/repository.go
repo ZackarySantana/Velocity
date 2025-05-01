@@ -15,11 +15,11 @@ func NewRepositoryManager[ID comparable](idCreator service.IDCreator[ID]) servic
 	jobs := make(map[ID]*job.Job[ID])
 	images := make(map[ID]*image.Image[ID])
 	tests := make(map[ID]*test.Test[ID])
-	return service.NewRepositoryManager[ID](
-		newTypeRepository[ID, routine.Routine[ID]](idCreator, routines),
-		newTypeRepository[ID, job.Job[ID]](idCreator, jobs),
-		newTypeRepository[ID, image.Image[ID]](idCreator, images),
-		newTypeRepository[ID, test.Test[ID]](idCreator, tests),
+	return service.NewRepositoryManager(
+		newTypeRepository(idCreator, routines),
+		newTypeRepository(idCreator, jobs),
+		newTypeRepository(idCreator, images),
+		newTypeRepository(idCreator, tests),
 		func(ctx context.Context, fn func(context.Context) error) error {
 			beforeRoutines := make(map[ID]*routine.Routine[ID], len(routines))
 			for k, v := range routines {

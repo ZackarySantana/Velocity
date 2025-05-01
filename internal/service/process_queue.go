@@ -2,11 +2,12 @@ package service
 
 import (
 	"context"
+	"io"
 )
 
 type ProcessQueue interface {
-	Write(context.Context, string, ...[]byte) error
-	Consume(context.Context, string, func([]byte) (bool, error)) error
+	io.Closer
 
-	Close() error
+	Write(ctx context.Context, topic string, messages ...[]byte) error
+	Consume(ctx context.Context, topic string, consumerFunc func(item []byte) (processed bool, err error)) error
 }

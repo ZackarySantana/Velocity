@@ -32,7 +32,7 @@ func GetRepositoryManager[T comparable](logger *slog.Logger, idCreator service.I
 	repositoryManager := os.Getenv("REPOSITORY_MANAGER")
 	if repositoryManager == "mock" {
 		logger.Debug("Using mock repository manager")
-		return mock.NewRepositoryManager[T](GetIDCreator[T](logger))
+		return mock.NewRepositoryManager(GetIDCreator[T](logger))
 	}
 	if repositoryManager == "mongodb" {
 		logger.Debug("Using mongo repository manager")
@@ -58,6 +58,10 @@ func GetProcessQueue(logger *slog.Logger, groupID string) service.ProcessQueue {
 			panic(err)
 		}
 		return pq
+	}
+	if processQueue == "mock" {
+		logger.Debug("Using mock process queue")
+		return mock.NewProcessQueue()
 	}
 
 	panic("No process queue set")

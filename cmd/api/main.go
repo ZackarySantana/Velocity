@@ -45,10 +45,10 @@ func main() {
 	// logger.Debug("Connected to process queue")
 
 	logger.Debug("Connecting to priority queue...")
-	pqt := internal.GetPriorityQueue[any, any](logger)
+	pq := internal.GetPriorityQueue[any, any](logger)
 	logger.Debug("Connected to priority queue")
 
-	serviceImpl := domain.NewService(repository, pqt, idCreator, logger)
+	serviceImpl := domain.NewService(repository, pq, idCreator, logger)
 
 	shutdown, err := otel.Setup(ctx)
 	defer shutdown(ctx)
