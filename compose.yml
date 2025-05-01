@@ -28,6 +28,7 @@ services:
             dockerfile: Dockerfile.cli
         volumes:
             - .:/app
+            - ./bin:/app/bin
         restart: on-failure
 
     agent:
