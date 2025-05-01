@@ -4,10 +4,8 @@ import (
 	"context"
 	"log/slog"
 
-	"github.com/samber/oops"
 	"github.com/zackarysantana/velocity/internal/service"
 	"github.com/zackarysantana/velocity/src/entities"
-	"github.com/zackarysantana/velocity/src/entities/routine"
 )
 
 type Service[ID any] struct {
@@ -19,42 +17,47 @@ type Service[ID any] struct {
 	logger *slog.Logger
 }
 
-func NewService[T any](repository service.RepositoryManager[T], pq service.PriorityQueue[T, T], idCreator service.IDCreator[T], logger *slog.Logger) service.Service[T] {
+func NewService[T any](idCreator service.IDCreator[T], repository service.RepositoryManager[T], pq service.PriorityQueue[T, T], logger *slog.Logger) service.Service[T] {
 	return &Service[T]{repository: repository, testQueue: pq, idCreator: idCreator, logger: logger}
 }
 
 func (s *Service[T]) StartRoutine(ctx context.Context, ec *entities.ConfigEntity[T], name string) error {
 	return s.repository.WithTransaction(ctx, func(ctx context.Context) error {
-		_, err := s.repository.Test().Put(ctx, ec.Tests)
+		ids, err := s.repository.Test().Put(ctx, ec.Tests)
 		if err != nil {
 			return err
 		}
+		for i := range ec.Tests {
+			ec.Tests[i].Id = ids[i]
+		}
 
-		_, err = s.repository.Image().Put(ctx, ec.Images)
+		ids, err = s.repository.Image().Put(ctx, ec.Images)
 		if err != nil {
 			return err
 		}
+		for i := range ec.Images {
+			ec.Images[i].Id = ids[i]
+		}
 
-		_, err = s.repository.Job().Put(ctx, ec.Jobs)
+		ids, err = s.repository.Job().Put(ctx, ec.Jobs)
 		if err != nil {
 			return err
 		}
-
-		for _, r := range ec.Routines {
-			_, err := s.repository.Routine().Put(ctx, []*routine.Routine[T]{r})
-			if err != nil {
-				return err
-			}
+		for i := range ec.Jobs {
+			ec.Jobs[i].Id = ids[i]
 		}
 
-		// testIds := make([][]byte, len(ec.Tests))
+		ids, err = s.repository.Routine().Put(ctx, ec.Routines)
+		if err != nil {
+			return err
+		}
+		for i := range ec.Routines {
+			ec.Routines[i].Id = ids[i]
+		}
+
 		tests := make([]service.PriorityQueueItem[T], len(ec.Tests))
 		for i, t := range ec.Tests {
-			id, err := s.idCreator.Read(t.Id)
-			if err != nil {
-				return oops.Wrapf(err, "id is invalid")
-			}
-			tests[i] = service.PriorityQueueItem[T]{Priority: 1, Payload: id}
+			tests[i] = service.PriorityQueueItem[T]{Priority: 1, Payload: t.Id}
 		}
 
 		return s.testQueue.Push(ctx, "tests", tests...)

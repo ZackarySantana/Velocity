@@ -32,10 +32,6 @@ func (a *api[T]) agentGetTask(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// h(agentMux, "POST /priority_queue/pop", a.agentGetTask)
-// h(agentMux, "POST /priority_queue/done", a.agentGetTask)
-// h(agentMux, "POST /priority_queue/unfinished", a.agentGetTask)
-
 func (a *api[T]) agentPriorityQueuePop(w http.ResponseWriter, r *http.Request) {
 	var req velocity.AgentPopRequest
 	err := json.NewDecoder(r.Body).Decode(&req)

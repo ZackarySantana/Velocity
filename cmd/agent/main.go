@@ -34,7 +34,7 @@ func main() {
 	}
 
 	logger.Debug("Connecting to process queue...")
-	pq := internal.GetPriorityQueue[any, []byte](logger)
+	pq := internal.GetPriorityQueue[any, any](logger)
 	defer pq.Close()
 	logger.Debug("Connected to process queue")
 

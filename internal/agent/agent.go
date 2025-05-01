@@ -11,14 +11,14 @@ import (
 )
 
 type agent struct {
-	priorityQueue service.PriorityQueue[any, []byte]
+	priorityQueue service.PriorityQueue[any, any]
 
 	client *velocity.AgentClient
 
 	logger *slog.Logger
 }
 
-func New(priorityQueue service.PriorityQueue[any, []byte], client *velocity.AgentClient, logger *slog.Logger) *agent {
+func New(priorityQueue service.PriorityQueue[any, any], client *velocity.AgentClient, logger *slog.Logger) *agent {
 	return &agent{priorityQueue: priorityQueue, client: client, logger: logger}
 }
 
@@ -46,7 +46,10 @@ func (a *agent) Start(ctx context.Context) error {
 				}
 				return oops.Wrapf(err, "failed to pop from queue")
 			}
-			testID := string(item.Payload)
+			testID, ok := item.Payload.(string)
+			if !ok {
+				return oops.Errorf("could not convert %v to test ID", item.Payload)
+			}
 			a.logger.Debug("Received test", "id", testID)
 
 			resp, data, err := a.client.GetTest(ctx, testID)
