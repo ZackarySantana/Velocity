@@ -51,6 +51,10 @@ func GetRepositoryManager[T comparable](logger *slog.Logger, idCreator service.I
 
 func GetProcessQueue(logger *slog.Logger, groupID string) service.ProcessQueue {
 	processQueue := os.Getenv("PROCESS_QUEUE")
+	if processQueue == "mock" {
+		logger.Debug("Using mock process queue")
+		return mock.NewProcessQueue()
+	}
 	if processQueue == "kafka" {
 		logger.Debug("Using kafka process queue")
 		pq, err := kafka.NewProcessQueue(kafka.NewProcessQueueConfigFromEnv(groupID))
@@ -58,10 +62,6 @@ func GetProcessQueue(logger *slog.Logger, groupID string) service.ProcessQueue {
 			panic(err)
 		}
 		return pq
-	}
-	if processQueue == "mock" {
-		logger.Debug("Using mock process queue")
-		return mock.NewProcessQueue()
 	}
 
 	panic("No process queue set")
