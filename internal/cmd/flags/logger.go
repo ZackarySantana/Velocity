@@ -89,7 +89,8 @@ func SetLogger(_ context.Context, cmd *cli.Command) error {
 	if cmd.Bool(VerboseFlag.Name) {
 		stdLogger = slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: level})
 	} else {
-		stdLogger = vlog.NewPlainHandler(os.Stdout, &vlog.Options{Level: level})
+		// stdLogger = vlog.NewPlainHandler(os.Stdout, &vlog.Options{Level: level})
+		stdLogger = vlog.NewYAMLHandler(os.Stdout, &vlog.Options{Level: level})
 	}
 
 	logger := slog.New(slogmulti.Fanout(

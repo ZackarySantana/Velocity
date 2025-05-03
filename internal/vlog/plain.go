@@ -2,76 +2,133 @@ package vlog
 
 import (
 	"context"
-	"fmt"
 	"io"
+	"strings"
+	"sync"
+	"time"
+
 	"log/slog"
 
 	"github.com/fatih/color"
 )
 
-type PlainHandler struct {
-	opts Options
-	out  io.Writer
-}
-
+// Options defines configuration for the PlainHandler.
 type Options struct {
-	Level slog.Leveler
+	// Level is the minimum level of log to output.
+	Level slog.Level
+	// TimeFormat is the format for timestamps. If empty, RFC3339 is used.
+	TimeFormat string
 }
 
+// PlainHandler is a user-friendly CLI slog handler.
+type PlainHandler struct {
+	out   io.Writer
+	opts  *Options
+	mu    *sync.Mutex
+	group []string
+	attrs []slog.Attr
+}
+
+// NewPlainHandler constructs a new PlainHandler.
 func NewPlainHandler(out io.Writer, opts *Options) *PlainHandler {
-	h := &PlainHandler{out: out}
-	if opts != nil {
-		h.opts = *opts
+	if opts == nil {
+		t := Options{Level: slog.LevelInfo, TimeFormat: time.RFC3339}
+		opts = &t
 	}
-	if h.opts.Level == nil {
-		h.opts.Level = slog.LevelInfo
+	if opts.TimeFormat == "" {
+		opts.TimeFormat = time.RFC3339
 	}
-	return h
+	return &PlainHandler{
+		out:  out,
+		opts: opts,
+		mu:   &sync.Mutex{},
+	}
 }
 
+// Enabled reports whether the Handler handles records at the given level.
 func (h *PlainHandler) Enabled(ctx context.Context, level slog.Level) bool {
-	return level >= h.opts.Level.Level()
+	return level >= h.opts.Level
 }
 
-func (h *PlainHandler) Handle(ctx context.Context, r slog.Record) error {
-	buf := make([]byte, 0, 1024)
+// Handle formats and writes the Record to the output.
+func (h *PlainHandler) Handle(ctx context.Context, rec slog.Record) error {
+	// Ensure only one write at a time
+	h.mu.Lock()
+	defer h.mu.Unlock()
 
-	buf = append(buf, r.Message...)
+	// Timestamp
+	timestamp := rec.Time.Format(h.opts.TimeFormat)
 
-	switch r.Level {
-	case slog.LevelInfo:
-		r.Attrs(func(a slog.Attr) bool {
-			buf = append(buf, ": "+a.Value.String()...)
-			return true
-		})
+	// Level
+	levelText := rec.Level.String()
+	switch rec.Level {
 	case slog.LevelDebug:
-		r.Attrs(func(a slog.Attr) bool {
-			buf = append(buf, fmt.Sprintf(" %s='%s'", a.Key, a.Value.String())...)
-			return true
-		})
-		buf = []byte(color.CyanString(string(buf)))
+		levelText = color.New(color.FgCyan).Sprint(levelText)
+	case slog.LevelInfo:
+		levelText = color.New(color.FgGreen).Sprint(levelText)
 	case slog.LevelWarn:
-		buf = []byte(color.YellowString(string(buf)))
+		levelText = color.New(color.FgYellow).Sprint(levelText)
 	case slog.LevelError:
-		r.Attrs(func(a slog.Attr) bool {
-			if a.Key == "error" {
-				buf = append(buf, ": "+a.Value.String()...)
-				return false
-			}
-			return true
-		})
-		buf = []byte(color.RedString(string(buf)))
+		levelText = color.New(color.FgRed).Sprint(levelText)
 	}
 
-	buf = append(buf, '\n')
-	_, err := h.out.Write(buf)
+	// Group prefix (joined by ".")
+	groupPrefix := ""
+	if len(h.group) > 0 {
+		groupPrefix = "[" + strings.Join(h.group, ".") + "] "
+	}
+
+	// Message
+	msg := rec.Message
+
+	// Collect and format attributes
+	var parts []string
+	for _, a := range h.attrs {
+		parts = append(parts, formatAttr(a))
+	}
+	rec.Attrs(func(a slog.Attr) bool {
+		parts = append(parts, formatAttr(a))
+		return true
+	})
+
+	// Build line
+	line := timestamp + " " + levelText + " " + groupPrefix + msg
+	if len(parts) > 0 {
+		line += " " + strings.Join(parts, " ")
+	}
+
+	// Write out
+	_, err := io.WriteString(h.out, line+"\n")
 	return err
 }
 
-func (h *PlainHandler) WithGroup(name string) slog.Handler {
-	return h
+// WithAttrs returns a new handler whose records will include the given attributes.
+func (h *PlainHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
+	r := &PlainHandler{
+		out:   h.out,
+		opts:  h.opts,
+		mu:    h.mu,
+		group: append([]string{}, h.group...),
+		attrs: append([]slog.Attr{}, h.attrs...),
+	}
+	r.attrs = append(r.attrs, attrs...)
+	return r
 }
 
-func (h *PlainHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
-	return h
+// WithGroup returns a new handler whose records will include the given group.
+func (h *PlainHandler) WithGroup(name string) slog.Handler {
+	r := &PlainHandler{
+		out:   h.out,
+		opts:  h.opts,
+		mu:    h.mu,
+		group: append([]string{}, h.group...),
+		attrs: append([]slog.Attr{}, h.attrs...),
+	}
+	r.group = append(r.group, name)
+	return r
+}
+
+// formatAttr formats an Attr as key=value
+func formatAttr(a slog.Attr) string {
+	return a.Key + "=" + a.Value.String()
 }

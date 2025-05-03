@@ -1,6 +1,13 @@
 ARG GO_VERSION=1.23.1-bookworm
 FROM golang:${GO_VERSION}
 
+ARG UID=1000
+ARG GID=1000
+
+# Create a non-root user with the same UID/GID as host
+RUN groupadd -g ${GID} appgroup && \
+    useradd -u ${UID} -g appgroup -m appuser
+
 RUN go install github.com/mitranim/gow@latest
 
 WORKDIR /app
@@ -12,5 +19,7 @@ COPY src src
 COPY internal internal
 COPY cmd cmd
 COPY Makefile Makefile
+
+USER appuser
 
 CMD make GO="gow -r=false" OUT=bin build-cli
