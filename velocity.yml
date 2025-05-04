@@ -1,7 +1,7 @@
 tests:
-    - name: Std golang tests
+    - name: Unit tests
       language: golang
-    - name: Custom golang tests
+    - name: Integration Tests
       commands:
           - shell: make test
     - name: Testdata Golang
@@ -15,11 +15,11 @@ images:
 jobs:
     - name: Golang tests
       tests:
-          - Std golang tests
-          - Custom golang tests
+          - Unit tests
+          - Integration Tests
       images:
           - golang
-    - name: Testdata
+    - name: Testdata Golang
       tests:
           - Testdata Golang
       images:
@@ -29,7 +29,7 @@ routines:
     - name: All tests
       jobs:
           - Golang tests
-          - Testdata
+          - Testdata Golang
     - name: Self tests
       jobs:
           - Golang tests
