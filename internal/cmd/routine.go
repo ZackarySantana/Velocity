@@ -36,7 +36,11 @@ var (
 				return oops.Code("request").Wrap(err)
 			}
 
-			flags.Logger(cmd).Info(fmt.Sprintf("%v", data.Id))
+			flags.Logger(cmd).Info("routine",
+				slog.String("id", fmt.Sprintf("%v", data.Id)),
+				slog.String("link", flags.API(cmd).GetRoutineLink(ctx, data.Id)),
+				slog.String("routine", routine),
+			)
 
 			return nil
 		},

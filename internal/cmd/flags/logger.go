@@ -48,13 +48,15 @@ func getAllLoggerModes() []string {
 }
 
 var (
-	loggerModes = map[LoggerMode]string{
+	loggerCategory = "Logging"
+	loggerModes    = map[LoggerMode]string{
 		Debug: "debug",
 		Quiet: "quiet",
 	}
 	LoggerModeFlag = &cli.StringFlag{
-		Name:  "mode",
-		Usage: fmt.Sprintf("set the mode to `%s`", strings.Join(getAllLoggerModes(), "|")),
+		Name:     "mode",
+		Usage:    fmt.Sprintf("set the mode to `%s`", strings.Join(getAllLoggerModes(), "|")),
+		Category: loggerCategory,
 		Validator: func(s string) error {
 			if s == "" {
 				return nil
@@ -66,8 +68,14 @@ var (
 		},
 	}
 	VerboseFlag = &cli.BoolFlag{
-		Name:  "verbose",
-		Usage: "enable verbose output",
+		Name:     "verbose",
+		Usage:    "enable verbose output",
+		Category: loggerCategory,
+	}
+	JSONFlag = &cli.BoolFlag{
+		Name:     "json",
+		Usage:    "enable json output. Forces verbose output",
+		Category: loggerCategory,
 	}
 )
 
@@ -86,11 +94,15 @@ func SetLogger(_ context.Context, cmd *cli.Command) error {
 		return oops.In("flags").Errorf("mode must be one of: %s", strings.Join(getAllLoggerModes(), ", "))
 	}
 	var stdLogger slog.Handler
-	if cmd.Bool(VerboseFlag.Name) {
-		stdLogger = slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: level})
+
+	if cmd.Bool(JSONFlag.Name) {
+		stdLogger = slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: level})
 	} else {
-		// stdLogger = vlog.NewPlainHandler(os.Stdout, &vlog.Options{Level: level})
-		stdLogger = vlog.NewYAMLHandler(os.Stdout, &vlog.Options{Level: level})
+		if cmd.Bool(VerboseFlag.Name) {
+			stdLogger = slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: level})
+		} else {
+			stdLogger = vlog.NewYAMLHandler(os.Stdout, &vlog.Options{Level: level})
+		}
 	}
 
 	logger := slog.New(slogmulti.Fanout(

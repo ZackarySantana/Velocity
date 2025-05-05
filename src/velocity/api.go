@@ -2,6 +2,7 @@ package velocity
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/zackarysantana/velocity/src/config"
@@ -32,4 +33,8 @@ func (c *APIClient) StartRoutine(ctx context.Context, config *config.Config, rou
 	decodedResp := APIStartRoutineResponse{}
 	resp, err := c.doAndDecode(ctx, "POST", "/routine/start", APIStartRoutineRequest{Config: *config, Routine: routine}, &decodedResp)
 	return resp, &decodedResp, err
+}
+
+func (c *APIClient) GetRoutineLink(ctx context.Context, id interface{}) string {
+	return fmt.Sprintf("%s/routine/%v", c.base, id)
 }

@@ -7,10 +7,15 @@ tests:
     - name: Testdata Golang
       directory: testdata/golang/std
       language: golang
+    - name: Testdata Node
+      directory: testdata/javascript/node
+      language: node
 
 images:
     - name: golang
       image: golang:latest
+    - name: node
+      image: node:latest
 
 jobs:
     - name: Golang tests

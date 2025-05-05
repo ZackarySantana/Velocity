@@ -19,6 +19,7 @@ func CreateCommand() *cli.Command {
 		Flags: []cli.Flag{
 			flags.LoggerModeFlag,
 			flags.VerboseFlag,
+			flags.JSONFlag,
 		},
 		Before: befores(flags.SetLogger),
 		Commands: []*cli.Command{
