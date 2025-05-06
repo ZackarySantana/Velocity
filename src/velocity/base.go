@@ -7,7 +7,6 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/samber/oops"
 	"github.com/zackarysantana/velocity/internal/service"
 )
 
@@ -57,9 +56,9 @@ func (c *baseClient) do(ctx context.Context, method, path string, payload interf
 	if resp.StatusCode != http.StatusOK {
 		respBody, err := io.ReadAll(resp.Body)
 		if err != nil {
-			return resp, oops.Code("decoding").Wrap(err)
+			return resp, err
 		}
-		return resp, oops.Code("status").Wrap(oops.With("status", resp.StatusCode).Errorf("%s", string(respBody)))
+		return resp, service.ParseErrorMsg(string(respBody))
 	}
 	return resp, nil
 }
@@ -67,7 +66,7 @@ func (c *baseClient) do(ctx context.Context, method, path string, payload interf
 func (c *baseClient) doAndDecode(ctx context.Context, method, path string, payload, dest interface{}) (*http.Response, error) {
 	resp, err := c.do(ctx, method, path, payload)
 	if err != nil {
-		return resp, service.ParseError(err)
+		return resp, err
 	}
 	defer resp.Body.Close()
 	return resp, json.NewDecoder(resp.Body).Decode(dest)

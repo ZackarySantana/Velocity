@@ -1,6 +1,9 @@
 package service
 
-import "strings"
+import (
+	"errors"
+	"strings"
+)
 
 func ParseError(err error) error {
 	if err == nil {
@@ -15,4 +18,8 @@ func ParseError(err error) error {
 	}
 
 	return err
+}
+
+func ParseErrorMsg(err string) error {
+	return ParseError(errors.New(err))
 }
