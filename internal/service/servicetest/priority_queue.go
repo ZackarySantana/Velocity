@@ -132,6 +132,7 @@ func TestPriorityQueue(t *testing.T, pqGen func() service.PriorityQueue[any, str
 		},
 	} {
 		t.Run(tName, func(t *testing.T) {
+			t.Parallel()
 			tFunc(t, pqGen())
 		})
 	}

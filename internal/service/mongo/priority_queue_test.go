@@ -16,7 +16,7 @@ func TestMongoPriorityQueue(t *testing.T) {
 
 	client, cleanup, err := mongotest.CreateContainer(ctx)
 	require.NoError(t, err)
-	defer cleanup(ctx)
+	t.Cleanup(func() { cleanup(ctx) })
 
 	i := 0
 	pqGen := func() service.PriorityQueue[any, string] {

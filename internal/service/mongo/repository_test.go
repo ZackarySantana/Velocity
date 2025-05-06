@@ -3,6 +3,7 @@ package mongo
 import (
 	"context"
 	"fmt"
+	"sync/atomic"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -16,12 +17,14 @@ func TestMongoRepository(t *testing.T) {
 
 	client, cleanup, err := mongotest.CreateContainer(ctx)
 	require.NoError(t, err)
-	defer cleanup(ctx)
+	t.Cleanup(func() { cleanup(ctx) })
 
-	i := 0
+	var i *int32
+	var starting int32 = 0
+	i = &starting
+
 	repoGen := func() service.RepositoryManager[any] {
-		i++
-		return NewRepositoryManager[any](client, fmt.Sprintf("test_%d", i))
+		return NewRepositoryManager[any](client, fmt.Sprintf("test_%d", atomic.AddInt32(i, 1)))
 	}
 
 	servicetest.TestRepository(t, repoGen, NewIDCreator[any]())

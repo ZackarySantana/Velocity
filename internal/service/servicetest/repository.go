@@ -187,6 +187,7 @@ func TestRepository(t *testing.T, repoGen func() service.RepositoryManager[any],
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
+			t.Parallel()
 			testFunc(t, repoGen())
 		})
 	}
