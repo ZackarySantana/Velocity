@@ -24,5 +24,5 @@ func TestMongoRepository(t *testing.T) {
 		return NewRepositoryManager[any](client, fmt.Sprintf("test_%d", i))
 	}
 
-	servicetest.TestRepository(t, repoGen)
+	servicetest.TestRepository(t, repoGen, NewIDCreator[any]())
 }

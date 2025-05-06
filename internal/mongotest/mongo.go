@@ -8,8 +8,10 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+// CreateContainer creates a MongoDB container. It creates a replica set
+// to support transactions.
 func CreateContainer(ctx context.Context) (*mongo.Client, func(context.Context) error, error) {
-	mongodbContainer, err := mongodb.Run(ctx, "mongo:6")
+	mongodbContainer, err := mongodb.Run(ctx, "mongo:6", mongodb.WithReplicaSet("rs0"))
 	if err != nil {
 		return nil, nil, err
 	}
@@ -21,10 +23,11 @@ func CreateContainer(ctx context.Context) (*mongo.Client, func(context.Context) 
 		cleanup(ctx)
 		return nil, nil, err
 	}
-	mongoClient, err := mongo.Connect(ctx, options.Client().ApplyURI(endpoint))
+	mongoClient, err := mongo.Connect(ctx, options.Client().ApplyURI(endpoint+"/?replicaSet=&directConnection=true"))
 	if err != nil {
 		cleanup(ctx)
 		return nil, nil, err
 	}
+
 	return mongoClient, cleanup, nil
 }

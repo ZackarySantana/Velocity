@@ -12,5 +12,5 @@ func TestMockRepository(t *testing.T) {
 		return NewRepositoryManager(NewIDCreator[any]())
 	}
 
-	servicetest.TestRepository(t, repoGen)
+	servicetest.TestRepository(t, repoGen, NewIDCreator[any]())
 }

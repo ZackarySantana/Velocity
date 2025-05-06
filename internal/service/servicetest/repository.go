@@ -13,12 +13,12 @@ import (
 	"github.com/zackarysantana/velocity/src/entities/test"
 )
 
-func TestRepository(t *testing.T, repoGen func() service.RepositoryManager[any]) {
+func TestRepository(t *testing.T, repoGen func() service.RepositoryManager[any], idCreator service.IDCreator[any]) {
 	ctx := context.Background()
 
 	for name, testFunc := range map[string]func(t *testing.T, rm service.RepositoryManager[any]){
 		"RoutinePutAndLoad": func(t *testing.T, rm service.RepositoryManager[any]) {
-			r := &routine.Routine[any]{Name: "routine1"}
+			r := &routine.Routine[any]{Id: idCreator.Create(), Name: "routine1"}
 			ids, err := rm.Routine().Put(ctx, []*routine.Routine[any]{r})
 			require.NoError(t, err)
 			require.Len(t, ids, 1)
@@ -29,7 +29,7 @@ func TestRepository(t *testing.T, repoGen func() service.RepositoryManager[any])
 			assert.Equal(t, "routine1", results[0].Name)
 		},
 		"JobPutAndLoad": func(t *testing.T, rm service.RepositoryManager[any]) {
-			j := &job.Job[any]{Name: "job1"}
+			j := &job.Job[any]{Id: idCreator.Create(), Name: "job1"}
 			ids, err := rm.Job().Put(ctx, []*job.Job[any]{j})
 			require.NoError(t, err)
 			require.Len(t, ids, 1)
@@ -40,7 +40,7 @@ func TestRepository(t *testing.T, repoGen func() service.RepositoryManager[any])
 			assert.Equal(t, "job1", results[0].Name)
 		},
 		"ImagePutAndLoad": func(t *testing.T, rm service.RepositoryManager[any]) {
-			img := &image.Image[any]{Name: "image1"}
+			img := &image.Image[any]{Id: idCreator.Create(), Name: "image1"}
 			ids, err := rm.Image().Put(ctx, []*image.Image[any]{img})
 			require.NoError(t, err)
 			require.Len(t, ids, 1)
@@ -51,7 +51,7 @@ func TestRepository(t *testing.T, repoGen func() service.RepositoryManager[any])
 			assert.Equal(t, "image1", results[0].Name)
 		},
 		"TestPutAndLoad": func(t *testing.T, rm service.RepositoryManager[any]) {
-			ts := &test.Test[any]{Name: "test1"}
+			ts := &test.Test[any]{Id: idCreator.Create(), Name: "test1"}
 			ids, err := rm.Test().Put(ctx, []*test.Test[any]{ts})
 			require.NoError(t, err)
 			require.Len(t, ids, 1)
@@ -62,7 +62,7 @@ func TestRepository(t *testing.T, repoGen func() service.RepositoryManager[any])
 			assert.Equal(t, "test1", results[0].Name)
 		},
 		"TransactionRollbackOnError": func(t *testing.T, rm service.RepositoryManager[any]) {
-			r := &routine.Routine[any]{Name: "txRoutine"}
+			r := &routine.Routine[any]{Id: idCreator.Create(), Name: "txRoutine"}
 			var insertedID any
 
 			err := rm.WithTransaction(ctx, func(txCtx context.Context) error {
@@ -78,7 +78,7 @@ func TestRepository(t *testing.T, repoGen func() service.RepositoryManager[any])
 			assert.Len(t, results, 0)
 		},
 		"TransactionCommitOnSuccess": func(t *testing.T, rm service.RepositoryManager[any]) {
-			r := &routine.Routine[any]{Name: "committedRoutine"}
+			r := &routine.Routine[any]{Id: idCreator.Create(), Name: "committedRoutine"}
 			var insertedID any
 
 			err := rm.WithTransaction(ctx, func(txCtx context.Context) error {
