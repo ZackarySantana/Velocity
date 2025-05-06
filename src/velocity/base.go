@@ -25,6 +25,10 @@ func newBaseClient(base string) *baseClient {
 	}
 }
 
+func (c *baseClient) GetLink() *linkClient {
+	return &linkClient{base: c.base}
+}
+
 func (c *baseClient) do(ctx context.Context, method, path string, payload interface{}) (*http.Response, error) {
 	var body io.Reader
 	if payload != nil {

@@ -38,7 +38,7 @@ var (
 
 			flags.Logger(cmd).Info("routine",
 				slog.String("id", fmt.Sprintf("%v", data.Id)),
-				slog.String("link", flags.API(cmd).GetRoutineLink(ctx, data.Id)),
+				slog.String("link", flags.API(cmd).GetLink().Routine(ctx, fmt.Sprintf("%s", data.Id))),
 				slog.String("routine", routine),
 			)
 
@@ -68,10 +68,18 @@ var (
 
 					testAttrs := []any{}
 					for _, testName := range job.Tests {
-						testAttrs = append(testAttrs, slog.String("name", testName), slog.String("command", "command_here"))
+						testAttrs = append(testAttrs, slog.String("name", testName))
 					}
 
-					jobAttrs = append(jobAttrs, slog.Group(jobName, slog.Group("tests", testAttrs...)))
+					imageAttrs := []any{}
+					for _, imageName := range job.Images {
+						imageAttrs = append(imageAttrs, slog.String("name", imageName))
+					}
+
+					jobAttrs = append(jobAttrs, slog.Group(jobName,
+						slog.Group("tests", testAttrs...),
+						slog.Group("images", imageAttrs...),
+					))
 				}
 
 				routineAttr := slog.Group(routine.Name, slog.Group("jobs", jobAttrs...))
@@ -79,7 +87,6 @@ var (
 			}
 
 			flags.Logger(cmd).LogAttrs(ctx, slog.LevelInfo, "routines", routinesAttrs...)
-			flags.Logger(cmd).LogAttrs(ctx, slog.LevelDebug, "routines", routinesAttrs...)
 
 			return nil
 		},
