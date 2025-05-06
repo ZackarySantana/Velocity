@@ -60,7 +60,6 @@ func (c *Catcher) Resolve() error {
 	return builder.Wrap(errors.Join(c.errs...))
 }
 
-// This joins a single error chain
 func joinOopsErrorsChain(errs ...error) error {
 	return oopsBuilderWithAllContext(errs...).Wrap(Join(errs...))
 }
