@@ -39,10 +39,31 @@ func NewRepositoryManager[ID comparable](idCreator service.IDCreator[ID]) servic
 			}
 			err := fn(ctx)
 			if err != nil {
-				routines = beforeRoutines
-				jobs = beforeJobs
-				images = beforeImages
-				tests = beforeTests
+				// We have to clear and reinsert because the maps aren't pointers.
+				for k := range routines {
+					delete(routines, k)
+				}
+				for k := range jobs {
+					delete(jobs, k)
+				}
+				for k := range images {
+					delete(images, k)
+				}
+				for k := range tests {
+					delete(tests, k)
+				}
+				for k, v := range beforeRoutines {
+					routines[k] = v
+				}
+				for k, v := range beforeJobs {
+					jobs[k] = v
+				}
+				for k, v := range beforeImages {
+					images[k] = v
+				}
+				for k, v := range beforeTests {
+					tests[k] = v
+				}
 			}
 			return err
 		},
