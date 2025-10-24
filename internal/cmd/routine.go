@@ -18,6 +18,7 @@ var (
 		Commands: []*cli.Command{
 			routineRun,
 			routineList,
+			routineView,
 		},
 	}
 	routineRun = &cli.Command{
@@ -39,7 +40,7 @@ var (
 			flags.Logger(cmd).Info("routine",
 				slog.String("id", fmt.Sprintf("%v", data.Id)),
 				slog.String("link", flags.API(cmd).GetLink().Routine(ctx, fmt.Sprintf("%s", data.Id))),
-				slog.String("routine", routine),
+				slog.String("name", routine),
 			)
 
 			return nil
@@ -87,6 +88,31 @@ var (
 			}
 
 			flags.Logger(cmd).LogAttrs(ctx, slog.LevelInfo, "routines", routinesAttrs...)
+
+			return nil
+		},
+	}
+	routineView = &cli.Command{
+		Name:  "view",
+		Usage: "view a ran routine",
+		Flags: []cli.Flag{
+			flags.APIFlag,
+		},
+		Before: befores(flags.SetAPI),
+		Action: func(ctx context.Context, cmd *cli.Command) error {
+
+			routineID := strings.Join(cmd.Args().Slice(), " ")
+
+			_, data, err := flags.API(cmd).GetRoutine(ctx, routineID)
+			if err != nil {
+				return oops.Code("request").Wrap(err)
+			}
+
+			flags.Logger(cmd).LogAttrs(ctx, slog.LevelInfo, "routine",
+				slog.String("id", routineID),
+				slog.String("link", flags.API(cmd).GetLink().Routine(ctx, routineID)),
+				slog.String("name", data.Routine.Name),
+			)
 
 			return nil
 		},

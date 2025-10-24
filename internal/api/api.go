@@ -93,6 +93,7 @@ func New[T any](idCreator service.IDCreator[T], repository service.RepositoryMan
 	apiMux := http.NewServeMux()
 	h(apiMux, "GET /health", a.health)
 	h(apiMux, "POST /routine/start", a.routineStart)
+	h(apiMux, "GET /routine/{id}", a.routineGet)
 	rootMux.Handle("/", applyMiddleware(apiMux, apiMiddlewares...))
 
 	agentMux := http.NewServeMux()

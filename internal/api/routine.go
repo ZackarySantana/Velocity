@@ -2,14 +2,11 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/zackarysantana/velocity/src/config"
 	"github.com/zackarysantana/velocity/src/velocity"
 )
-
-// routeinestart2 is a version that is just the handler func
 
 func (a *api[T]) routineStart(w http.ResponseWriter, r *http.Request) {
 	body := velocity.APIStartRoutineRequest{}
@@ -18,12 +15,8 @@ func (a *api[T]) routineStart(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	if err = body.Config.Validate(); err != nil {
+	if err = body.Validate(); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	if routine := body.Config.Routines.GetRoutine(body.Routine); routine == nil {
-		http.Error(w, fmt.Sprintf("'%s' routine not found", body.Routine), http.StatusBadRequest)
 		return
 	}
 	ec, err := config.CreateEntity(&body.Config, config.CreateEntityOptions[T]{
@@ -39,6 +32,29 @@ func (a *api[T]) routineStart(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	resp := velocity.APIStartRoutineResponse{Id: ec.Routines[0].Id}
+	err = json.NewEncoder(w).Encode(resp)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func (a *api[T]) routineGet(w http.ResponseWriter, r *http.Request) {
+	id, err := a.idCreator.Read(r.PathValue("id"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	routines, err := a.repository.Routine().Load(r.Context(), []T{id})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if len(routines) == 0 {
+		http.Error(w, "routine not found", http.StatusNotFound)
+		return
+	}
+	resp := velocity.APIGetRoutineResponse[T]{Routine: *routines[0]}
 	err = json.NewEncoder(w).Encode(resp)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

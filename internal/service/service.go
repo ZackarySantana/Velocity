@@ -8,4 +8,5 @@ import (
 
 type Service[T any] interface {
 	StartRoutine(context.Context, *entities.ConfigEntity[T], string) error
+	// GetRoutine(context.Context, string)
 }
